@@ -1,31 +1,39 @@
 #include <SFML/Graphics.hpp>
-class GAME{
-private:
-	
-public:
-	void RUN();
-	
-};
-void GAME::RUN(){
-		sf::RenderWindow window( sf::VideoMode( { 200, 200 } ), "SFML works!" );
-		sf::CircleShape shape( 100.f );
-		shape.setFillColor( sf::Color::Green );
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <string>
+#include <fstream>
+#include <algorithm>
+#include <optional>
+#include <map>
 
-		while ( window.isOpen() )
-		{
-			while ( const std::optional event = window.pollEvent() )
-			{
-				if ( event->is<sf::Event::Closed>() )
-					window.close();
-			}
 
-			window.clear();
-			window.draw( shape );
-			window.display();
+
+struct GAME{
+	sf::RenderWindow window{ sf::VideoMode( { 200, 200 } ), "platformer game" };
+
+	void SETUP(){
+
+	}
+	void UPDATE_INPUT(){
+		
+	}
+	void UPDATE_PHYSICS(){
+		
+	}
+	void DRAW(){
+		
+
+		window.display();
+	}
+	void RUN(){
+		SETUP();
+		while (window.isOpen()){
+			
 		}
 	}
-
-
+};
 
 int main()
 {
