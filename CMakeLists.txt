@@ -13,11 +13,14 @@ FetchContent_Declare(SFML
 FetchContent_MakeAvailable(SFML)
 
 add_executable(main src/main.cpp)
-target_link_options(main PRIVATE
-    -static
-    -static-libgcc
-    -static-libstdc++
-)
+
+if(WIN32)
+    target_link_options(main PRIVATE
+        -static
+        -static-libgcc
+        -static-libstdc++
+    )
+endif()
 
 
 target_compile_features(main PRIVATE cxx_std_20)

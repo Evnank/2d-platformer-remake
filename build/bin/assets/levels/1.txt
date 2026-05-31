@@ -1,1 +1,14 @@
-type: wall   is_entity: 0   cords: 0 0
+type: wall   is_entity: 0   index: 1   cords: 0 1
+type: wall   is_entity: 0   index: 1   cords: -1 1
+type: wall   is_entity: 0   index: 1   cords: -2 1
+type: wall   is_entity: 0   index: 1   cords: -3 1
+type: wall   is_entity: 0   index: 1   cords: -4 1
+type: wall   is_entity: 0   index: 1   cords: -5 1
+type: wall   is_entity: 0   index: 1   cords: 1 1
+type: wall   is_entity: 0   index: 1   cords: 2 1
+type: wall   is_entity: 0   index: 1   cords: 3 1
+type: wall   is_entity: 0   index: 1   cords: 4 1
+type: wall   is_entity: 0   index: 1   cords: 5 1
+
+
+type: wall   is_entity: 1   index: 1   points: 2   loop: 1   cords0: 0 0   cords1: 5 5
