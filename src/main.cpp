@@ -10,9 +10,28 @@
 #include <unordered_map>
 
 struct GLOBALS{
+	sf::View default_view=sf::View(sf::FloatRect({0,0},{1920,1080}));
 	float BLOCK_SIZE=64;
 	float CHUNK_SIZE=10;
+	float BLOCK_TEXTURE_SIZE=64;
+	bool SHOW_FPS=true;
+
+	float player_max_side_speed=8;
+	float player_acceleration=0.4;
+	float player_speed_loss=0.1;
+	float player_jump_power=12;
+	float player_gravity_power=0.5;
+	sf::Keyboard::Key player1_left_bind=sf::Keyboard::Key::Left;
+	sf::Keyboard::Key player1_right_bind=sf::Keyboard::Key::Right;
+	sf::Keyboard::Key player1_jump_bind=sf::Keyboard::Key::Up;
+
+	sf::Keyboard::Key player2_left_bind=sf::Keyboard::Key::A;
+	sf::Keyboard::Key player2_right_bind=sf::Keyboard::Key::D;
+	sf::Keyboard::Key player2_jump_bind=sf::Keyboard::Key::W;
 };
+
+
+
 GLOBALS GLOBAL_VARIABLES; 
 
 struct ASSETS{
@@ -21,21 +40,18 @@ struct ASSETS{
 	sf::Texture player_blue;
 	sf::Texture player_red;
 
-	void LOAD_ALL_ASSETS(){
-		if (!font.openFromFile("assets/fonts/arial.ttf")){} 
-		if (!wall_texture.loadFromFile("assets/textures/WALL.png")){} 
-		if (!player_blue.loadFromFile("assets/textures/PLAYER_BLUE.png")){} 
-		if (!player_red.loadFromFile("assets/textures/PLAYER_RED.png")){} 
-	}
+	void LOAD_ALL_ASSETS();
 };
 
 ASSETS GLOBAL_ASSETS;
 
+
+
+
+
 struct INPUT{
 	sf::Vector2f mouse_true_coords;
 	bool Mouse1,Mouse2;
-	bool W,S,A,D;
-	bool UP,DOWN,LEFT,RIGHT;
 
 	bool SPACE;
 
@@ -45,29 +61,243 @@ struct INPUT{
 	
 	bool F1,F2,F9;
 
-	void read(sf::RenderWindow& window){
+	bool player1_left;
+	bool player1_right;
+	bool player1_jump;
+
+	bool player2_left;
+	bool player2_right;
+	bool player2_jump;
+
+	void read(sf::RenderWindow& window);
+};
+
+
+
+enum class BLOCK_TYPE{
+	AIR,
+	WALL,
+	BUTTON,
+	ERROR
+};
+
+
+
+BLOCK_TYPE STRING_TO_BLOCK_TYPE(std::string the_string){
+	if (the_string=="air"){return BLOCK_TYPE::AIR;}
+	if (the_string=="wall"){return BLOCK_TYPE::WALL;}
+	if (the_string=="button"){return BLOCK_TYPE::BUTTON;}
+
+	return BLOCK_TYPE::ERROR;
+};
+
+
+
+struct STATIC_BLOCK{
+	BLOCK_TYPE type=BLOCK_TYPE::AIR;
+	int index=0;
+};
+
+
+
+struct PLAYER;
+
+
+
+struct ENTITY{
+	BLOCK_TYPE type=BLOCK_TYPE::AIR;
+	int index=-1;
+	bool IS_LOOPING=false;
+	std::vector<sf::Vector2f> coords;
+	sf::Vector2f current_coordinates{0.f,0.f};
+
+	void SETUP(int setup_index,bool setup_looping,std::vector<sf::Vector2f> setup_coords,BLOCK_TYPE& setup_type);
+
+	void UPDATE(PLAYER& player1,PLAYER& player2);
+	void MOVEX(PLAYER& player1,PLAYER& player2);
+	void MOVEY(PLAYER& player1,PLAYER& player2);
+
+};
+
+
+
+struct GAME_CHUNK{
+	std::vector<STATIC_BLOCK> chunk_blocks=std::vector<STATIC_BLOCK>(GLOBAL_VARIABLES.CHUNK_SIZE*GLOBAL_VARIABLES.CHUNK_SIZE);
+};
+
+
+
+struct PairHash {
+    std::size_t operator()(const std::pair<int, int>& p) const {
+        return (std::size_t)p.first ^ ((std::size_t)p.second << 16);
+    }
+};
+
+
+
+struct PLAYER{
+	sf::Vector2f coords{0.f,0.f};
+	sf::Vector2f velocity{0.f,0.f};
+	sf::Vector2f size{32.f,48.f};
+	sf::Vector2f texsize{32.f,48.f};
+	int index=0;
+	bool is_standing=false;
+
+	void SETUP(int ind);
+
+	void DRAW(sf::RenderWindow& window);
+
+//generalized functions
+
+	void UPDATE(INPUT& input,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
+
+	void UPDATE_VELOCITY(INPUT& input);
+
+	void MOVE(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
+
+//collision
+
+	void RESOLVE_COLLISION_X(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
+
+	void RESOLVE_COLLISION_Y(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
+
+
+//velocity
+
+	void VELOCITY_SIDE(INPUT& input);
+
+	void GRAVITY();
+
+	void JUMP(INPUT& input);
+
+};
+
+void UPDATE(PLAYER& player1,PLAYER& player2){
+
+}
+
+
+
+struct CAMERA{
+	sf::Vector2f position{0.f,0.f};
+	sf::Vector2f size{1920.f,1080.f};
+
+	sf::View getview(){
+		sf::View view;
+		view.setSize(size);
+		view.setCenter(position);
+		return view;
+	}
+};
+
+
+
+struct PERFORMACE_COUNTER{
+	int FRAMES_COUNTER=0;
+	sf::Clock FPS_CLOCK;
+	sf::Time FPS_UPDATE_TIME=sf::milliseconds(500);
+	std::string FPS_STRING;
+
+	int UPDATES_COUNTER=0;
+	sf::Clock UPS_CLOCK;
+	sf::Time UPS_UPDATE_TIME=sf::milliseconds(500);
+	std::string UPS_STRING;
+	sf::Text FPS_UPS_RENDER_TEXT{GLOBAL_ASSETS.font};
+	
+	void SETUP();
+
+	void FPS_UPDATE();
+
+	void UPS_UPDATE();
+
+	void DRAW(sf::RenderWindow& window);
+
+};
+
+
+
+
+
+struct GAME{
+	sf::RenderWindow window{ sf::VideoMode( { 1920, 1080 } ), "platformer game" };
+	INPUT input;
+	CAMERA camera;
+	PLAYER player1;
+	PLAYER player2;
+	PERFORMACE_COUNTER performance_clocks;
+	int current_level=1;
+	std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash> game_chunks;
+	std::unordered_map<int,bool> indexes_pressed;
+	std::vector <ENTITY> entities;
+
+
+
+
+	void RUN();
+
+	void SETUP();
+
+	void UPDATE_INPUT();
+	
+	void UPDATE_PHYSICS();
+
+	void DRAW();
+
+
+	void DRAW_CHUNKS();
+
+	void APPEND_VERTEXES(float left,float right,float up,float down,
+	std::unordered_map<BLOCK_TYPE,sf::VertexArray>& draw_arrays,BLOCK_TYPE& cur_block_type);
+
+	void GAME_LOAD();
+
+};
+
+
+
+int main()
+{
+	GAME game;
+	game.RUN();
+}
+
+
+
+
+
+
+
+
+
+
+
+void ASSETS::LOAD_ALL_ASSETS(){
+		if (!font.openFromFile("assets/fonts/arial.ttf")){std::cout<<"font failed to load";} 
+		if (!wall_texture.loadFromFile("assets/textures/WALL.png")){} 
+		if (!player_blue.loadFromFile("assets/textures/PLAYER_BLUE.png")){} 
+		if (!player_red.loadFromFile("assets/textures/PLAYER_RED.png")){} 
+	}
+
+
+
+
+
+
+
+
+	void INPUT::read(sf::RenderWindow& window){
 		Mouse1=false;Mouse2=false;
-		W=false;S=false;A=false;D=false;
-		UP=false;DOWN=false;LEFT=false;RIGHT=false;
 		SPACE=false;
 		ESCAPE=false;LSHIFT=false;TAB=false;ENTER=false;PageUp=false;
 		F=false;R=false;M=false;
 		F1=false;F2=false;F9=false;
+		player1_left=false;player1_right=false;player1_jump=false;
+		player2_left=false;player2_right=false;player2_jump=false;
 		mouse_true_coords=window.mapPixelToCoords(sf::Mouse::getPosition(window));
 		while (const std::optional event=window.pollEvent()) {
 			if (event->is<sf::Event::Closed>()){window.close();}
 				
 			if (const auto* key=event->getIf<sf::Event::KeyPressed>()){
-				if (key->code == sf::Keyboard::Key::W){W=true;}
-				if (key->code == sf::Keyboard::Key::A){A=true;}
-				if (key->code == sf::Keyboard::Key::S){S=true;}
-				if (key->code == sf::Keyboard::Key::D){D=true;}
-
-				if (key->code == sf::Keyboard::Key::Up){UP=true;}
-				if (key->code == sf::Keyboard::Key::Down){DOWN=true;}
-				if (key->code == sf::Keyboard::Key::Left){LEFT=true;}
-				if (key->code == sf::Keyboard::Key::Right){RIGHT=true;}
-
 				if (key->code == sf::Keyboard::Key::Space){SPACE=true;}
 
 				if (key->code == sf::Keyboard::Key::Escape){ESCAPE=true;}
@@ -83,77 +313,57 @@ struct INPUT{
 				if (key->code == sf::Keyboard::Key::F1){F1=true;}
 				if (key->code == sf::Keyboard::Key::F2){F2=true;}
 				if (key->code == sf::Keyboard::Key::F9){F9=true;}
-	
 			}
 			if (const auto* mouse=event->getIf<sf::Event::MouseButtonPressed>()){
 				if (mouse->button == sf::Mouse::Button::Left){Mouse1=true;}
 				if (mouse->button == sf::Mouse::Button::Right){Mouse2=true;}
 			}
 		}
+		player1_left=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player1_left_bind);
+		player1_right=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player1_right_bind);
+		player1_jump=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player1_jump_bind);
+
+		player2_left=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player2_left_bind);
+		player2_right=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player2_right_bind);
+		player2_jump=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player2_jump_bind);
+
 	}
-};
 
-enum class BLOCK_TYPE{
-	AIR,
-	WALL,
-	BUTTON,
-	ERROR
-};
 
-BLOCK_TYPE STRING_TO_BLOCK_TYPE(std::string the_string){
-	if (the_string=="air"){return BLOCK_TYPE::AIR;}
-	if (the_string=="wall"){return BLOCK_TYPE::WALL;}
-	if (the_string=="button"){return BLOCK_TYPE::BUTTON;}
 
-	return BLOCK_TYPE::ERROR;
-};
 
-struct STATIC_BLOCK{
-	BLOCK_TYPE type=BLOCK_TYPE::AIR;
-};
 
-struct GAME_CHUNK{
-	std::vector<STATIC_BLOCK> chunk_blocks=std::vector<STATIC_BLOCK>(GLOBAL_VARIABLES.CHUNK_SIZE*GLOBAL_VARIABLES.CHUNK_SIZE);
-};
 
-struct PairHash {
-    std::size_t operator()(const std::pair<int, int>& p) const {
-        return (std::size_t)p.first ^ ((std::size_t)p.second << 16);
-    }
-};
 
-struct PERFORMACE_COUNTER{
-	int FRAMES_COUNTER;
-	sf::Clock FPS_CLOCK;
-	sf::Time FPS_UPDATE_TIME=sf::milliseconds(1000);
-	
-	void SETUP(){
-		FPS_CLOCK.restart();
-	} 
 
-	void FPS_UPDATE(){
-		FRAMES_COUNTER++;
-		if (FPS_CLOCK.getElapsedTime()>FPS_UPDATE_TIME){
-			std::cout<<"FPS: "<<FRAMES_COUNTER<<"\n";
-			FRAMES_COUNTER=0;
-			FPS_CLOCK.restart();
-		}
+
+
+void ENTITY::SETUP(int setup_index,bool setup_looping,std::vector<sf::Vector2f> setup_coords,BLOCK_TYPE& setup_type){
+		coords.clear();
+		index=setup_index;
+		IS_LOOPING=setup_looping;
+		current_coordinates=setup_coords[0];
+		coords=setup_coords;
+		type=setup_type;
 	}
-};
 
-struct PLAYER{
-	sf::Vector2f coords{0.f,0.f};
-	sf::Vector2f velocity{0.f,0.f};
-	sf::Vector2f size{32.f,48.f};
-	int index=0;
-	void SETUP(int ind){
+
+
+
+
+
+
+
+
+
+void PLAYER::SETUP(int ind){
 		velocity.x=0;velocity.y=0;
 		coords.x=0;coords.y=0;
 		index=ind;
 		if (index==0){coords.x=128;}
 	}
 
-	void DRAW(sf::RenderWindow& window){
+	void PLAYER::DRAW(sf::RenderWindow& window){
 		sf::VertexArray cur_vertex_array(sf::PrimitiveType::Triangles,6);
 		float left=coords.x;
 		float up=coords.y;
@@ -163,92 +373,260 @@ struct PLAYER{
 		sf::Color color=sf::Color::White;
 		
 		cur_vertex_array.append(sf::Vertex({left,up},color,{0.f,0.f}));
-		cur_vertex_array.append(sf::Vertex({right,up},color,{size.x,0.f}));
-		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f,size.y}));
+		cur_vertex_array.append(sf::Vertex({right,up},color,{texsize.x,0.f}));
+		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f,texsize.y}));
 
-		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f,size.y}));
-		cur_vertex_array.append(sf::Vertex({right,up},color,{size.x,0.f}));
-		cur_vertex_array.append(sf::Vertex({right,down},color,{size.x,size.y}));
+		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f,texsize.y}));
+		cur_vertex_array.append(sf::Vertex({right,up},color,{texsize.x,0.f}));
+		cur_vertex_array.append(sf::Vertex({right,down},color,{texsize.x,texsize.y}));
 
 		if (index==0){
 			window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_blue));
 		} else {window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_red));}
 	}
-};
 
-struct CAMERA{
-	sf::Vector2f position{0.f,0.f};
-	sf::Vector2f size{1920.f,1080.f};
-	void setup(sf::RenderWindow& window){
-		size=window.getView().getSize();
+	void PLAYER::UPDATE(INPUT& input,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
+		UPDATE_VELOCITY(input);
+		MOVE(game_chunks);
 	}
-	sf::View getview(){
-		sf::View view;
-		view.setSize(size);
-		view.setCenter(position);
-		return view;
+
+	void PLAYER::UPDATE_VELOCITY(INPUT& input){
+		VELOCITY_SIDE(input);
+		GRAVITY();
+		JUMP(input);
 	}
-};
 
+	void PLAYER::MOVE(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
+		coords.x+=velocity.x;
+		RESOLVE_COLLISION_X(game_chunks);
+		coords.y+=velocity.y;
+		RESOLVE_COLLISION_Y(game_chunks);
+	}
 
-
-
-
-
-struct GAME{
-	sf::RenderWindow window{ sf::VideoMode( { 1920, 1080 } ), "platformer game" };
-	INPUT input;
-	CAMERA camera;
-	PLAYER player1;
-	PLAYER player2;
-	PERFORMACE_COUNTER performance_clocks;
-	int current_level=1;
-	std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash> game_chunks;
-
-
-
-
-	void GAME_LOAD();
-
-	void APPEND_VERTEXES(GAME_CHUNK& cur_chunk,int cur_chunkx,int cur_chunky,
-	std::unordered_map<BLOCK_TYPE,sf::VertexArray>& draw_arrays,int i,int g){
-
-		BLOCK_TYPE cur_block_type=cur_chunk.chunk_blocks[i+g*10].type;
-
-		if (cur_block_type==BLOCK_TYPE::AIR){return;}
-
-		sf::VertexArray& cur_vertex_array=draw_arrays[cur_block_type];
-		float b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
-		float c_size=GLOBAL_VARIABLES.CHUNK_SIZE;
-
-
-		float chunk_origin_x=cur_chunkx*b_size*c_size;
-		float chunk_origin_y=cur_chunky*b_size*c_size;
-
-		float left=chunk_origin_x+i*b_size;
-		float right=left+b_size;
-		float up=chunk_origin_y+g*b_size;
-		float down=up+b_size;
-
-		sf::Color color=sf::Color::White;
-
-		cur_vertex_array.append(sf::Vertex({left,up},color,{0.f,0.f}));
-		cur_vertex_array.append(sf::Vertex({right,up},color,{b_size,0.f}));
-		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f,b_size}));
-
-		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f,b_size}));
-		cur_vertex_array.append(sf::Vertex({right,up},color,{b_size,0.f}));
-		cur_vertex_array.append(sf::Vertex({right,down},color,{b_size,b_size}));
+	void PLAYER::RESOLVE_COLLISION_X(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
+		int c_size=GLOBAL_VARIABLES.CHUNK_SIZE;
+		int b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
+		sf::FloatRect player_rect{coords,size};
+		int startx=std::floor(coords.x/b_size);
+		int starty=std::floor(coords.y/b_size);
+		for (int x=startx-1;x<=startx+1;x++){
+			for (int y=starty-1;y<=starty+1;y++){
+				int cur_chunkx=std::floor(float(x)/c_size);
+				int cur_chunky=std::floor(float(y)/c_size);
+				int curx_inside=x-cur_chunkx*c_size;
+				int cury_inside=y-cur_chunky*c_size;
+				if (game_chunks.find({cur_chunkx,cur_chunky})==game_chunks.end()){continue;}
+				GAME_CHUNK& cur_chunk=game_chunks[{cur_chunkx,cur_chunky}];
+				BLOCK_TYPE& type=cur_chunk.chunk_blocks[curx_inside+cury_inside*c_size].type;
+				sf::FloatRect block_rect{{float(x*b_size),float(y*b_size)},{float(b_size),float(b_size)}};
+				if (player_rect.findIntersection(block_rect)){
+					switch (type){
+						case BLOCK_TYPE::WALL:
+							if (coords.x<x*b_size){
+								coords.x=x*b_size-size.x;
+							} else {
+								coords.x=(x+1)*b_size;
+							}
+								velocity.x=0;
+							break;
+						
+						default:
+							break;
+					}
+				}
+			}
+		}
 
 	}
 
-	void DRAW_CHUNKS(){
+	void PLAYER::RESOLVE_COLLISION_Y(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
+		is_standing=false;
+		int c_size=GLOBAL_VARIABLES.CHUNK_SIZE;
+		int b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
+		sf::FloatRect player_rect{coords,size};
+		int startx=std::floor(coords.x/b_size);
+		int starty=std::floor(coords.y/b_size);
+		for (int x=startx-1;x<=startx+1;x++){
+			for (int y=starty-1;y<=starty+1;y++){
+				int cur_chunkx=std::floor(float(x)/c_size);
+				int cur_chunky=std::floor(float(y)/c_size);
+				int curx_inside=x-cur_chunkx*c_size;
+				int cury_inside=y-cur_chunky*c_size;
+				if (game_chunks.find({cur_chunkx,cur_chunky})==game_chunks.end()){continue;}
+				GAME_CHUNK& cur_chunk=game_chunks[{cur_chunkx,cur_chunky}];
+				BLOCK_TYPE& type=cur_chunk.chunk_blocks[curx_inside+cury_inside*c_size].type;
+				sf::FloatRect block_rect{{float(x*b_size),float(y*b_size)},{float(b_size),float(b_size)}};
+				if (player_rect.findIntersection(block_rect)){
+					switch (type){
+						case BLOCK_TYPE::WALL:
+							if (coords.y<y*b_size){
+								coords.y=y*b_size-size.y;
+								is_standing=true;
+							} else {
+								coords.y=(y+1)*b_size;
+							}
+								velocity.y=0;
+							break;
+						
+						default:
+							break;
+					}
+				}
+			}
+		}
+	}
+
+	void PLAYER::VELOCITY_SIDE(INPUT& input){
+		bool cur_move_left=false;
+		bool cur_move_right=false;
+		if (index==0){
+			cur_move_left=input.player1_left;cur_move_right=input.player1_right;
+		} else {
+			cur_move_left=input.player2_left;cur_move_right=input.player2_right;
+		}
+	//moving
+		if (cur_move_left){
+			if (velocity.x>-GLOBAL_VARIABLES.player_max_side_speed){
+				velocity.x-=GLOBAL_VARIABLES.player_acceleration;
+			}
+		} else if(cur_move_right){
+			if (velocity.x<GLOBAL_VARIABLES.player_max_side_speed){
+				velocity.x+=GLOBAL_VARIABLES.player_acceleration;
+			}
+		} else {
+			velocity.x*=(1-GLOBAL_VARIABLES.player_speed_loss);
+			if (abs(velocity.x)<0.1){velocity.x=0;}
+		}
+	}
+
+	void PLAYER::GRAVITY(){
+		velocity.y+=GLOBAL_VARIABLES.player_gravity_power;
+	}
+
+	void PLAYER::JUMP(INPUT& input){
+		bool jump_input=false;
+		if (index==0){
+			jump_input=input.player1_jump;
+		} else {
+			jump_input=input.player2_jump;
+		}
+		if (is_standing && jump_input){
+			velocity.y=-GLOBAL_VARIABLES.player_jump_power;
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+	void PERFORMACE_COUNTER::SETUP(){
+		FPS_CLOCK.restart();
+		UPS_CLOCK.restart();
+		FPS_UPS_RENDER_TEXT.setCharacterSize(50);
+		FPS_UPS_RENDER_TEXT.setPosition({1690.f,0.f});
+		FPS_UPS_RENDER_TEXT.setFillColor(sf::Color::Green);
+	} 
+
+	void PERFORMACE_COUNTER::FPS_UPDATE(){
+		FRAMES_COUNTER++;
+		if (FPS_CLOCK.getElapsedTime()>FPS_UPDATE_TIME){
+			FPS_STRING=std::to_string(int(FRAMES_COUNTER*(sf::milliseconds(1000)/FPS_UPDATE_TIME)));
+			FRAMES_COUNTER=0;
+			FPS_CLOCK.restart();
+		}
+	}
+
+	void PERFORMACE_COUNTER::UPS_UPDATE(){
+		UPDATES_COUNTER++;
+		if (UPS_CLOCK.getElapsedTime()>UPS_UPDATE_TIME){
+			UPS_STRING=std::to_string(int(UPDATES_COUNTER*(sf::milliseconds(1000)/UPS_UPDATE_TIME)));
+			UPDATES_COUNTER=0;
+			UPS_CLOCK.restart();
+		}
+	}
+
+	void PERFORMACE_COUNTER::DRAW(sf::RenderWindow& window){
+		window.setView(GLOBAL_VARIABLES.default_view);
+		FPS_UPS_RENDER_TEXT.setString("FPS/UPS\n"+FPS_STRING+"/"+UPS_STRING);
+		window.draw(FPS_UPS_RENDER_TEXT);
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+	void GAME::RUN(){
+		SETUP();
+		GAME_LOAD();
+		float time_accumulator=0;
+		float tick_speed=1;
+		float delta_time=1.f/60.f;
+		sf::Clock delta_clock;
+		while (window.isOpen()){
+			float elapsed=delta_clock.restart().asSeconds()*tick_speed;
+			time_accumulator+=elapsed;
+			for (;time_accumulator>=delta_time;time_accumulator-=delta_time){
+				UPDATE_INPUT();
+				UPDATE_PHYSICS();
+			}	
+			performance_clocks.FPS_UPDATE();
+			DRAW();
+		}
+	}
+
+
+	void GAME::SETUP(){
+		GLOBAL_ASSETS.LOAD_ALL_ASSETS();
+		window.setVerticalSyncEnabled(false);
+		performance_clocks.SETUP();
+	}
+
+
+	void GAME::UPDATE_INPUT(){
+		input.read(window);
+	}
+	
+
+	void GAME::UPDATE_PHYSICS(){
+		performance_clocks.UPS_UPDATE();
+		player1.UPDATE(input,game_chunks);
+		player2.UPDATE(input,game_chunks);
+	}
+
+
+	void GAME::DRAW(){
+		window.clear();
+		DRAW_CHUNKS();
+		window.setView(camera.getview());
+		player1.DRAW(window);
+		player2.DRAW(window);
+		performance_clocks.DRAW(window);
+		window.display();
+	}
+
+
+	void GAME::DRAW_CHUNKS(){
 		window.setView(camera.getview());
 		std::unordered_map<BLOCK_TYPE,sf::VertexArray> draw_arrays;
 		draw_arrays[BLOCK_TYPE::WALL]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		float b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
 		float c_size=GLOBAL_VARIABLES.CHUNK_SIZE;
-
+		float bts=GLOBAL_VARIABLES.BLOCK_TEXTURE_SIZE;
 		sf::Vector2f camera_left_up(camera.position-camera.size/2.f);
 		int chunk_left=int(std::floor(camera_left_up.x/(b_size*c_size)));
 		int chunk_up=int(std::floor(camera_left_up.y/(b_size*c_size)));
@@ -263,49 +641,51 @@ struct GAME{
 					GAME_CHUNK& cur_chunk = game_chunks[{cur_chunkx,cur_chunky}];
 					for (int i=0; i<c_size; i++){
 						for (int g=0; g<c_size; g++){
-							APPEND_VERTEXES(cur_chunk,cur_chunkx,cur_chunky,draw_arrays,i,g);
+							BLOCK_TYPE cur_block_type=cur_chunk.chunk_blocks[i+g*c_size].type;
+							if (cur_block_type==BLOCK_TYPE::AIR){continue;}
+							float chunk_origin_x=cur_chunkx*b_size*c_size;
+							float chunk_origin_y=cur_chunky*b_size*c_size;
+
+							float left=chunk_origin_x+i*b_size;
+							float right=left+b_size;
+							float up=chunk_origin_y+g*b_size;
+							float down=up+b_size;
+							APPEND_VERTEXES(left,right,up,down,draw_arrays,cur_block_type);
 						}
 					}
 				}
 			}
 		}
+		for (auto& cur_entity:entities){
+			float left=cur_entity.current_coordinates.x;
+			float right=left+b_size;
+			float up=cur_entity.current_coordinates.y;
+			float down=up+b_size;
+			BLOCK_TYPE& cur_type=cur_entity.type;
+			APPEND_VERTEXES(left,right,up,down,draw_arrays,cur_type);
+		}
 
 		window.draw(draw_arrays[BLOCK_TYPE::WALL],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
 	}
 
-	void SETUP(){
-		camera.setup(window);
-		GLOBAL_ASSETS.LOAD_ALL_ASSETS();
-		window.setVerticalSyncEnabled(false);
-		performance_clocks.SETUP();
+
+
+void GAME::APPEND_VERTEXES(float left,float right,float up,float down,
+	std::unordered_map<BLOCK_TYPE,sf::VertexArray>& draw_arrays,BLOCK_TYPE& cur_block_type){
+
+		float bts=GLOBAL_VARIABLES.BLOCK_TEXTURE_SIZE;
+		sf::VertexArray& cur_vertex_array=draw_arrays[cur_block_type];
+
+		sf::Color color=sf::Color::White;
+		cur_vertex_array.append(sf::Vertex({left,up},color,{0.f,0.f}));
+		cur_vertex_array.append(sf::Vertex({right,up},color,{bts,0.f}));
+		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f,bts}));
+
+		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f,bts}));
+		cur_vertex_array.append(sf::Vertex({right,up},color,{bts,0.f}));
+		cur_vertex_array.append(sf::Vertex({right,down},color,{bts,bts}));
 	}
 
-	void UPDATE_INPUT(){
-		input.read(window);
-	}
-	
-	void UPDATE_PHYSICS(){
-		performance_clocks.FPS_UPDATE();
-	}
-
-	void DRAW(){
-		window.clear();
-		DRAW_CHUNKS();
-		player1.DRAW(window);
-		player2.DRAW(window);
-		window.display();
-	}
-
-	void RUN(){
-		SETUP();
-		GAME_LOAD();
-		while (window.isOpen()){
-			UPDATE_INPUT();
-			UPDATE_PHYSICS();
-			DRAW();
-		}
-	}
-};
 
 void GAME::GAME_LOAD(){
 		player1.SETUP(0);
@@ -313,6 +693,7 @@ void GAME::GAME_LOAD(){
 		std::string level_load_string="assets/levels/"+std::to_string(current_level)+".txt";
 		std::ifstream input_file(level_load_string);
 
+		entities.clear();
 		game_chunks.clear();
 		std::string cur_type_string;
 		std::string spare_string;
@@ -349,8 +730,8 @@ void GAME::GAME_LOAD(){
 			input_file>>spare_string;
 			input_file>>cur_index;
 		//entity reading	
-			points.clear();
 			if (is_entity){
+				points.clear();
 			// points amount
 				input_file>>spare_string;
 				input_file>>number_of_points;
@@ -362,8 +743,11 @@ void GAME::GAME_LOAD(){
 				for (int i=0;i<number_of_points;i++){
 					input_file>>spare_string;
 					input_file>>cur_cordx>>cur_cordy;
-					points.push_back(sf::Vector2f{cur_cordx,cur_cordy});
+					points.push_back(sf::Vector2f{cur_cordx*GLOBAL_VARIABLES.BLOCK_SIZE,cur_cordy*GLOBAL_VARIABLES.BLOCK_SIZE});
 				}
+				ENTITY cur_entity;
+				cur_entity.SETUP(cur_index,entity_loop,points,cur_block_type);
+				entities.push_back(cur_entity);
 			} else {
 		//static block reading
 				input_file>>spare_string;
@@ -374,31 +758,8 @@ void GAME::GAME_LOAD(){
 
 				curx_inside=int(cur_cordx)-cur_chunkx*int(GLOBAL_VARIABLES.CHUNK_SIZE);
 				cury_inside=int(cur_cordy)-cur_chunky*int(GLOBAL_VARIABLES.CHUNK_SIZE);
-			}
-	//switch statement
-			switch (cur_block_type)
-			{
-			case BLOCK_TYPE::AIR:{
-				break;
-			}
-			case BLOCK_TYPE::WALL:{
-				if (is_entity){
-					
-				} else{
-					game_chunks[{cur_chunkx,cur_chunky}].chunk_blocks[curx_inside+cury_inside*int(GLOBAL_VARIABLES.CHUNK_SIZE)].type=BLOCK_TYPE::WALL;
-				}
-				break;
-			}
-
-
-			default:
-				break;
+				game_chunks[{cur_chunkx,cur_chunky}].chunk_blocks[curx_inside+cury_inside*int(GLOBAL_VARIABLES.CHUNK_SIZE)].type=cur_block_type;
+				game_chunks[{cur_chunkx,cur_chunky}].chunk_blocks[curx_inside+cury_inside*int(GLOBAL_VARIABLES.CHUNK_SIZE)].index=cur_index;
 			}
 		}
 	}
-
-int main()
-{
-	GAME game;
-	game.RUN();
-}
