@@ -119,17 +119,17 @@ struct ENTITY{
 
 	void SETUP(int setup_index,bool setup_looping,std::vector<sf::Vector2f> setup_coords,BLOCK_TYPE& setup_type);
 
-	void UPDATE(PLAYER& player1,PLAYER& player2);
+	void UPDATE(std::vector<PLAYER>& players);
 
 	void UPDATE_TARGETS();
 
 	void SWITCH_TARGETS();
 
 	void MOVEX();
-	void RESOLVE_COLLISION_X(PLAYER& player1,PLAYER& player2);
+	void RESOLVE_COLLISION_X(std::vector<PLAYER>& players);
 
 	void MOVEY();
-	void RESOLVE_COLLISION_Y(PLAYER& player1,PLAYER& player2);
+	void RESOLVE_COLLISION_Y(std::vector<PLAYER>& players);
 
 };
 
@@ -241,8 +241,7 @@ struct GAME{
 	sf::RenderWindow window{ sf::VideoMode( { 1920, 1080 } ), "platformer game" };
 	INPUT input;
 	CAMERA camera;
-	PLAYER player1;
-	PLAYER player2;
+	std::vector<PLAYER> players;
 	PERFORMACE_COUNTER performance_clocks;
 	int current_level=1;
 	std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash> game_chunks;
@@ -369,15 +368,16 @@ void ENTITY::SETUP(int setup_index,bool setup_looping,std::vector<sf::Vector2f> 
 		cur_speed={0.f,0.f};
 	}
 
-void ENTITY::UPDATE(PLAYER& player1,PLAYER& player2){
+void ENTITY::UPDATE(std::vector<PLAYER>& players){
 		
 		MOVEX();
-		if (touched_player1_bottom){player1.coords.x+=cur_speed.x*GLOBAL_VARIABLES.ENTITY_SPEED;}
-		if (touched_player2_bottom){player2.coords.x+=cur_speed.x*GLOBAL_VARIABLES.ENTITY_SPEED;}
-		RESOLVE_COLLISION_X(player1,player2);
+		if (touched_player1_bottom){players[0].coords.x+=cur_speed.x*GLOBAL_VARIABLES.ENTITY_SPEED;}
+		if (touched_player2_bottom){players[1].coords.x+=cur_speed.x*GLOBAL_VARIABLES.ENTITY_SPEED;}
+		RESOLVE_COLLISION_X(players);
 
 		MOVEY();
-		RESOLVE_COLLISION_Y(player1,player2);
+		RESOLVE_COLLISION_Y(players);
+		
 		UPDATE_TARGETS();
 	}
 
@@ -405,91 +405,59 @@ void ENTITY::MOVEX(){
 		current_coordinates.x+=cur_speed.x*GLOBAL_VARIABLES.ENTITY_SPEED;
 	}
 
-void ENTITY::RESOLVE_COLLISION_X(PLAYER& player1,PLAYER& player2){
-	float b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
-		sf::FloatRect player1_rect={player1.coords,player1.size};
-		sf::FloatRect player2_rect={player2.coords,player2.size};
+void ENTITY::RESOLVE_COLLISION_X(std::vector<PLAYER>& players){
+		float b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
 		sf::FloatRect cur_entity_rect={current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
-		if (cur_entity_rect.findIntersection(player1_rect)){
-			switch (type){
-				case BLOCK_TYPE::WALL:
-					if (player1.coords.x<current_coordinates.x){
-						player1.coords.x=current_coordinates.x-player1.size.x;
-					} else {
-						player1.coords.x=current_coordinates.x+b_size;
-					}
-						player1.velocity.x=0;
-					break;
+
+		for (auto& cur_player:players){
+			sf::FloatRect cur_player_rect={cur_player.coords,cur_player.size};
+			if (cur_entity_rect.findIntersection(cur_player_rect)){
+				switch (type){
+					case BLOCK_TYPE::WALL:
+						if (cur_player.coords.x<current_coordinates.x){
+							cur_player.coords.x=current_coordinates.x-cur_player.size.x;
+						} else {
+							cur_player.coords.x=current_coordinates.x+b_size;
+						}
+							cur_player.velocity.x=cur_speed.x;
+						break;
 				
-				default:
-					break;
-			}
+					default:
+						break;
+				}
+			}	
 		}
-		if (cur_entity_rect.findIntersection(player2_rect)){
-			switch (type){
-				case BLOCK_TYPE::WALL:
-					if (player2.coords.x<current_coordinates.x){
-						player2.coords.x=current_coordinates.x-player2.size.x;
-					} else {
-						player2.coords.x=current_coordinates.x+b_size;
-					}
-						player2.velocity.x=0;
-					break;
-				
-				default:
-					break;
-			}
-		}
-		
 	}
 
 void ENTITY::MOVEY(){
 		current_coordinates.y+=cur_speed.y*GLOBAL_VARIABLES.ENTITY_SPEED;
 	}
 
-void ENTITY::RESOLVE_COLLISION_Y(PLAYER& player1,PLAYER& player2){
+void ENTITY::RESOLVE_COLLISION_Y(std::vector<PLAYER>& players){
 		float b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
-		sf::FloatRect player1_rect={player1.coords,player1.size};
-		sf::FloatRect player2_rect={player2.coords,player2.size};
 		sf::FloatRect cur_entity_rect={current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
-		if (cur_entity_rect.findIntersection(player1_rect)){
-			switch (type){
-				case BLOCK_TYPE::WALL:
-					if (player1.coords.y<current_coordinates.y){
-						player1.coords.y=current_coordinates.y-player1.size.y;
-						player1.coords.x+=cur_speed.x;
-						touched_player1_bottom=true;
-						player1.is_standing=true;
-					} else {
-						player1.coords.y=current_coordinates.y+b_size;
-					}
-						player1.velocity.y=cur_speed.y;
-						//if (player1.velocity.y<0){player1.velocity.y=0;}
-					break;
+		for (auto& cur_player:players){
+			sf::FloatRect cur_player_rect={cur_player.coords,cur_player.size};
+			if (cur_entity_rect.findIntersection(cur_player_rect)){
+				switch (type){
+					case BLOCK_TYPE::WALL:
+						if (cur_player.coords.y<current_coordinates.y){
+							cur_player.coords.y=current_coordinates.y-cur_player.size.y;
+							cur_player.coords.x+=cur_speed.x;
+							if (cur_player.index==0){touched_player1_bottom=true;}else{touched_player2_bottom=true;}
+							cur_player.is_standing=true;
+						} else {
+							cur_player.coords.y=current_coordinates.y+b_size;
+						}
+							cur_player.velocity.y=cur_speed.y;
+						break;
 				
-				default:
-					break;
+					default:
+						break;
+				}
 			}
 		}
-		if (cur_entity_rect.findIntersection(player2_rect)){
-			switch (type){
-				case BLOCK_TYPE::WALL:
-					if (player2.coords.y<current_coordinates.y){
-						player2.coords.y=current_coordinates.y-player2.size.y;
-						touched_player2_bottom=true;
-						player2.is_standing=true;
-					} else {
-						player2.coords.y=current_coordinates.y+b_size;
-					}
-						player2.velocity.y=cur_speed.y;
-						//if (player2.velocity.y<0){player2.velocity.y=0;}
-					break;
-				
-				default:
-					break;
-			}
-		}
-		
+			
 	}
 
 
@@ -792,11 +760,15 @@ void PLAYER::SETUP(int ind){
 
 
 	void GAME::SETUP(){
+		PLAYER player1;
+		PLAYER player2;
+		player1.SETUP(0);
+		player2.SETUP(1);
+		players.push_back(player1);
+		players.push_back(player2);
 		GLOBAL_ASSETS.LOAD_ALL_ASSETS();
 		window.setVerticalSyncEnabled(false);
 		performance_clocks.SETUP();
-		player1.SETUP(0);
-		player2.SETUP(1);
 	}
 
 
@@ -807,15 +779,16 @@ void PLAYER::SETUP(int ind){
 
 	void GAME::UPDATE_PHYSICS(){
 		performance_clocks.UPS_UPDATE();
-		player1.UPDATE(input,game_chunks,entities);
-		player2.UPDATE(input,game_chunks,entities);
+		for (auto& cur_player:players){
+			cur_player.UPDATE(input,game_chunks,entities);
+		}
 		UPDATE_ENTETIES();
 
 	}
 
 	void GAME::UPDATE_ENTETIES(){
 		for (auto& cur_entity:entities){
-			cur_entity.UPDATE(player1,player2);
+			cur_entity.UPDATE(players);
 		}
 	}
 
@@ -824,8 +797,9 @@ void PLAYER::SETUP(int ind){
 		window.clear();
 		DRAW_CHUNKS();
 		window.setView(camera.getview());
-		player1.DRAW(window);
-		player2.DRAW(window);
+		for (auto& cur_player:players){
+			cur_player.DRAW(window);
+		}
 		performance_clocks.DRAW(window);
 		window.display();
 	}
@@ -899,8 +873,9 @@ void GAME::APPEND_VERTEXES(float left,float right,float up,float down,
 
 
 void GAME::GAME_LOAD(){
-		player1.SETUP(0);
-		player2.SETUP(1);
+		for (int i=0;i<2;i++){
+			players[i].SETUP(i);
+		}
 		std::string level_load_string="assets/levels/"+std::to_string(current_level)+".txt";
 		std::ifstream input_file(level_load_string);
 
