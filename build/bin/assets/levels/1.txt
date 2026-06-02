@@ -18,4 +18,6 @@ type: wall   is_entity: 0   index: 1   cords: 5 -1
 type: wall   is_entity: 0   index: 1   cords: 5 -2
 
 
-type: wall   is_entity: 1   index: 1   points: 2   loop: 1   cords0: 3 -2   cords1: 2 -4
+type: wall   is_entity: 1   index: 1   points: 2   loop: 1   cords0: 3 -1   cords1: 2 -4
+
+type: wall   is_entity: 1   index: 1   points: 2   loop: 1   cords0: -4 0   cords1: 0 0

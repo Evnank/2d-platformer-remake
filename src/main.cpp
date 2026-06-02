@@ -19,8 +19,10 @@ struct GLOBALS{
 	float player_max_side_speed=8;
 	float player_acceleration=0.4;
 	float player_speed_loss=0.1;
-	float player_jump_power=12;
+	float player_jump_power=13;
 	float player_gravity_power=0.5;
+
+	float ENTITY_SPEED=1;
 	sf::Keyboard::Key player1_left_bind=sf::Keyboard::Key::Left;
 	sf::Keyboard::Key player1_right_bind=sf::Keyboard::Key::Right;
 	sf::Keyboard::Key player1_jump_bind=sf::Keyboard::Key::Up;
@@ -108,14 +110,26 @@ struct ENTITY{
 	BLOCK_TYPE type=BLOCK_TYPE::AIR;
 	int index=-1;
 	bool IS_LOOPING=false;
+	bool touched_player1_bottom=false;
+	bool touched_player2_bottom=false;
+	int current_target=0;
+	sf::Vector2f cur_speed{0.f,0.f};
 	std::vector<sf::Vector2f> coords;
 	sf::Vector2f current_coordinates{0.f,0.f};
 
 	void SETUP(int setup_index,bool setup_looping,std::vector<sf::Vector2f> setup_coords,BLOCK_TYPE& setup_type);
 
 	void UPDATE(PLAYER& player1,PLAYER& player2);
-	void MOVEX(PLAYER& player1,PLAYER& player2);
-	void MOVEY(PLAYER& player1,PLAYER& player2);
+
+	void UPDATE_TARGETS();
+
+	void SWITCH_TARGETS();
+
+	void MOVEX();
+	void RESOLVE_COLLISION_X(PLAYER& player1,PLAYER& player2);
+
+	void MOVEY();
+	void RESOLVE_COLLISION_Y(PLAYER& player1,PLAYER& player2);
 
 };
 
@@ -149,17 +163,20 @@ struct PLAYER{
 
 //generalized functions
 
-	void UPDATE(INPUT& input,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
+	void UPDATE(INPUT& input,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,std::vector<ENTITY>& entities);
 
 	void UPDATE_VELOCITY(INPUT& input);
 
-	void MOVE(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
+	void MOVE(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,std::vector<ENTITY>& entities);
 
 //collision
 
 	void RESOLVE_COLLISION_X(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
+	void RESOLVE_COLLISION_X_ENTITY(std::vector<ENTITY>& entities);
+
 
 	void RESOLVE_COLLISION_Y(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
+	void RESOLVE_COLLISION_Y_ENTITY(std::vector<ENTITY>& entities);
 
 
 //velocity
@@ -189,6 +206,8 @@ struct CAMERA{
 		return view;
 	}
 };
+
+
 
 
 
@@ -240,6 +259,8 @@ struct GAME{
 	void UPDATE_INPUT();
 	
 	void UPDATE_PHYSICS();
+
+	void UPDATE_ENTETIES();
 
 	void DRAW();
 
@@ -345,6 +366,130 @@ void ENTITY::SETUP(int setup_index,bool setup_looping,std::vector<sf::Vector2f> 
 		current_coordinates=setup_coords[0];
 		coords=setup_coords;
 		type=setup_type;
+		cur_speed={0.f,0.f};
+	}
+
+void ENTITY::UPDATE(PLAYER& player1,PLAYER& player2){
+		
+		MOVEX();
+		if (touched_player1_bottom){player1.coords.x+=cur_speed.x*GLOBAL_VARIABLES.ENTITY_SPEED;}
+		if (touched_player2_bottom){player2.coords.x+=cur_speed.x*GLOBAL_VARIABLES.ENTITY_SPEED;}
+		RESOLVE_COLLISION_X(player1,player2);
+
+		MOVEY();
+		RESOLVE_COLLISION_Y(player1,player2);
+		UPDATE_TARGETS();
+	}
+
+void ENTITY::UPDATE_TARGETS(){
+		if ((coords[current_target]-current_coordinates).dot(cur_speed)<=0){
+			current_coordinates=coords[current_target];
+			SWITCH_TARGETS();
+			if ((coords[current_target]-current_coordinates).lengthSquared()!=0){
+				cur_speed=(coords[current_target]-current_coordinates).normalized();
+			} else {cur_speed={0.f,0.f};}
+			
+			
+		}
+	}
+
+	void ENTITY::SWITCH_TARGETS(){
+		if (IS_LOOPING){
+			current_target=(current_target+1)%coords.size();
+		} else{
+			current_target=std::min(current_target+1,int(coords.size()-1));
+		}
+	}
+
+void ENTITY::MOVEX(){
+		current_coordinates.x+=cur_speed.x*GLOBAL_VARIABLES.ENTITY_SPEED;
+	}
+
+void ENTITY::RESOLVE_COLLISION_X(PLAYER& player1,PLAYER& player2){
+	float b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
+		sf::FloatRect player1_rect={player1.coords,player1.size};
+		sf::FloatRect player2_rect={player2.coords,player2.size};
+		sf::FloatRect cur_entity_rect={current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
+		if (cur_entity_rect.findIntersection(player1_rect)){
+			switch (type){
+				case BLOCK_TYPE::WALL:
+					if (player1.coords.x<current_coordinates.x){
+						player1.coords.x=current_coordinates.x-player1.size.x;
+					} else {
+						player1.coords.x=current_coordinates.x+b_size;
+					}
+						player1.velocity.x=0;
+					break;
+				
+				default:
+					break;
+			}
+		}
+		if (cur_entity_rect.findIntersection(player2_rect)){
+			switch (type){
+				case BLOCK_TYPE::WALL:
+					if (player2.coords.x<current_coordinates.x){
+						player2.coords.x=current_coordinates.x-player2.size.x;
+					} else {
+						player2.coords.x=current_coordinates.x+b_size;
+					}
+						player2.velocity.x=0;
+					break;
+				
+				default:
+					break;
+			}
+		}
+		
+	}
+
+void ENTITY::MOVEY(){
+		current_coordinates.y+=cur_speed.y*GLOBAL_VARIABLES.ENTITY_SPEED;
+	}
+
+void ENTITY::RESOLVE_COLLISION_Y(PLAYER& player1,PLAYER& player2){
+		float b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
+		sf::FloatRect player1_rect={player1.coords,player1.size};
+		sf::FloatRect player2_rect={player2.coords,player2.size};
+		sf::FloatRect cur_entity_rect={current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
+		if (cur_entity_rect.findIntersection(player1_rect)){
+			switch (type){
+				case BLOCK_TYPE::WALL:
+					if (player1.coords.y<current_coordinates.y){
+						player1.coords.y=current_coordinates.y-player1.size.y;
+						player1.coords.x+=cur_speed.x;
+						touched_player1_bottom=true;
+						player1.is_standing=true;
+					} else {
+						player1.coords.y=current_coordinates.y+b_size;
+					}
+						player1.velocity.y=cur_speed.y;
+						//if (player1.velocity.y<0){player1.velocity.y=0;}
+					break;
+				
+				default:
+					break;
+			}
+		}
+		if (cur_entity_rect.findIntersection(player2_rect)){
+			switch (type){
+				case BLOCK_TYPE::WALL:
+					if (player2.coords.y<current_coordinates.y){
+						player2.coords.y=current_coordinates.y-player2.size.y;
+						touched_player2_bottom=true;
+						player2.is_standing=true;
+					} else {
+						player2.coords.y=current_coordinates.y+b_size;
+					}
+						player2.velocity.y=cur_speed.y;
+						//if (player2.velocity.y<0){player2.velocity.y=0;}
+					break;
+				
+				default:
+					break;
+			}
+		}
+		
 	}
 
 
@@ -385,9 +530,9 @@ void PLAYER::SETUP(int ind){
 		} else {window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_red));}
 	}
 
-	void PLAYER::UPDATE(INPUT& input,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
+	void PLAYER::UPDATE(INPUT& input,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,std::vector<ENTITY>& entities){
 		UPDATE_VELOCITY(input);
-		MOVE(game_chunks);
+		MOVE(game_chunks,entities);
 	}
 
 	void PLAYER::UPDATE_VELOCITY(INPUT& input){
@@ -396,11 +541,13 @@ void PLAYER::SETUP(int ind){
 		JUMP(input);
 	}
 
-	void PLAYER::MOVE(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
+	void PLAYER::MOVE(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,std::vector<ENTITY>& entities){
 		coords.x+=velocity.x;
 		RESOLVE_COLLISION_X(game_chunks);
+		RESOLVE_COLLISION_X_ENTITY(entities);
 		coords.y+=velocity.y;
 		RESOLVE_COLLISION_Y(game_chunks);
+		RESOLVE_COLLISION_Y_ENTITY(entities);
 	}
 
 	void PLAYER::RESOLVE_COLLISION_X(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
@@ -473,6 +620,60 @@ void PLAYER::SETUP(int ind){
 					}
 				}
 			}
+		}
+	}
+
+	void PLAYER::RESOLVE_COLLISION_X_ENTITY(std::vector<ENTITY>& entities){
+			int b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
+			sf::FloatRect player_rect{coords,size};
+		for (auto& cur_entity:entities){
+			sf::FloatRect entity_rect{cur_entity.current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{float(b_size),float(b_size)}-sf::Vector2f{0,0.2}};
+			BLOCK_TYPE& type=cur_entity.type;
+			if (player_rect.findIntersection(entity_rect)){
+					switch (type){
+						case BLOCK_TYPE::WALL:
+							if (coords.x<cur_entity.current_coordinates.x){
+								coords.x=cur_entity.current_coordinates.x-size.x;
+							} else {
+								coords.x=cur_entity.current_coordinates.x+b_size;
+							}
+								velocity.x=0;
+							break;
+						
+						default:
+							break;
+					}
+				}
+			
+		}
+	}
+
+	void PLAYER::RESOLVE_COLLISION_Y_ENTITY(std::vector<ENTITY>& entities){
+		int b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
+			sf::FloatRect player_rect{coords,size};
+		for (auto& cur_entity:entities){
+			if (index==0){cur_entity.touched_player1_bottom=false;} else {cur_entity.touched_player2_bottom=false;}
+			sf::FloatRect entity_rect{cur_entity.current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{float(b_size),float(b_size)}-sf::Vector2f{0,0.2}};
+			BLOCK_TYPE& type=cur_entity.type;
+			if (player_rect.findIntersection(entity_rect)){
+					switch (type){
+						case BLOCK_TYPE::WALL:
+							if (coords.y<cur_entity.current_coordinates.y){
+								coords.y=cur_entity.current_coordinates.y-size.y;
+								is_standing=true;
+								if (index==0){cur_entity.touched_player1_bottom=true;} else {cur_entity.touched_player2_bottom=true;}
+							} else {
+								coords.y=cur_entity.current_coordinates.y+b_size;
+							}
+								velocity.y=cur_entity.cur_speed.y;
+								//velocity.y=0;
+							break;
+						
+						default:
+							break;
+					}
+				}
+			
 		}
 	}
 
@@ -594,6 +795,8 @@ void PLAYER::SETUP(int ind){
 		GLOBAL_ASSETS.LOAD_ALL_ASSETS();
 		window.setVerticalSyncEnabled(false);
 		performance_clocks.SETUP();
+		player1.SETUP(0);
+		player2.SETUP(1);
 	}
 
 
@@ -604,8 +807,16 @@ void PLAYER::SETUP(int ind){
 
 	void GAME::UPDATE_PHYSICS(){
 		performance_clocks.UPS_UPDATE();
-		player1.UPDATE(input,game_chunks);
-		player2.UPDATE(input,game_chunks);
+		player1.UPDATE(input,game_chunks,entities);
+		player2.UPDATE(input,game_chunks,entities);
+		UPDATE_ENTETIES();
+
+	}
+
+	void GAME::UPDATE_ENTETIES(){
+		for (auto& cur_entity:entities){
+			cur_entity.UPDATE(player1,player2);
+		}
 	}
 
 
