@@ -23,6 +23,7 @@ struct GLOBALS{
 	float player_gravity_power=0.5;
 
 	float ENTITY_SPEED=1;
+	float CAMERA_SPEED=0.02;
 	sf::Keyboard::Key player1_left_bind=sf::Keyboard::Key::Left;
 	sf::Keyboard::Key player1_right_bind=sf::Keyboard::Key::Right;
 	sf::Keyboard::Key player1_jump_bind=sf::Keyboard::Key::Up;
@@ -100,6 +101,16 @@ struct STATIC_BLOCK{
 	int index=0;
 };
 
+struct GAME_CHUNK{
+	std::vector<STATIC_BLOCK> chunk_blocks=std::vector<STATIC_BLOCK>(GLOBAL_VARIABLES.CHUNK_SIZE*GLOBAL_VARIABLES.CHUNK_SIZE);
+};
+
+struct PairHash {
+    std::size_t operator()(const std::pair<int, int>& p) const {
+        return (std::size_t)p.first ^ ((std::size_t)p.second << 16);
+    }
+};
+
 
 
 struct PLAYER;
@@ -119,33 +130,27 @@ struct ENTITY{
 
 	void SETUP(int setup_index,bool setup_looping,std::vector<sf::Vector2f> setup_coords,BLOCK_TYPE& setup_type);
 
-	void UPDATE(std::vector<PLAYER>& players);
+	void UPDATE(std::vector<PLAYER>& players,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
 
 	void UPDATE_TARGETS();
 
 	void SWITCH_TARGETS();
 
 	void MOVEX();
-	void RESOLVE_COLLISION_X(std::vector<PLAYER>& players);
+	void RESOLVE_COLLISION_X(std::vector<PLAYER>& players,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
 
 	void MOVEY();
-	void RESOLVE_COLLISION_Y(std::vector<PLAYER>& players);
+	void RESOLVE_COLLISION_Y(std::vector<PLAYER>& players,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
 
 };
 
 
 
-struct GAME_CHUNK{
-	std::vector<STATIC_BLOCK> chunk_blocks=std::vector<STATIC_BLOCK>(GLOBAL_VARIABLES.CHUNK_SIZE*GLOBAL_VARIABLES.CHUNK_SIZE);
-};
 
 
 
-struct PairHash {
-    std::size_t operator()(const std::pair<int, int>& p) const {
-        return (std::size_t)p.first ^ ((std::size_t)p.second << 16);
-    }
-};
+
+
 
 
 
@@ -154,6 +159,7 @@ struct PLAYER{
 	sf::Vector2f velocity{0.f,0.f};
 	sf::Vector2f size{32.f,48.f};
 	sf::Vector2f texsize{32.f,48.f};
+	bool died=false;
 	int index=0;
 	bool is_standing=false;
 
@@ -170,6 +176,7 @@ struct PLAYER{
 	void MOVE(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,std::vector<ENTITY>& entities);
 
 //collision
+
 
 	void RESOLVE_COLLISION_X(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
 	void RESOLVE_COLLISION_X_ENTITY(std::vector<ENTITY>& entities);
@@ -189,22 +196,30 @@ struct PLAYER{
 
 };
 
-void UPDATE(PLAYER& player1,PLAYER& player2){
-
-}
+enum class CMAERA_TYPE{
+	BOTH,
+	PLAYER1,
+	PLAYER2
+};
 
 
 
 struct CAMERA{
 	sf::Vector2f position{0.f,0.f};
 	sf::Vector2f size{1920.f,1080.f};
+	sf::Vector2f freedom{200.f,200.f};
+	sf::Vector2f freedom2{800.f,400.f};
+	float scale=1.f;
+	CMAERA_TYPE camera_type=CMAERA_TYPE::BOTH;
 
 	sf::View getview(){
 		sf::View view;
-		view.setSize(size);
+		view.setSize(size*scale);
 		view.setCenter(position);
 		return view;
 	}
+
+	void UPDATE(std::vector<PLAYER>& players);
 };
 
 
@@ -368,15 +383,15 @@ void ENTITY::SETUP(int setup_index,bool setup_looping,std::vector<sf::Vector2f> 
 		cur_speed={0.f,0.f};
 	}
 
-void ENTITY::UPDATE(std::vector<PLAYER>& players){
+void ENTITY::UPDATE(std::vector<PLAYER>& players,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
 		
 		MOVEX();
 		if (touched_player1_bottom){players[0].coords.x+=cur_speed.x*GLOBAL_VARIABLES.ENTITY_SPEED;}
 		if (touched_player2_bottom){players[1].coords.x+=cur_speed.x*GLOBAL_VARIABLES.ENTITY_SPEED;}
-		RESOLVE_COLLISION_X(players);
+		RESOLVE_COLLISION_X(players,game_chunks);
 
 		MOVEY();
-		RESOLVE_COLLISION_Y(players);
+		RESOLVE_COLLISION_Y(players,game_chunks);
 		
 		UPDATE_TARGETS();
 	}
@@ -405,7 +420,7 @@ void ENTITY::MOVEX(){
 		current_coordinates.x+=cur_speed.x*GLOBAL_VARIABLES.ENTITY_SPEED;
 	}
 
-void ENTITY::RESOLVE_COLLISION_X(std::vector<PLAYER>& players){
+void ENTITY::RESOLVE_COLLISION_X(std::vector<PLAYER>& players,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
 		float b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
 		sf::FloatRect cur_entity_rect={current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
 
@@ -425,7 +440,10 @@ void ENTITY::RESOLVE_COLLISION_X(std::vector<PLAYER>& players){
 					default:
 						break;
 				}
-			}	
+			}
+			cur_player.RESOLVE_COLLISION_X(game_chunks);
+			cur_player_rect={cur_player.coords,cur_player.size};
+			if (cur_entity_rect.findIntersection(cur_player_rect)){cur_player.died=true;}
 		}
 	}
 
@@ -433,7 +451,7 @@ void ENTITY::MOVEY(){
 		current_coordinates.y+=cur_speed.y*GLOBAL_VARIABLES.ENTITY_SPEED;
 	}
 
-void ENTITY::RESOLVE_COLLISION_Y(std::vector<PLAYER>& players){
+void ENTITY::RESOLVE_COLLISION_Y(std::vector<PLAYER>& players,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
 		float b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
 		sf::FloatRect cur_entity_rect={current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
 		for (auto& cur_player:players){
@@ -455,6 +473,9 @@ void ENTITY::RESOLVE_COLLISION_Y(std::vector<PLAYER>& players){
 					default:
 						break;
 				}
+				cur_player.RESOLVE_COLLISION_Y(game_chunks);
+				cur_player_rect={cur_player.coords,cur_player.size};
+				if (cur_entity_rect.findIntersection(cur_player_rect)){cur_player.died=true;}
 			}
 		}
 			
@@ -474,6 +495,7 @@ void PLAYER::SETUP(int ind){
 		coords.x=0;coords.y=0;
 		index=ind;
 		if (index==0){coords.x=128;}
+		died=false;
 	}
 
 	void PLAYER::DRAW(sf::RenderWindow& window){
@@ -514,6 +536,7 @@ void PLAYER::SETUP(int ind){
 		RESOLVE_COLLISION_X(game_chunks);
 		RESOLVE_COLLISION_X_ENTITY(entities);
 		coords.y+=velocity.y;
+		is_standing=false;
 		RESOLVE_COLLISION_Y(game_chunks);
 		RESOLVE_COLLISION_Y_ENTITY(entities);
 	}
@@ -555,7 +578,6 @@ void PLAYER::SETUP(int ind){
 	}
 
 	void PLAYER::RESOLVE_COLLISION_Y(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
-		is_standing=false;
 		int c_size=GLOBAL_VARIABLES.CHUNK_SIZE;
 		int b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
 		sf::FloatRect player_rect{coords,size};
@@ -605,7 +627,7 @@ void PLAYER::SETUP(int ind){
 							} else {
 								coords.x=cur_entity.current_coordinates.x+b_size;
 							}
-								velocity.x=0;
+								velocity.x=cur_entity.cur_speed.x;
 							break;
 						
 						default:
@@ -634,7 +656,6 @@ void PLAYER::SETUP(int ind){
 								coords.y=cur_entity.current_coordinates.y+b_size;
 							}
 								velocity.y=cur_entity.cur_speed.y;
-								//velocity.y=0;
 							break;
 						
 						default:
@@ -682,6 +703,57 @@ void PLAYER::SETUP(int ind){
 		if (is_standing && jump_input){
 			velocity.y=-GLOBAL_VARIABLES.player_jump_power;
 		}
+	}
+
+
+
+
+
+
+
+
+
+
+	void CAMERA::UPDATE(std::vector<PLAYER>& players){
+		sf::FloatRect box(position-freedom*scale,freedom*scale*2.f);
+		sf::FloatRect box2(position-freedom2*scale,freedom2*scale*2.f);
+		float boundry_x=freedom.x*scale;
+		float boundry_y=freedom.y*scale;
+		sf::FloatRect player1_rect(players[0].coords,players[0].size);
+		sf::FloatRect player2_rect(players[1].coords,players[1].size);
+			if (players[0].coords.x-position.x<-boundry_x){
+				position.x+=(players[0].coords.x-position.x+boundry_x)*GLOBAL_VARIABLES.CAMERA_SPEED;
+			}
+			if (players[0].coords.x-position.x>boundry_x){
+				position.x+=(players[0].coords.x-position.x-boundry_x)*GLOBAL_VARIABLES.CAMERA_SPEED;
+			}
+			if (players[0].coords.y-position.y<-boundry_y){
+				position.y+=(players[0].coords.y-position.y+boundry_y)*GLOBAL_VARIABLES.CAMERA_SPEED;
+			}
+			if (players[0].coords.y-position.y>boundry_y){
+				position.y+=(players[0].coords.y-position.y-boundry_y)*GLOBAL_VARIABLES.CAMERA_SPEED;
+			}
+
+			if (players[1].coords.x-position.x<-boundry_x){
+				position.x+=(players[1].coords.x-position.x+boundry_x)*GLOBAL_VARIABLES.CAMERA_SPEED;
+			}
+			if (players[1].coords.x-position.x>boundry_x){
+				position.x+=(players[1].coords.x-position.x-boundry_x)*GLOBAL_VARIABLES.CAMERA_SPEED;
+			}
+			if (players[1].coords.y-position.y<-boundry_y){
+				position.y+=(players[1].coords.y-position.y+boundry_y)*GLOBAL_VARIABLES.CAMERA_SPEED;
+			}
+			if (players[1].coords.y-position.y>boundry_y){
+				position.y+=(players[1].coords.y-position.y-boundry_y)*GLOBAL_VARIABLES.CAMERA_SPEED;
+			}
+
+			if (player1_rect.findIntersection(box2) && player2_rect.findIntersection(box2)){
+				scale-=scale*GLOBAL_VARIABLES.CAMERA_SPEED/5.f;
+				if (scale<1){scale=1;}
+			}
+			if (!player1_rect.findIntersection(box2) && !player2_rect.findIntersection(box2)){
+				scale+=scale*GLOBAL_VARIABLES.CAMERA_SPEED/10.f;
+			}
 	}
 
 
@@ -783,12 +855,15 @@ void PLAYER::SETUP(int ind){
 			cur_player.UPDATE(input,game_chunks,entities);
 		}
 		UPDATE_ENTETIES();
-
+		for (auto& cur_player:players){
+			if (cur_player.died){cur_player.SETUP(cur_player.index);}
+		}
+		camera.UPDATE(players);
 	}
 
 	void GAME::UPDATE_ENTETIES(){
 		for (auto& cur_entity:entities){
-			cur_entity.UPDATE(players);
+			cur_entity.UPDATE(players,game_chunks);
 		}
 	}
 
