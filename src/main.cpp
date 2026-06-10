@@ -1,3 +1,4 @@
+
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
@@ -9,86 +10,11 @@
 #include <map>
 #include <unordered_map>
 
+#include "enums.h"
+#include "GLOBALS.h"
 
 
 
-enum class BLOCK_TYPE{
-	AIR,
-	WALL,
-	BUTTON,
-	ERROR
-};
-
-enum class BUTTON_TYPE{
-	NOTHING,
-	ESCAPE_RESUME,
-	ESCAPE_RESTART,
-	ESCAPE_SETTINGS,
-	ESCAPE_MAIN_MENU,
-	ESCAPE_PAUSED
-};
-
-enum class GAME_STATE{
-	PLAYING,
-	ESCAPE,
-	SETTINGS,
-	MAIN_MENU
-};
-
-
-
-
-
-
-struct GLOBAL_VARIABLES{
-	float tick_speed=1;
-	sf::Keyboard::Key player1_left_bind=sf::Keyboard::Key::Left;
-	sf::Keyboard::Key player1_right_bind=sf::Keyboard::Key::Right;
-	sf::Keyboard::Key player1_jump_bind=sf::Keyboard::Key::Up;
-
-	sf::Keyboard::Key player2_left_bind=sf::Keyboard::Key::A;
-	sf::Keyboard::Key player2_right_bind=sf::Keyboard::Key::D;
-	sf::Keyboard::Key player2_jump_bind=sf::Keyboard::Key::W;
-	GAME_STATE game_state=GAME_STATE::PLAYING;
-
-	bool SHOW_FPS=true;
-	bool is_full_screen_mode=false;
-	bool is_vsync_on=false;
-};
-
-
-
-struct GLOBAL_CONSTANTS{
-	sf::View default_view=sf::View(sf::FloatRect({0,0},{1920,1080}));
-	float BLOCK_SIZE=64;
-	float CHUNK_SIZE=10;
-	float BLOCK_TEXTURE_SIZE=64;
-	
-
-	float player_max_side_speed=8;
-	float player_acceleration=0.4;
-	float player_speed_loss=0.1;
-	float player_jump_power=13;
-	float player_gravity_power=0.5;
-
-	float ENTITY_SPEED=1;
-	float CAMERA_SPEED=0.02;
-	float CAMERA_SCALE_INCREASE_SPEED=0.05;
-	float CAMERA_SCALE_DECREASE_SPEED=0.005;
-
-	float UI_BUTTON_COLOR_CHANGE_SPEED=10;
-	float background_darkening_speed=30;
-	float background_darkening_limit=180;
-
-	sf::Vector2u desktop=sf::VideoMode::getDesktopMode().size;
-	unsigned int screen_width=desktop.x*0.8f;
-	unsigned int screen_height=desktop.y*0.8f;
-};
-
-GLOBAL_CONSTANTS CONSTANTS_GLOBAL;
-
-
- 
 
 
 
@@ -133,7 +59,7 @@ struct INPUT{
 	bool player2_right;
 	bool player2_jump;
 
-	void read(sf::RenderWindow& window,GLOBAL_VARIABLES& VARIABLES_GLOBAL);
+	void read(sf::RenderWindow& window);
 };
 
 
@@ -165,7 +91,7 @@ struct UI_BUTTON{
 	void SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTTON_TYPE setup_type, std::string setup_string,
 	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size);
 
-	void UPDATE(INPUT& input,GLOBAL_VARIABLES& VARIABLES_GLOBAL);
+	void UPDATE(INPUT& input);
 
 	void DRAW(sf::RenderWindow& window);
 };
@@ -184,18 +110,18 @@ struct USER_INTERFACE{
 
 	void SETUP();
 
-	void UPDATE(INPUT& input,GLOBAL_VARIABLES& VARIABLES_GLOBAL);
+	void UPDATE(INPUT& input);
 
 	void DRAW_BACKGROUND_BLUR(sf::RenderWindow& window);
 
-	void DRAW_BACKGROUND(sf::RenderWindow& window,GLOBAL_VARIABLES& VARIABLES_GLOBAL);
+	void DRAW_BACKGROUND(sf::RenderWindow& window);
 
-	void DRAW(sf::RenderWindow& window,GLOBAL_VARIABLES& VARIABLES_GLOBAL);
+	void DRAW(sf::RenderWindow& window);
 
 	void CREATE_BUTTON(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTTON_TYPE setup_type, std::string setup_string,
 	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size);
 
-	bool CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button,GLOBAL_VARIABLES& VARIABLES_GLOBAL);
+	bool CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button);
 };
 
 
@@ -378,7 +304,6 @@ struct PERFORMACE_COUNTER{
 
 
 struct GAME{
-	GLOBAL_VARIABLES VARIABLES_GLOBAL;
 	sf::RenderWindow window{ sf::VideoMode({CONSTANTS_GLOBAL.screen_width, CONSTANTS_GLOBAL.screen_height}), "platformer game" };
 	INPUT input;
 	CAMERA camera;
@@ -449,7 +374,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 
 
 
-	void INPUT::read(sf::RenderWindow& window,GLOBAL_VARIABLES& VARIABLES_GLOBAL){
+	void INPUT::read(sf::RenderWindow& window){
 		Mouse1=false;Mouse2=false;
 		SPACE=false;
 		ESCAPE=false;LSHIFT=false;TAB=false;ENTER=false;PageUp=false;
@@ -543,7 +468,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		binc=(end_color.b-start_color.b)/100.f;
 	}
 
-	void UI_BUTTON::UPDATE(INPUT& input,GLOBAL_VARIABLES& VARIABLES_GLOBAL){
+	void UI_BUTTON::UPDATE(INPUT& input){
 		if (rect.contains(input.mouse_window_coords)){
 			conversion_procentile+=CONSTANTS_GLOBAL.UI_BUTTON_COLOR_CHANGE_SPEED;
 			if (conversion_procentile>=100){conversion_procentile=100;}
@@ -629,7 +554,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		CREATE_BUTTON({850,600},{300,100},BUTTON_TYPE::ESCAPE_SETTINGS,"Settings",sf::Color(253,132,0),sf::Color(0,253,0),60);
 		CREATE_BUTTON({850,700},{300,100},BUTTON_TYPE::ESCAPE_MAIN_MENU,"Main Menu",sf::Color(253,132,0),sf::Color(0,253,0),50);
 	}
-	void USER_INTERFACE::UPDATE(INPUT& input,GLOBAL_VARIABLES& VARIABLES_GLOBAL){
+	void USER_INTERFACE::UPDATE(INPUT& input){
 		if (input.ESCAPE){
 			switch (VARIABLES_GLOBAL.game_state)
 			{
@@ -656,8 +581,8 @@ void ASSETS::LOAD_ALL_ASSETS(){
 			if (background_darkening<=0){background_darkening=0;}
 		}
 		for (auto& cur_button:buttons){
-			if (CHECK_IF_UPDATE_BUTTON(cur_button,VARIABLES_GLOBAL)){
-				cur_button.UPDATE(input,VARIABLES_GLOBAL);
+			if (CHECK_IF_UPDATE_BUTTON(cur_button)){
+				cur_button.UPDATE(input);
 			}
 		}
 	}
@@ -683,7 +608,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		window.draw(va);
 	}
 
-	void USER_INTERFACE::DRAW_BACKGROUND(sf::RenderWindow& window,GLOBAL_VARIABLES& VARIABLES_GLOBAL){
+	void USER_INTERFACE::DRAW_BACKGROUND(sf::RenderWindow& window){
 		float left=0;
 		float right=0;
 		float top=0;
@@ -722,12 +647,12 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		
 	}
 
-	void USER_INTERFACE::DRAW(sf::RenderWindow& window,GLOBAL_VARIABLES& VARIABLES_GLOBAL){
+	void USER_INTERFACE::DRAW(sf::RenderWindow& window){
 		window.setView(CONSTANTS_GLOBAL.default_view);
 		DRAW_BACKGROUND_BLUR(window);
-		DRAW_BACKGROUND(window,VARIABLES_GLOBAL);
+		DRAW_BACKGROUND(window);
 		for (auto& cur_button:buttons){
-			if (CHECK_IF_UPDATE_BUTTON(cur_button,VARIABLES_GLOBAL)){
+			if (CHECK_IF_UPDATE_BUTTON(cur_button)){
 				cur_button.DRAW(window);
 			}
 		}
@@ -740,7 +665,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		buttons.push_back(cur_button);
 	}
 
-	bool USER_INTERFACE::CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button,GLOBAL_VARIABLES& VARIABLES_GLOBAL){
+	bool USER_INTERFACE::CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button){
 		BUTTON_TYPE type=cur_button.type;
 		GAME_STATE state=VARIABLES_GLOBAL.game_state;
 		bool function_return_bool=false;
@@ -1186,7 +1111,7 @@ void PLAYER::SETUP(int ind){
 
 	void GAME::UPDATE_INPUT(){
 		window.setView(camera.getview());
-		input.read(window,VARIABLES_GLOBAL);
+		input.read(window);
 	}
 	
 
@@ -1210,7 +1135,7 @@ void PLAYER::SETUP(int ind){
 		}
 		
 
-		game_ui.UPDATE(input,VARIABLES_GLOBAL);
+		game_ui.UPDATE(input);
 	}
 
 	void GAME::UPDATE_ENTETIES(){
@@ -1240,6 +1165,8 @@ void PLAYER::SETUP(int ind){
 				sf::FloatRect cur_player_rect={cur_player.coords,cur_player.size};
 				if (cur_entity_rect.findIntersection(cur_player_rect)){cur_player.died=true;}
 			}
+			if (cur_entity.touched_player1_bottom){players[0].coords.x+=cur_entity.cur_speed.x*CONSTANTS_GLOBAL.ENTITY_SPEED;}
+			if (cur_entity.touched_player2_bottom){players[1].coords.x+=cur_entity.cur_speed.x*CONSTANTS_GLOBAL.ENTITY_SPEED;}
 
 			cur_entity.UPDATE_TARGETS();
 		}
@@ -1253,7 +1180,7 @@ void PLAYER::SETUP(int ind){
 		for (auto& cur_player:players){
 			cur_player.DRAW(window);
 		}
-		game_ui.DRAW(window,VARIABLES_GLOBAL);
+		game_ui.DRAW(window);
 		performance_clocks.DRAW(window);
 
 		window.display();	
