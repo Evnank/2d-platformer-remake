@@ -9,6 +9,35 @@
 #include <map>
 #include <unordered_map>
 
+enum class BLOCK_TYPE{
+	AIR,
+	WALL,
+	BUTTON,
+	ERROR
+};
+
+enum class BUTTON_TYPE{
+	NOTHING,
+	ESCAPE_RESUME,
+	ESCAPE_RESTART,
+	ESCAPE_SETTINGS,
+	ESCAPE_MAIN_MENU
+};
+
+enum class GAME_STATE{
+	PLAYING,
+	ESCAPE,
+	SETTINGS,
+	MAIN_MENU
+};
+
+
+
+
+
+
+
+
 struct GLOBALS{
 	sf::View default_view=sf::View(sf::FloatRect({0,0},{1920,1080}));
 	float BLOCK_SIZE=64;
@@ -24,6 +53,8 @@ struct GLOBALS{
 
 	float ENTITY_SPEED=1;
 	float CAMERA_SPEED=0.02;
+
+	float UI_BUTTON_COLOR_CHANGE_SPEED=10;
 	sf::Keyboard::Key player1_left_bind=sf::Keyboard::Key::Left;
 	sf::Keyboard::Key player1_right_bind=sf::Keyboard::Key::Right;
 	sf::Keyboard::Key player1_jump_bind=sf::Keyboard::Key::Up;
@@ -31,14 +62,20 @@ struct GLOBALS{
 	sf::Keyboard::Key player2_left_bind=sf::Keyboard::Key::A;
 	sf::Keyboard::Key player2_right_bind=sf::Keyboard::Key::D;
 	sf::Keyboard::Key player2_jump_bind=sf::Keyboard::Key::W;
+	GAME_STATE game_state=GAME_STATE::PLAYING;
 };
 
 
 
 GLOBALS GLOBAL_VARIABLES; 
 
+
+
+
+
 struct ASSETS{
-	sf::Font font;
+	sf::Font arial_font;
+	sf::Font conthrax_font;
 	sf::Texture wall_texture;
 	sf::Texture player_blue;
 	sf::Texture player_red;
@@ -54,6 +91,7 @@ ASSETS GLOBAL_ASSETS;
 
 struct INPUT{
 	sf::Vector2f mouse_true_coords;
+	sf::Vector2f mouse_window_coords;
 	bool Mouse1,Mouse2;
 
 	bool SPACE;
@@ -77,12 +115,63 @@ struct INPUT{
 
 
 
-enum class BLOCK_TYPE{
-	AIR,
-	WALL,
-	BUTTON,
-	ERROR
+
+
+
+
+
+struct UI_BUTTON{
+	sf::FloatRect rect;
+	BUTTON_TYPE type=BUTTON_TYPE::NOTHING;
+	std::string text_string="";
+	sf::Color start_color;
+	sf::Color end_color;
+	int text_char_size=30;
+	sf::Color background_color=sf::Color(80,80,80);
+	float conversion_procentile=0;
+	float rinc;
+	float ginc;
+	float binc;
+
+	bool is_hovering=false;
+	sf::Color cur_color;
+
+	sf::Text text{GLOBAL_ASSETS.conthrax_font};
+
+	void SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTTON_TYPE setup_type, std::string setup_string,
+	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size);
+
+	void UPDATE(INPUT& input);
+
+	void DRAW(sf::RenderWindow& window);
 };
+
+
+
+
+
+
+
+
+
+struct USER_INTERFACE{
+	std::vector<UI_BUTTON> buttons;
+
+	void SETUP();
+
+	void UPDATE(INPUT& input);
+
+	void DRAW(sf::RenderWindow& window);
+
+	void CREATE_BUTTON(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTTON_TYPE setup_type, std::string setup_string,
+	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size);
+
+	bool CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button);
+};
+
+
+
+
 
 
 
@@ -93,6 +182,9 @@ BLOCK_TYPE STRING_TO_BLOCK_TYPE(std::string the_string){
 
 	return BLOCK_TYPE::ERROR;
 };
+
+
+
 
 
 
@@ -110,6 +202,11 @@ struct PairHash {
         return (std::size_t)p.first ^ ((std::size_t)p.second << 16);
     }
 };
+
+
+
+
+
 
 
 
@@ -236,7 +333,7 @@ struct PERFORMACE_COUNTER{
 	sf::Clock UPS_CLOCK;
 	sf::Time UPS_UPDATE_TIME=sf::milliseconds(500);
 	std::string UPS_STRING;
-	sf::Text FPS_UPS_RENDER_TEXT{GLOBAL_ASSETS.font};
+	sf::Text FPS_UPS_RENDER_TEXT{GLOBAL_ASSETS.conthrax_font};
 	
 	void SETUP();
 
@@ -252,6 +349,11 @@ struct PERFORMACE_COUNTER{
 
 
 
+
+
+
+
+
 struct GAME{
 	sf::RenderWindow window{ sf::VideoMode( { 1920, 1080 } ), "platformer game" };
 	INPUT input;
@@ -262,6 +364,7 @@ struct GAME{
 	std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash> game_chunks;
 	std::unordered_map<int,bool> indexes_pressed;
 	std::vector <ENTITY> entities;
+	USER_INTERFACE game_ui;
 
 
 
@@ -307,7 +410,8 @@ int main()
 
 
 void ASSETS::LOAD_ALL_ASSETS(){
-		if (!font.openFromFile("assets/fonts/arial.ttf")){std::cout<<"font failed to load";} 
+		if (!arial_font.openFromFile("assets/fonts/arial.ttf")){std::cout<<"font failed to load";} 
+		if (!conthrax_font.openFromFile("assets/fonts/Conthrax.otf")){std::cout<<"font failed to load";} 
 		if (!wall_texture.loadFromFile("assets/textures/WALL.png")){} 
 		if (!player_blue.loadFromFile("assets/textures/PLAYER_BLUE.png")){} 
 		if (!player_red.loadFromFile("assets/textures/PLAYER_RED.png")){} 
@@ -329,6 +433,8 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		player1_left=false;player1_right=false;player1_jump=false;
 		player2_left=false;player2_right=false;player2_jump=false;
 		mouse_true_coords=window.mapPixelToCoords(sf::Mouse::getPosition(window));
+		window.setView(GLOBAL_VARIABLES.default_view);
+		mouse_window_coords=window.mapPixelToCoords(sf::Mouse::getPosition(window));
 		while (const std::optional event=window.pollEvent()) {
 			if (event->is<sf::Event::Closed>()){window.close();}
 				
@@ -362,6 +468,183 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		player2_right=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player2_right_bind);
 		player2_jump=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player2_jump_bind);
 
+	}
+
+
+
+
+
+
+
+
+
+
+
+	void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTTON_TYPE setup_type, std::string setup_string,
+	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size){
+		rect=sf::FloatRect(setup_position,setup_size);
+		type=setup_type;
+		text_string=setup_string;
+		start_color=setup_start_color;
+		end_color=setup_end_color;
+		text_char_size=setup_char_size;
+
+		cur_color=start_color;
+
+		text.setString(text_string);
+		text.setPosition(rect.position);
+		text.setCharacterSize(text_char_size);
+		text.setFillColor(cur_color);
+
+		text.setOrigin(text.getLocalBounds().position+text.getLocalBounds().size/2.f);
+
+		text.setPosition(rect.position+rect.size/2.f);
+
+		rinc=(end_color.r-start_color.r)/100.f;
+		ginc=(end_color.g-start_color.g)/100.f;
+		binc=(end_color.b-start_color.b)/100.f;
+	}
+
+	void UI_BUTTON::UPDATE(INPUT& input){
+		if (rect.contains(input.mouse_window_coords)){
+			conversion_procentile+=GLOBAL_VARIABLES.UI_BUTTON_COLOR_CHANGE_SPEED;
+			if (conversion_procentile>=100){conversion_procentile=100;}
+			is_hovering=true;
+			if (input.Mouse1){
+				switch (type)
+				{
+				case BUTTON_TYPE::ESCAPE_RESUME:
+					GLOBAL_VARIABLES.game_state=GAME_STATE::PLAYING;
+					break;
+		
+				default:
+					break;
+				}
+			}
+		} else {
+			conversion_procentile-=GLOBAL_VARIABLES.UI_BUTTON_COLOR_CHANGE_SPEED;
+			if (conversion_procentile<=0){conversion_procentile=0;}
+			is_hovering=false;
+		}
+		cur_color.r=start_color.r+rinc*conversion_procentile;
+		cur_color.g=start_color.g+ginc*conversion_procentile;
+		cur_color.b=start_color.b+binc*conversion_procentile;
+		
+	}
+
+	void UI_BUTTON::DRAW(sf::RenderWindow& window){
+		window.setView(GLOBAL_VARIABLES.default_view);
+		sf::VertexArray va(sf::PrimitiveType::Triangles);
+		text.setFillColor(cur_color);
+
+		float left=rect.position.x;
+		float right=left+rect.size.x;
+		float top=rect.position.y;
+		float bottom=top+rect.size.y;
+
+		va.append(sf::Vertex({left,top},background_color,{0,0}));
+		va.append(sf::Vertex({right,top},background_color,{0,0}));
+		va.append(sf::Vertex({left,bottom},background_color,{0,0}));
+
+		va.append(sf::Vertex({left,bottom},background_color,{0,0}));
+		va.append(sf::Vertex({right,top},background_color,{0,0}));
+		va.append(sf::Vertex({right,bottom},background_color,{0,0}));
+
+		window.draw(va);
+		window.draw(text);
+		if (is_hovering){
+			text.move({1,1});
+			window.draw(text);
+			text.move({-2,-2});
+			window.draw(text);
+			text.move({1,1});
+		}
+		
+
+	}
+
+
+
+
+	
+
+
+
+
+
+
+
+	void USER_INTERFACE::SETUP(){
+		CREATE_BUTTON({500,500},{400,100},BUTTON_TYPE::ESCAPE_RESUME,"Resume",sf::Color(253,132,0),sf::Color(0,253,0),60);
+	}
+	void USER_INTERFACE::UPDATE(INPUT& input){
+		if (input.ESCAPE){
+			switch (GLOBAL_VARIABLES.game_state)
+			{
+			case GAME_STATE::PLAYING:
+				GLOBAL_VARIABLES.game_state=GAME_STATE::ESCAPE;
+				break;
+			case GAME_STATE::ESCAPE:
+				GLOBAL_VARIABLES.game_state=GAME_STATE::PLAYING;
+				break;
+			case GAME_STATE::SETTINGS:
+				GLOBAL_VARIABLES.game_state=GAME_STATE::MAIN_MENU;
+				break;
+			
+			
+			default:
+				break;
+			}
+		}
+		for (auto& cur_button:buttons){
+			if (CHECK_IF_UPDATE_BUTTON(cur_button)){
+				cur_button.UPDATE(input);
+			}
+		}
+	}
+
+	void USER_INTERFACE::DRAW(sf::RenderWindow& window){
+		for (auto& cur_button:buttons){
+			if (CHECK_IF_UPDATE_BUTTON(cur_button)){
+				cur_button.DRAW(window);
+			}
+		}
+	}
+
+	void USER_INTERFACE::CREATE_BUTTON(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTTON_TYPE setup_type, std::string setup_string,
+	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size){
+		UI_BUTTON cur_button;
+		cur_button.SETUP(setup_position, setup_size, setup_type, setup_string, setup_start_color, setup_end_color, setup_char_size);
+		buttons.push_back(cur_button);
+	}
+
+	bool USER_INTERFACE::CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button){
+		BUTTON_TYPE type=cur_button.type;
+		GAME_STATE state=GLOBAL_VARIABLES.game_state;
+		bool function_return_bool=false;
+			switch (type)
+			{
+			case BUTTON_TYPE::ESCAPE_RESUME:
+				if (state==GAME_STATE::ESCAPE){function_return_bool=true;}
+				break;
+
+			case BUTTON_TYPE::ESCAPE_RESTART:
+				if (state==GAME_STATE::ESCAPE){function_return_bool=true;}
+				break;
+
+			case BUTTON_TYPE::ESCAPE_SETTINGS:
+				if (state==GAME_STATE::ESCAPE){function_return_bool=true;}
+				break;
+
+			case BUTTON_TYPE::ESCAPE_MAIN_MENU:
+				if (state==GAME_STATE::ESCAPE){function_return_bool=true;}
+				break;
+			
+			default:
+				break;
+			}
+
+		return function_return_bool;
 	}
 
 
@@ -771,7 +1054,7 @@ void PLAYER::SETUP(int ind){
 	void PERFORMACE_COUNTER::SETUP(){
 		FPS_CLOCK.restart();
 		UPS_CLOCK.restart();
-		FPS_UPS_RENDER_TEXT.setCharacterSize(50);
+		FPS_UPS_RENDER_TEXT.setCharacterSize(35);
 		FPS_UPS_RENDER_TEXT.setPosition({1690.f,0.f});
 		FPS_UPS_RENDER_TEXT.setFillColor(sf::Color::Green);
 	} 
@@ -841,24 +1124,37 @@ void PLAYER::SETUP(int ind){
 		GLOBAL_ASSETS.LOAD_ALL_ASSETS();
 		window.setVerticalSyncEnabled(false);
 		performance_clocks.SETUP();
+		game_ui.SETUP();
 	}
 
 
 	void GAME::UPDATE_INPUT(){
+		window.setView(camera.getview());
 		input.read(window);
 	}
 	
 
 	void GAME::UPDATE_PHYSICS(){
 		performance_clocks.UPS_UPDATE();
-		for (auto& cur_player:players){
-			cur_player.UPDATE(input,game_chunks,entities);
+		switch (GLOBAL_VARIABLES.game_state)
+		{
+		case GAME_STATE::PLAYING:
+			for (auto& cur_player:players){
+				cur_player.UPDATE(input,game_chunks,entities);
+			}
+			UPDATE_ENTETIES();
+			for (auto& cur_player:players){
+				if (cur_player.died){cur_player.SETUP(cur_player.index);}
+			}
+			camera.UPDATE(players);
+			break;
+			
+		default:
+			break;
 		}
-		UPDATE_ENTETIES();
-		for (auto& cur_player:players){
-			if (cur_player.died){cur_player.SETUP(cur_player.index);}
-		}
-		camera.UPDATE(players);
+		
+
+		game_ui.UPDATE(input);
 	}
 
 	void GAME::UPDATE_ENTETIES(){
@@ -876,7 +1172,10 @@ void PLAYER::SETUP(int ind){
 			cur_player.DRAW(window);
 		}
 		performance_clocks.DRAW(window);
-		window.display();
+		game_ui.DRAW(window);
+
+
+		window.display();	
 	}
 
 
