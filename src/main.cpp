@@ -9,6 +9,9 @@
 #include <map>
 #include <unordered_map>
 
+
+
+
 enum class BLOCK_TYPE{
 	AIR,
 	WALL,
@@ -37,30 +40,8 @@ enum class GAME_STATE{
 
 
 
-
-
-struct GLOBALS{
-	sf::View default_view=sf::View(sf::FloatRect({0,0},{1920,1080}));
-	float BLOCK_SIZE=64;
-	float CHUNK_SIZE=10;
-	float BLOCK_TEXTURE_SIZE=64;
-	bool SHOW_FPS=true;
-
-	float player_max_side_speed=8;
-	float player_acceleration=0.4;
-	float player_speed_loss=0.1;
-	float player_jump_power=13;
-	float player_gravity_power=0.5;
-
-	float ENTITY_SPEED=1;
+struct GLOBAL_VARIABLES{
 	float tick_speed=1;
-	float CAMERA_SPEED=0.02;
-	float CAMERA_SCALE_INCREASE_SPEED=0.05;
-	float CAMERA_SCALE_DECREASE_SPEED=0.005;
-
-	float UI_BUTTON_COLOR_CHANGE_SPEED=10;
-	float background_darkening_speed=30;
-	float background_darkening_limit=180;
 	sf::Keyboard::Key player1_left_bind=sf::Keyboard::Key::Left;
 	sf::Keyboard::Key player1_right_bind=sf::Keyboard::Key::Right;
 	sf::Keyboard::Key player1_jump_bind=sf::Keyboard::Key::Up;
@@ -70,17 +51,44 @@ struct GLOBALS{
 	sf::Keyboard::Key player2_jump_bind=sf::Keyboard::Key::W;
 	GAME_STATE game_state=GAME_STATE::PLAYING;
 
-	sf::Vector2u desktop=sf::VideoMode::getDesktopMode().size;
-	unsigned int screen_width=desktop.x*0.8f;
-	unsigned int screen_height=desktop.y*0.8f;
-
+	bool SHOW_FPS=true;
 	bool is_full_screen_mode=false;
 	bool is_vsync_on=false;
 };
 
 
 
-GLOBALS GLOBAL_VARIABLES; 
+struct GLOBAL_CONSTANTS{
+	sf::View default_view=sf::View(sf::FloatRect({0,0},{1920,1080}));
+	float BLOCK_SIZE=64;
+	float CHUNK_SIZE=10;
+	float BLOCK_TEXTURE_SIZE=64;
+	
+
+	float player_max_side_speed=8;
+	float player_acceleration=0.4;
+	float player_speed_loss=0.1;
+	float player_jump_power=13;
+	float player_gravity_power=0.5;
+
+	float ENTITY_SPEED=1;
+	float CAMERA_SPEED=0.02;
+	float CAMERA_SCALE_INCREASE_SPEED=0.05;
+	float CAMERA_SCALE_DECREASE_SPEED=0.005;
+
+	float UI_BUTTON_COLOR_CHANGE_SPEED=10;
+	float background_darkening_speed=30;
+	float background_darkening_limit=180;
+
+	sf::Vector2u desktop=sf::VideoMode::getDesktopMode().size;
+	unsigned int screen_width=desktop.x*0.8f;
+	unsigned int screen_height=desktop.y*0.8f;
+};
+
+GLOBAL_CONSTANTS CONSTANTS_GLOBAL;
+
+
+ 
 
 
 
@@ -125,7 +133,7 @@ struct INPUT{
 	bool player2_right;
 	bool player2_jump;
 
-	void read(sf::RenderWindow& window);
+	void read(sf::RenderWindow& window,GLOBAL_VARIABLES& VARIABLES_GLOBAL);
 };
 
 
@@ -157,7 +165,7 @@ struct UI_BUTTON{
 	void SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTTON_TYPE setup_type, std::string setup_string,
 	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size);
 
-	void UPDATE(INPUT& input);
+	void UPDATE(INPUT& input,GLOBAL_VARIABLES& VARIABLES_GLOBAL);
 
 	void DRAW(sf::RenderWindow& window);
 };
@@ -176,18 +184,18 @@ struct USER_INTERFACE{
 
 	void SETUP();
 
-	void UPDATE(INPUT& input);
+	void UPDATE(INPUT& input,GLOBAL_VARIABLES& VARIABLES_GLOBAL);
 
 	void DRAW_BACKGROUND_BLUR(sf::RenderWindow& window);
 
-	void DRAW_BACKGROUND(sf::RenderWindow& window);
+	void DRAW_BACKGROUND(sf::RenderWindow& window,GLOBAL_VARIABLES& VARIABLES_GLOBAL);
 
-	void DRAW(sf::RenderWindow& window);
+	void DRAW(sf::RenderWindow& window,GLOBAL_VARIABLES& VARIABLES_GLOBAL);
 
 	void CREATE_BUTTON(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTTON_TYPE setup_type, std::string setup_string,
 	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size);
 
-	bool CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button);
+	bool CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button,GLOBAL_VARIABLES& VARIABLES_GLOBAL);
 };
 
 
@@ -215,7 +223,7 @@ struct STATIC_BLOCK{
 };
 
 struct GAME_CHUNK{
-	std::vector<STATIC_BLOCK> chunk_blocks=std::vector<STATIC_BLOCK>(GLOBAL_VARIABLES.CHUNK_SIZE*GLOBAL_VARIABLES.CHUNK_SIZE);
+	std::vector<STATIC_BLOCK> chunk_blocks=std::vector<STATIC_BLOCK>(CONSTANTS_GLOBAL.CHUNK_SIZE*CONSTANTS_GLOBAL.CHUNK_SIZE);
 };
 
 struct PairHash {
@@ -230,8 +238,6 @@ struct PairHash {
 
 
 
-
-struct PLAYER;
 
 
 
@@ -248,17 +254,13 @@ struct ENTITY{
 
 	void SETUP(int setup_index,bool setup_looping,std::vector<sf::Vector2f> setup_coords,BLOCK_TYPE& setup_type);
 
-	void UPDATE(std::vector<PLAYER>& players,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
-
 	void UPDATE_TARGETS();
 
 	void SWITCH_TARGETS();
 
 	void MOVEX();
-	void RESOLVE_COLLISION_X(std::vector<PLAYER>& players,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
 
 	void MOVEY();
-	void RESOLVE_COLLISION_Y(std::vector<PLAYER>& players,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
 
 };
 
@@ -297,11 +299,11 @@ struct PLAYER{
 
 
 	void RESOLVE_COLLISION_X(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
-	void RESOLVE_COLLISION_X_ENTITY(std::vector<ENTITY>& entities);
+	void RESOLVE_COLLISION_X_ENTITY(ENTITY& cur_entity);
 
 
 	void RESOLVE_COLLISION_Y(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
-	void RESOLVE_COLLISION_Y_ENTITY(std::vector<ENTITY>& entities);
+	void RESOLVE_COLLISION_Y_ENTITY(ENTITY& cur_entity);
 
 
 //velocity
@@ -376,8 +378,8 @@ struct PERFORMACE_COUNTER{
 
 
 struct GAME{
-	
-	sf::RenderWindow window{ sf::VideoMode({GLOBAL_VARIABLES.screen_width, GLOBAL_VARIABLES.screen_height}), "platformer game" };
+	GLOBAL_VARIABLES VARIABLES_GLOBAL;
+	sf::RenderWindow window{ sf::VideoMode({CONSTANTS_GLOBAL.screen_width, CONSTANTS_GLOBAL.screen_height}), "platformer game" };
 	INPUT input;
 	CAMERA camera;
 	std::vector<PLAYER> players;
@@ -447,7 +449,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 
 
 
-	void INPUT::read(sf::RenderWindow& window){
+	void INPUT::read(sf::RenderWindow& window,GLOBAL_VARIABLES& VARIABLES_GLOBAL){
 		Mouse1=false;Mouse2=false;
 		SPACE=false;
 		ESCAPE=false;LSHIFT=false;TAB=false;ENTER=false;PageUp=false;
@@ -456,7 +458,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		player1_left=false;player1_right=false;player1_jump=false;
 		player2_left=false;player2_right=false;player2_jump=false;
 		mouse_true_coords=window.mapPixelToCoords(sf::Mouse::getPosition(window));
-		window.setView(GLOBAL_VARIABLES.default_view);
+		window.setView(CONSTANTS_GLOBAL.default_view);
 		mouse_window_coords=window.mapPixelToCoords(sf::Mouse::getPosition(window));
 		while (const std::optional event=window.pollEvent()) {
 			if (event->is<sf::Event::Closed>()){window.close();}
@@ -484,23 +486,23 @@ void ASSETS::LOAD_ALL_ASSETS(){
 				if (mouse->button == sf::Mouse::Button::Right){Mouse2=true;}
 			}
 		}
-		player1_left=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player1_left_bind);
-		player1_right=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player1_right_bind);
-		player1_jump=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player1_jump_bind);
+		player1_left=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player1_left_bind);
+		player1_right=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player1_right_bind);
+		player1_jump=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player1_jump_bind);
 
-		player2_left=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player2_left_bind);
-		player2_right=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player2_right_bind);
-		player2_jump=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player2_jump_bind);
+		player2_left=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player2_left_bind);
+		player2_right=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player2_right_bind);
+		player2_jump=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player2_jump_bind);
 
 		if (F11){
-			GLOBAL_VARIABLES.is_full_screen_mode=!GLOBAL_VARIABLES.is_full_screen_mode;
-			if (GLOBAL_VARIABLES.is_full_screen_mode){
+			VARIABLES_GLOBAL.is_full_screen_mode=!VARIABLES_GLOBAL.is_full_screen_mode;
+			if (VARIABLES_GLOBAL.is_full_screen_mode){
 				
-				window.create( sf::VideoMode({GLOBAL_VARIABLES.desktop}), "platformer game",sf::State::Fullscreen );
+				window.create( sf::VideoMode({CONSTANTS_GLOBAL.desktop}), "platformer game",sf::State::Fullscreen );
 			} else {
-				window.create( sf::VideoMode({GLOBAL_VARIABLES.screen_width, GLOBAL_VARIABLES.screen_height}), "platformer game",sf::State::Windowed );
+				window.create( sf::VideoMode({CONSTANTS_GLOBAL.screen_width, CONSTANTS_GLOBAL.screen_height}), "platformer game",sf::State::Windowed );
 			}
-			window.setVerticalSyncEnabled(GLOBAL_VARIABLES.is_vsync_on);
+			window.setVerticalSyncEnabled(VARIABLES_GLOBAL.is_vsync_on);
 		}
 
 	}
@@ -541,16 +543,16 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		binc=(end_color.b-start_color.b)/100.f;
 	}
 
-	void UI_BUTTON::UPDATE(INPUT& input){
+	void UI_BUTTON::UPDATE(INPUT& input,GLOBAL_VARIABLES& VARIABLES_GLOBAL){
 		if (rect.contains(input.mouse_window_coords)){
-			conversion_procentile+=GLOBAL_VARIABLES.UI_BUTTON_COLOR_CHANGE_SPEED;
+			conversion_procentile+=CONSTANTS_GLOBAL.UI_BUTTON_COLOR_CHANGE_SPEED;
 			if (conversion_procentile>=100){conversion_procentile=100;}
 			is_hovering=true;
 			if (input.Mouse1){
 				switch (type)
 				{
 				case BUTTON_TYPE::ESCAPE_RESUME:
-					GLOBAL_VARIABLES.game_state=GAME_STATE::PLAYING;
+					VARIABLES_GLOBAL.game_state=GAME_STATE::PLAYING;
 					break;
 		
 				default:
@@ -558,7 +560,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 				}
 			}
 		} else {
-			conversion_procentile-=GLOBAL_VARIABLES.UI_BUTTON_COLOR_CHANGE_SPEED;
+			conversion_procentile-=CONSTANTS_GLOBAL.UI_BUTTON_COLOR_CHANGE_SPEED;
 			if (conversion_procentile<=0){conversion_procentile=0;}
 			is_hovering=false;
 		}
@@ -569,7 +571,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 	}
 
 	void UI_BUTTON::DRAW(sf::RenderWindow& window){
-		window.setView(GLOBAL_VARIABLES.default_view);
+		window.setView(CONSTANTS_GLOBAL.default_view);
 		sf::VertexArray va(sf::PrimitiveType::Triangles);
 		text.setFillColor(cur_color);
 
@@ -627,18 +629,18 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		CREATE_BUTTON({850,600},{300,100},BUTTON_TYPE::ESCAPE_SETTINGS,"Settings",sf::Color(253,132,0),sf::Color(0,253,0),60);
 		CREATE_BUTTON({850,700},{300,100},BUTTON_TYPE::ESCAPE_MAIN_MENU,"Main Menu",sf::Color(253,132,0),sf::Color(0,253,0),50);
 	}
-	void USER_INTERFACE::UPDATE(INPUT& input){
+	void USER_INTERFACE::UPDATE(INPUT& input,GLOBAL_VARIABLES& VARIABLES_GLOBAL){
 		if (input.ESCAPE){
-			switch (GLOBAL_VARIABLES.game_state)
+			switch (VARIABLES_GLOBAL.game_state)
 			{
 			case GAME_STATE::PLAYING:
-				GLOBAL_VARIABLES.game_state=GAME_STATE::ESCAPE;
+				VARIABLES_GLOBAL.game_state=GAME_STATE::ESCAPE;
 				break;
 			case GAME_STATE::ESCAPE:
-				GLOBAL_VARIABLES.game_state=GAME_STATE::PLAYING;
+				VARIABLES_GLOBAL.game_state=GAME_STATE::PLAYING;
 				break;
 			case GAME_STATE::SETTINGS:
-				GLOBAL_VARIABLES.game_state=GAME_STATE::MAIN_MENU;
+				VARIABLES_GLOBAL.game_state=GAME_STATE::MAIN_MENU;
 				break;
 			
 			
@@ -646,16 +648,16 @@ void ASSETS::LOAD_ALL_ASSETS(){
 				break;
 			}
 		}
-		if (GLOBAL_VARIABLES.game_state==GAME_STATE::ESCAPE){
-			background_darkening+=GLOBAL_VARIABLES.background_darkening_speed;
-			if (background_darkening>GLOBAL_VARIABLES.background_darkening_limit){background_darkening=GLOBAL_VARIABLES.background_darkening_limit;}
+		if (VARIABLES_GLOBAL.game_state==GAME_STATE::ESCAPE){
+			background_darkening+=CONSTANTS_GLOBAL.background_darkening_speed;
+			if (background_darkening>CONSTANTS_GLOBAL.background_darkening_limit){background_darkening=CONSTANTS_GLOBAL.background_darkening_limit;}
 		} else {
-			background_darkening-=GLOBAL_VARIABLES.background_darkening_speed;
+			background_darkening-=CONSTANTS_GLOBAL.background_darkening_speed;
 			if (background_darkening<=0){background_darkening=0;}
 		}
 		for (auto& cur_button:buttons){
-			if (CHECK_IF_UPDATE_BUTTON(cur_button)){
-				cur_button.UPDATE(input);
+			if (CHECK_IF_UPDATE_BUTTON(cur_button,VARIABLES_GLOBAL)){
+				cur_button.UPDATE(input,VARIABLES_GLOBAL);
 			}
 		}
 	}
@@ -681,7 +683,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		window.draw(va);
 	}
 
-	void USER_INTERFACE::DRAW_BACKGROUND(sf::RenderWindow& window){
+	void USER_INTERFACE::DRAW_BACKGROUND(sf::RenderWindow& window,GLOBAL_VARIABLES& VARIABLES_GLOBAL){
 		float left=0;
 		float right=0;
 		float top=0;
@@ -691,7 +693,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		sf::Color color=sf::Color::White;
 		sf::VertexArray va(sf::PrimitiveType::Triangles);
 
-		switch (GLOBAL_VARIABLES.game_state)
+		switch (VARIABLES_GLOBAL.game_state)
 		{
 		case GAME_STATE::ESCAPE:
 				left=750;
@@ -720,12 +722,12 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		
 	}
 
-	void USER_INTERFACE::DRAW(sf::RenderWindow& window){
-		window.setView(GLOBAL_VARIABLES.default_view);
+	void USER_INTERFACE::DRAW(sf::RenderWindow& window,GLOBAL_VARIABLES& VARIABLES_GLOBAL){
+		window.setView(CONSTANTS_GLOBAL.default_view);
 		DRAW_BACKGROUND_BLUR(window);
-		DRAW_BACKGROUND(window);
+		DRAW_BACKGROUND(window,VARIABLES_GLOBAL);
 		for (auto& cur_button:buttons){
-			if (CHECK_IF_UPDATE_BUTTON(cur_button)){
+			if (CHECK_IF_UPDATE_BUTTON(cur_button,VARIABLES_GLOBAL)){
 				cur_button.DRAW(window);
 			}
 		}
@@ -738,9 +740,9 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		buttons.push_back(cur_button);
 	}
 
-	bool USER_INTERFACE::CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button){
+	bool USER_INTERFACE::CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button,GLOBAL_VARIABLES& VARIABLES_GLOBAL){
 		BUTTON_TYPE type=cur_button.type;
-		GAME_STATE state=GLOBAL_VARIABLES.game_state;
+		GAME_STATE state=VARIABLES_GLOBAL.game_state;
 		bool function_return_bool=false;
 			switch (type)
 			{
@@ -789,19 +791,6 @@ void ENTITY::SETUP(int setup_index,bool setup_looping,std::vector<sf::Vector2f> 
 		cur_speed={0.f,0.f};
 	}
 
-void ENTITY::UPDATE(std::vector<PLAYER>& players,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
-		
-		MOVEX();
-		if (touched_player1_bottom){players[0].coords.x+=cur_speed.x*GLOBAL_VARIABLES.ENTITY_SPEED;}
-		if (touched_player2_bottom){players[1].coords.x+=cur_speed.x*GLOBAL_VARIABLES.ENTITY_SPEED;}
-		RESOLVE_COLLISION_X(players,game_chunks);
-
-		MOVEY();
-		RESOLVE_COLLISION_Y(players,game_chunks);
-		
-		UPDATE_TARGETS();
-	}
-
 void ENTITY::UPDATE_TARGETS(){
 		if ((coords[current_target]-current_coordinates).dot(cur_speed)<=0){
 			current_coordinates=coords[current_target];
@@ -823,69 +812,16 @@ void ENTITY::UPDATE_TARGETS(){
 	}
 
 void ENTITY::MOVEX(){
-		current_coordinates.x+=cur_speed.x*GLOBAL_VARIABLES.ENTITY_SPEED;
-	}
-
-void ENTITY::RESOLVE_COLLISION_X(std::vector<PLAYER>& players,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
-		float b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
-		sf::FloatRect cur_entity_rect={current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
-
-		for (auto& cur_player:players){
-			sf::FloatRect cur_player_rect={cur_player.coords,cur_player.size};
-			if (cur_entity_rect.findIntersection(cur_player_rect)){
-				switch (type){
-					case BLOCK_TYPE::WALL:
-						if (cur_player.coords.x<current_coordinates.x){
-							cur_player.coords.x=current_coordinates.x-cur_player.size.x;
-						} else {
-							cur_player.coords.x=current_coordinates.x+b_size;
-						}
-							cur_player.velocity.x=cur_speed.x;
-						break;
-				
-					default:
-						break;
-				}
-			}
-			cur_player.RESOLVE_COLLISION_X(game_chunks);
-			cur_player_rect={cur_player.coords,cur_player.size};
-			if (cur_entity_rect.findIntersection(cur_player_rect)){cur_player.died=true;}
-		}
+		current_coordinates.x+=cur_speed.x*CONSTANTS_GLOBAL.ENTITY_SPEED;
 	}
 
 void ENTITY::MOVEY(){
-		current_coordinates.y+=cur_speed.y*GLOBAL_VARIABLES.ENTITY_SPEED;
+		current_coordinates.y+=cur_speed.y*CONSTANTS_GLOBAL.ENTITY_SPEED;
 	}
 
-void ENTITY::RESOLVE_COLLISION_Y(std::vector<PLAYER>& players,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
-		float b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
-		sf::FloatRect cur_entity_rect={current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
-		for (auto& cur_player:players){
-			sf::FloatRect cur_player_rect={cur_player.coords,cur_player.size};
-			if (cur_entity_rect.findIntersection(cur_player_rect)){
-				switch (type){
-					case BLOCK_TYPE::WALL:
-						if (cur_player.coords.y<current_coordinates.y){
-							cur_player.coords.y=current_coordinates.y-cur_player.size.y;
-							cur_player.coords.x+=cur_speed.x;
-							if (cur_player.index==0){touched_player1_bottom=true;}else{touched_player2_bottom=true;}
-							cur_player.is_standing=true;
-						} else {
-							cur_player.coords.y=current_coordinates.y+b_size;
-						}
-							cur_player.velocity.y=cur_speed.y;
-						break;
-				
-					default:
-						break;
-				}
-				cur_player.RESOLVE_COLLISION_Y(game_chunks);
-				cur_player_rect={cur_player.coords,cur_player.size};
-				if (cur_entity_rect.findIntersection(cur_player_rect)){cur_player.died=true;}
-			}
-		}
-			
-	}
+
+
+
 
 
 
@@ -940,16 +876,20 @@ void PLAYER::SETUP(int ind){
 	void PLAYER::MOVE(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,std::vector<ENTITY>& entities){
 		coords.x+=velocity.x;
 		RESOLVE_COLLISION_X(game_chunks);
-		RESOLVE_COLLISION_X_ENTITY(entities);
+		for (auto& cur_entity:entities){
+			RESOLVE_COLLISION_X_ENTITY(cur_entity);
+		}	
 		coords.y+=velocity.y;
 		is_standing=false;
 		RESOLVE_COLLISION_Y(game_chunks);
-		RESOLVE_COLLISION_Y_ENTITY(entities);
+		for (auto& cur_entity:entities){
+			RESOLVE_COLLISION_Y_ENTITY(cur_entity);
+		}	
 	}
 
 	void PLAYER::RESOLVE_COLLISION_X(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
-		int c_size=GLOBAL_VARIABLES.CHUNK_SIZE;
-		int b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
+		int c_size=CONSTANTS_GLOBAL.CHUNK_SIZE;
+		int b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 		sf::FloatRect player_rect{coords,size};
 		int startx=std::floor(coords.x/b_size);
 		int starty=std::floor(coords.y/b_size);
@@ -984,8 +924,8 @@ void PLAYER::SETUP(int ind){
 	}
 
 	void PLAYER::RESOLVE_COLLISION_Y(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
-		int c_size=GLOBAL_VARIABLES.CHUNK_SIZE;
-		int b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
+		int c_size=CONSTANTS_GLOBAL.CHUNK_SIZE;
+		int b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 		sf::FloatRect player_rect{coords,size};
 		int startx=std::floor(coords.x/b_size);
 		int starty=std::floor(coords.y/b_size);
@@ -1019,10 +959,9 @@ void PLAYER::SETUP(int ind){
 		}
 	}
 
-	void PLAYER::RESOLVE_COLLISION_X_ENTITY(std::vector<ENTITY>& entities){
-			int b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
+	void PLAYER::RESOLVE_COLLISION_X_ENTITY(ENTITY& cur_entity){
+			int b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 			sf::FloatRect player_rect{coords,size};
-		for (auto& cur_entity:entities){
 			sf::FloatRect entity_rect{cur_entity.current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{float(b_size),float(b_size)}-sf::Vector2f{0,0.2}};
 			BLOCK_TYPE& type=cur_entity.type;
 			if (player_rect.findIntersection(entity_rect)){
@@ -1040,14 +979,11 @@ void PLAYER::SETUP(int ind){
 							break;
 					}
 				}
-			
-		}
 	}
 
-	void PLAYER::RESOLVE_COLLISION_Y_ENTITY(std::vector<ENTITY>& entities){
-		int b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
+	void PLAYER::RESOLVE_COLLISION_Y_ENTITY(ENTITY& cur_entity){
+		int b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 			sf::FloatRect player_rect{coords,size};
-		for (auto& cur_entity:entities){
 			if (index==0){cur_entity.touched_player1_bottom=false;} else {cur_entity.touched_player2_bottom=false;}
 			sf::FloatRect entity_rect{cur_entity.current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{float(b_size),float(b_size)}-sf::Vector2f{0,0.2}};
 			BLOCK_TYPE& type=cur_entity.type;
@@ -1068,8 +1004,6 @@ void PLAYER::SETUP(int ind){
 							break;
 					}
 				}
-			
-		}
 	}
 
 	void PLAYER::VELOCITY_SIDE(INPUT& input){
@@ -1082,21 +1016,21 @@ void PLAYER::SETUP(int ind){
 		}
 	//moving
 		if (cur_move_left){
-			if (velocity.x>-GLOBAL_VARIABLES.player_max_side_speed){
-				velocity.x-=GLOBAL_VARIABLES.player_acceleration;
+			if (velocity.x>-CONSTANTS_GLOBAL.player_max_side_speed){
+				velocity.x-=CONSTANTS_GLOBAL.player_acceleration;
 			}
 		} else if(cur_move_right){
-			if (velocity.x<GLOBAL_VARIABLES.player_max_side_speed){
-				velocity.x+=GLOBAL_VARIABLES.player_acceleration;
+			if (velocity.x<CONSTANTS_GLOBAL.player_max_side_speed){
+				velocity.x+=CONSTANTS_GLOBAL.player_acceleration;
 			}
 		} else {
-			velocity.x*=(1-GLOBAL_VARIABLES.player_speed_loss);
+			velocity.x*=(1-CONSTANTS_GLOBAL.player_speed_loss);
 			if (abs(velocity.x)<0.1){velocity.x=0;}
 		}
 	}
 
 	void PLAYER::GRAVITY(){
-		velocity.y+=GLOBAL_VARIABLES.player_gravity_power;
+		velocity.y+=CONSTANTS_GLOBAL.player_gravity_power;
 	}
 
 	void PLAYER::JUMP(INPUT& input){
@@ -1107,7 +1041,7 @@ void PLAYER::SETUP(int ind){
 			jump_input=input.player2_jump;
 		}
 		if (is_standing && jump_input){
-			velocity.y=-GLOBAL_VARIABLES.player_jump_power;
+			velocity.y=-CONSTANTS_GLOBAL.player_jump_power;
 		}
 	}
 
@@ -1128,37 +1062,37 @@ void PLAYER::SETUP(int ind){
 		sf::FloatRect player1_rect(players[0].coords,players[0].size);
 		sf::FloatRect player2_rect(players[1].coords,players[1].size);
 			if (players[0].coords.x-position.x<-boundry_x){
-				position.x+=(players[0].coords.x-position.x+boundry_x)*GLOBAL_VARIABLES.CAMERA_SPEED;
+				position.x+=(players[0].coords.x-position.x+boundry_x)*CONSTANTS_GLOBAL.CAMERA_SPEED;
 			}
 			if (players[0].coords.x-position.x>boundry_x){
-				position.x+=(players[0].coords.x-position.x-boundry_x)*GLOBAL_VARIABLES.CAMERA_SPEED;
+				position.x+=(players[0].coords.x-position.x-boundry_x)*CONSTANTS_GLOBAL.CAMERA_SPEED;
 			}
 			if (players[0].coords.y-position.y<-boundry_y){
-				position.y+=(players[0].coords.y-position.y+boundry_y)*GLOBAL_VARIABLES.CAMERA_SPEED;
+				position.y+=(players[0].coords.y-position.y+boundry_y)*CONSTANTS_GLOBAL.CAMERA_SPEED;
 			}
 			if (players[0].coords.y-position.y>boundry_y){
-				position.y+=(players[0].coords.y-position.y-boundry_y)*GLOBAL_VARIABLES.CAMERA_SPEED;
+				position.y+=(players[0].coords.y-position.y-boundry_y)*CONSTANTS_GLOBAL.CAMERA_SPEED;
 			}
 
 			if (players[1].coords.x-position.x<-boundry_x){
-				position.x+=(players[1].coords.x-position.x+boundry_x)*GLOBAL_VARIABLES.CAMERA_SPEED;
+				position.x+=(players[1].coords.x-position.x+boundry_x)*CONSTANTS_GLOBAL.CAMERA_SPEED;
 			}
 			if (players[1].coords.x-position.x>boundry_x){
-				position.x+=(players[1].coords.x-position.x-boundry_x)*GLOBAL_VARIABLES.CAMERA_SPEED;
+				position.x+=(players[1].coords.x-position.x-boundry_x)*CONSTANTS_GLOBAL.CAMERA_SPEED;
 			}
 			if (players[1].coords.y-position.y<-boundry_y){
-				position.y+=(players[1].coords.y-position.y+boundry_y)*GLOBAL_VARIABLES.CAMERA_SPEED;
+				position.y+=(players[1].coords.y-position.y+boundry_y)*CONSTANTS_GLOBAL.CAMERA_SPEED;
 			}
 			if (players[1].coords.y-position.y>boundry_y){
-				position.y+=(players[1].coords.y-position.y-boundry_y)*GLOBAL_VARIABLES.CAMERA_SPEED;
+				position.y+=(players[1].coords.y-position.y-boundry_y)*CONSTANTS_GLOBAL.CAMERA_SPEED;
 			}
 
 			if (player1_rect.findIntersection(box2) && player2_rect.findIntersection(box2)){
-				scale-=scale*GLOBAL_VARIABLES.CAMERA_SCALE_INCREASE_SPEED/5.f;
+				scale-=scale*CONSTANTS_GLOBAL.CAMERA_SCALE_INCREASE_SPEED/5.f;
 				if (scale<1){scale=1;}
 			}
 			if (!player1_rect.findIntersection(box2) && !player2_rect.findIntersection(box2)){
-				scale+=scale*GLOBAL_VARIABLES.CAMERA_SCALE_DECREASE_SPEED/5.f;
+				scale+=scale*CONSTANTS_GLOBAL.CAMERA_SCALE_DECREASE_SPEED/5.f;
 			}
 	}
 
@@ -1201,7 +1135,7 @@ void PLAYER::SETUP(int ind){
 	}
 
 	void PERFORMACE_COUNTER::DRAW(sf::RenderWindow& window){
-		window.setView(GLOBAL_VARIABLES.default_view);
+		window.setView(CONSTANTS_GLOBAL.default_view);
 		FPS_UPS_RENDER_TEXT.setString("FPS/UPS\n"+FPS_STRING+"/"+UPS_STRING);
 		window.draw(FPS_UPS_RENDER_TEXT);
 	}
@@ -1224,7 +1158,7 @@ void PLAYER::SETUP(int ind){
 		float delta_time=1.f/60.f;
 		sf::Clock delta_clock;
 		while (window.isOpen()){
-			float elapsed=delta_clock.restart().asSeconds()*GLOBAL_VARIABLES.tick_speed;
+			float elapsed=delta_clock.restart().asSeconds()*VARIABLES_GLOBAL.tick_speed;
 			time_accumulator+=elapsed;
 			for (;time_accumulator>=delta_time;time_accumulator-=delta_time){
 				UPDATE_INPUT();
@@ -1244,7 +1178,7 @@ void PLAYER::SETUP(int ind){
 		players.push_back(player1);
 		players.push_back(player2);
 		GLOBAL_ASSETS.LOAD_ALL_ASSETS();
-		window.setVerticalSyncEnabled(GLOBAL_VARIABLES.is_vsync_on);
+		window.setVerticalSyncEnabled(VARIABLES_GLOBAL.is_vsync_on);
 		performance_clocks.SETUP();
 		game_ui.SETUP();
 	}
@@ -1252,13 +1186,13 @@ void PLAYER::SETUP(int ind){
 
 	void GAME::UPDATE_INPUT(){
 		window.setView(camera.getview());
-		input.read(window);
+		input.read(window,VARIABLES_GLOBAL);
 	}
 	
 
 	void GAME::UPDATE_PHYSICS(){
 		performance_clocks.UPS_UPDATE();
-		switch (GLOBAL_VARIABLES.game_state)
+		switch (VARIABLES_GLOBAL.game_state)
 		{
 		case GAME_STATE::PLAYING:
 			for (auto& cur_player:players){
@@ -1276,12 +1210,38 @@ void PLAYER::SETUP(int ind){
 		}
 		
 
-		game_ui.UPDATE(input);
+		game_ui.UPDATE(input,VARIABLES_GLOBAL);
 	}
 
 	void GAME::UPDATE_ENTETIES(){
+		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 		for (auto& cur_entity:entities){
-			cur_entity.UPDATE(players,game_chunks);
+			sf::FloatRect cur_entity_rect={cur_entity.current_coordinates+sf::Vector2f{0,0.1},
+			sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
+			cur_entity.MOVEX();
+			cur_entity_rect={cur_entity.current_coordinates+sf::Vector2f{0,0.1},
+			sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
+			if (cur_entity.touched_player1_bottom){players[0].coords.x+=cur_entity.cur_speed.x*CONSTANTS_GLOBAL.ENTITY_SPEED;}
+			if (cur_entity.touched_player2_bottom){players[1].coords.x+=cur_entity.cur_speed.x*CONSTANTS_GLOBAL.ENTITY_SPEED;}
+			
+			for (auto& cur_player:players){
+				cur_player.RESOLVE_COLLISION_X_ENTITY(cur_entity);
+				cur_player.RESOLVE_COLLISION_X(game_chunks);
+				sf::FloatRect cur_player_rect={cur_player.coords,cur_player.size};
+				if (cur_entity_rect.findIntersection(cur_player_rect)){cur_player.died=true;}
+			}
+
+			cur_entity.MOVEY();
+			cur_entity_rect={cur_entity.current_coordinates+sf::Vector2f{0,0.1},
+			sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
+			for (auto& cur_player:players){
+				cur_player.RESOLVE_COLLISION_Y_ENTITY(cur_entity);
+				cur_player.RESOLVE_COLLISION_Y(game_chunks);
+				sf::FloatRect cur_player_rect={cur_player.coords,cur_player.size};
+				if (cur_entity_rect.findIntersection(cur_player_rect)){cur_player.died=true;}
+			}
+
+			cur_entity.UPDATE_TARGETS();
 		}
 	}
 
@@ -1293,7 +1253,7 @@ void PLAYER::SETUP(int ind){
 		for (auto& cur_player:players){
 			cur_player.DRAW(window);
 		}
-		game_ui.DRAW(window);
+		game_ui.DRAW(window,VARIABLES_GLOBAL);
 		performance_clocks.DRAW(window);
 
 		window.display();	
@@ -1304,9 +1264,9 @@ void PLAYER::SETUP(int ind){
 		window.setView(camera.getview());
 		std::unordered_map<BLOCK_TYPE,sf::VertexArray> draw_arrays;
 		draw_arrays[BLOCK_TYPE::WALL]=sf::VertexArray(sf::PrimitiveType::Triangles);
-		float b_size=GLOBAL_VARIABLES.BLOCK_SIZE;
-		float c_size=GLOBAL_VARIABLES.CHUNK_SIZE;
-		float bts=GLOBAL_VARIABLES.BLOCK_TEXTURE_SIZE;
+		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
+		float c_size=CONSTANTS_GLOBAL.CHUNK_SIZE;
+		float bts=CONSTANTS_GLOBAL.BLOCK_TEXTURE_SIZE;
 		sf::Vector2f camera_left_up(camera.position-camera.size/2.f);
 		int chunk_left=int(std::floor(camera_left_up.x/(b_size*c_size)));
 		int chunk_up=int(std::floor(camera_left_up.y/(b_size*c_size)));
@@ -1353,7 +1313,7 @@ void PLAYER::SETUP(int ind){
 void GAME::APPEND_VERTEXES(float left,float right,float up,float down,
 	std::unordered_map<BLOCK_TYPE,sf::VertexArray>& draw_arrays,BLOCK_TYPE& cur_block_type){
 
-		float bts=GLOBAL_VARIABLES.BLOCK_TEXTURE_SIZE;
+		float bts=CONSTANTS_GLOBAL.BLOCK_TEXTURE_SIZE;
 		sf::VertexArray& cur_vertex_array=draw_arrays[cur_block_type];
 
 		sf::Color color=sf::Color::White;
@@ -1424,7 +1384,7 @@ void GAME::GAME_LOAD(){
 				for (int i=0;i<number_of_points;i++){
 					input_file>>spare_string;
 					input_file>>cur_cordx>>cur_cordy;
-					points.push_back(sf::Vector2f{cur_cordx*GLOBAL_VARIABLES.BLOCK_SIZE,cur_cordy*GLOBAL_VARIABLES.BLOCK_SIZE});
+					points.push_back(sf::Vector2f{cur_cordx*CONSTANTS_GLOBAL.BLOCK_SIZE,cur_cordy*CONSTANTS_GLOBAL.BLOCK_SIZE});
 				}
 				ENTITY cur_entity;
 				cur_entity.SETUP(cur_index,entity_loop,points,cur_block_type);
@@ -1434,13 +1394,13 @@ void GAME::GAME_LOAD(){
 				input_file>>spare_string;
 				input_file>>cur_cordx>>cur_cordy;
 
-				cur_chunkx=std::floor(cur_cordx/GLOBAL_VARIABLES.CHUNK_SIZE);
-				cur_chunky=std::floor(cur_cordy/GLOBAL_VARIABLES.CHUNK_SIZE);
+				cur_chunkx=std::floor(cur_cordx/CONSTANTS_GLOBAL.CHUNK_SIZE);
+				cur_chunky=std::floor(cur_cordy/CONSTANTS_GLOBAL.CHUNK_SIZE);
 
-				curx_inside=int(cur_cordx)-cur_chunkx*int(GLOBAL_VARIABLES.CHUNK_SIZE);
-				cury_inside=int(cur_cordy)-cur_chunky*int(GLOBAL_VARIABLES.CHUNK_SIZE);
-				game_chunks[{cur_chunkx,cur_chunky}].chunk_blocks[curx_inside+cury_inside*int(GLOBAL_VARIABLES.CHUNK_SIZE)].type=cur_block_type;
-				game_chunks[{cur_chunkx,cur_chunky}].chunk_blocks[curx_inside+cury_inside*int(GLOBAL_VARIABLES.CHUNK_SIZE)].index=cur_index;
+				curx_inside=int(cur_cordx)-cur_chunkx*int(CONSTANTS_GLOBAL.CHUNK_SIZE);
+				cury_inside=int(cur_cordy)-cur_chunky*int(CONSTANTS_GLOBAL.CHUNK_SIZE);
+				game_chunks[{cur_chunkx,cur_chunky}].chunk_blocks[curx_inside+cury_inside*int(CONSTANTS_GLOBAL.CHUNK_SIZE)].type=cur_block_type;
+				game_chunks[{cur_chunkx,cur_chunky}].chunk_blocks[curx_inside+cury_inside*int(CONSTANTS_GLOBAL.CHUNK_SIZE)].index=cur_index;
 			}
 		}
 	}
