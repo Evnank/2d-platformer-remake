@@ -21,7 +21,8 @@ enum class BUTTON_TYPE{
 	ESCAPE_RESUME,
 	ESCAPE_RESTART,
 	ESCAPE_SETTINGS,
-	ESCAPE_MAIN_MENU
+	ESCAPE_MAIN_MENU,
+	ESCAPE_PAUSED
 };
 
 enum class GAME_STATE{
@@ -52,9 +53,14 @@ struct GLOBALS{
 	float player_gravity_power=0.5;
 
 	float ENTITY_SPEED=1;
+	float tick_speed=1;
 	float CAMERA_SPEED=0.02;
+	float CAMERA_SCALE_INCREASE_SPEED=0.05;
+	float CAMERA_SCALE_DECREASE_SPEED=0.005;
 
 	float UI_BUTTON_COLOR_CHANGE_SPEED=10;
+	float background_darkening_speed=30;
+	float background_darkening_limit=180;
 	sf::Keyboard::Key player1_left_bind=sf::Keyboard::Key::Left;
 	sf::Keyboard::Key player1_right_bind=sf::Keyboard::Key::Right;
 	sf::Keyboard::Key player1_jump_bind=sf::Keyboard::Key::Up;
@@ -63,6 +69,13 @@ struct GLOBALS{
 	sf::Keyboard::Key player2_right_bind=sf::Keyboard::Key::D;
 	sf::Keyboard::Key player2_jump_bind=sf::Keyboard::Key::W;
 	GAME_STATE game_state=GAME_STATE::PLAYING;
+
+	sf::Vector2u desktop=sf::VideoMode::getDesktopMode().size;
+	unsigned int screen_width=desktop.x*0.8f;
+	unsigned int screen_height=desktop.y*0.8f;
+
+	bool is_full_screen_mode=false;
+	bool is_vsync_on=false;
 };
 
 
@@ -79,6 +92,8 @@ struct ASSETS{
 	sf::Texture wall_texture;
 	sf::Texture player_blue;
 	sf::Texture player_red;
+
+	sf::Texture ESCAPE_TEXTURE;
 
 	void LOAD_ALL_ASSETS();
 };
@@ -100,7 +115,7 @@ struct INPUT{
 
 	bool ESCAPE,LSHIFT,TAB,ENTER,PageUp;
 	
-	bool F1,F2,F9;
+	bool F1,F2,F9,F11;
 
 	bool player1_left;
 	bool player1_right;
@@ -127,11 +142,12 @@ struct UI_BUTTON{
 	sf::Color start_color;
 	sf::Color end_color;
 	int text_char_size=30;
-	sf::Color background_color=sf::Color(80,80,80);
+	sf::Color background_color2=sf::Color(100,100,100);
+	sf::Color background_color=sf::Color(80,80,80,0);
 	float conversion_procentile=0;
-	float rinc;
-	float ginc;
-	float binc;
+	float rinc=0;
+	float ginc=0;
+	float binc=0;
 
 	bool is_hovering=false;
 	sf::Color cur_color;
@@ -156,10 +172,15 @@ struct UI_BUTTON{
 
 struct USER_INTERFACE{
 	std::vector<UI_BUTTON> buttons;
+	float background_darkening=0;
 
 	void SETUP();
 
 	void UPDATE(INPUT& input);
+
+	void DRAW_BACKGROUND_BLUR(sf::RenderWindow& window);
+
+	void DRAW_BACKGROUND(sf::RenderWindow& window);
 
 	void DRAW(sf::RenderWindow& window);
 
@@ -355,7 +376,8 @@ struct PERFORMACE_COUNTER{
 
 
 struct GAME{
-	sf::RenderWindow window{ sf::VideoMode( { 1920, 1080 } ), "platformer game" };
+	
+	sf::RenderWindow window{ sf::VideoMode({GLOBAL_VARIABLES.screen_width, GLOBAL_VARIABLES.screen_height}), "platformer game" };
 	INPUT input;
 	CAMERA camera;
 	std::vector<PLAYER> players;
@@ -415,6 +437,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		if (!wall_texture.loadFromFile("assets/textures/WALL.png")){} 
 		if (!player_blue.loadFromFile("assets/textures/PLAYER_BLUE.png")){} 
 		if (!player_red.loadFromFile("assets/textures/PLAYER_RED.png")){} 
+		if (!ESCAPE_TEXTURE.loadFromFile("assets/textures/ESCAPE.png")){} 
 	}
 
 
@@ -429,7 +452,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		SPACE=false;
 		ESCAPE=false;LSHIFT=false;TAB=false;ENTER=false;PageUp=false;
 		F=false;R=false;M=false;
-		F1=false;F2=false;F9=false;
+		F1=false;F2=false;F9=false,F11=false;
 		player1_left=false;player1_right=false;player1_jump=false;
 		player2_left=false;player2_right=false;player2_jump=false;
 		mouse_true_coords=window.mapPixelToCoords(sf::Mouse::getPosition(window));
@@ -454,6 +477,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 				if (key->code == sf::Keyboard::Key::F1){F1=true;}
 				if (key->code == sf::Keyboard::Key::F2){F2=true;}
 				if (key->code == sf::Keyboard::Key::F9){F9=true;}
+				if (key->code == sf::Keyboard::Key::F11){F11=true;}
 			}
 			if (const auto* mouse=event->getIf<sf::Event::MouseButtonPressed>()){
 				if (mouse->button == sf::Mouse::Button::Left){Mouse1=true;}
@@ -467,6 +491,17 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		player2_left=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player2_left_bind);
 		player2_right=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player2_right_bind);
 		player2_jump=sf::Keyboard::isKeyPressed(GLOBAL_VARIABLES.player2_jump_bind);
+
+		if (F11){
+			GLOBAL_VARIABLES.is_full_screen_mode=!GLOBAL_VARIABLES.is_full_screen_mode;
+			if (GLOBAL_VARIABLES.is_full_screen_mode){
+				
+				window.create( sf::VideoMode({GLOBAL_VARIABLES.desktop}), "platformer game",sf::State::Fullscreen );
+			} else {
+				window.create( sf::VideoMode({GLOBAL_VARIABLES.screen_width, GLOBAL_VARIABLES.screen_height}), "platformer game",sf::State::Windowed );
+			}
+			window.setVerticalSyncEnabled(GLOBAL_VARIABLES.is_vsync_on);
+		}
 
 	}
 
@@ -495,6 +530,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		text.setPosition(rect.position);
 		text.setCharacterSize(text_char_size);
 		text.setFillColor(cur_color);
+		text.setScale({0.7f,1.f});
 
 		text.setOrigin(text.getLocalBounds().position+text.getLocalBounds().size/2.f);
 
@@ -550,6 +586,16 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		va.append(sf::Vertex({right,top},background_color,{0,0}));
 		va.append(sf::Vertex({right,bottom},background_color,{0,0}));
 
+
+
+		va.append(sf::Vertex({left,top},background_color2,{0,0}));
+		va.append(sf::Vertex({right,top},background_color2,{0,0}));
+		va.append(sf::Vertex({left,top-5},background_color2,{0,0}));
+
+		va.append(sf::Vertex({left,top-5},background_color2,{0,0}));
+		va.append(sf::Vertex({right,top},background_color2,{0,0}));
+		va.append(sf::Vertex({right,top-5},background_color2,{0,0}));
+
 		window.draw(va);
 		window.draw(text);
 		if (is_hovering){
@@ -575,7 +621,11 @@ void ASSETS::LOAD_ALL_ASSETS(){
 
 
 	void USER_INTERFACE::SETUP(){
-		CREATE_BUTTON({500,500},{400,100},BUTTON_TYPE::ESCAPE_RESUME,"Resume",sf::Color(253,132,0),sf::Color(0,253,0),60);
+		CREATE_BUTTON({1000,280},{0,100},BUTTON_TYPE::ESCAPE_PAUSED,"PAUSED",sf::Color(255,255,255),sf::Color(255,255,255),110);
+		CREATE_BUTTON({850,400},{300,100},BUTTON_TYPE::ESCAPE_RESUME,"Resume",sf::Color(253,132,0),sf::Color(0,253,0),60);
+		CREATE_BUTTON({850,500},{300,100},BUTTON_TYPE::ESCAPE_RESTART,"Restart",sf::Color(253,132,0),sf::Color(0,253,0),60);
+		CREATE_BUTTON({850,600},{300,100},BUTTON_TYPE::ESCAPE_SETTINGS,"Settings",sf::Color(253,132,0),sf::Color(0,253,0),60);
+		CREATE_BUTTON({850,700},{300,100},BUTTON_TYPE::ESCAPE_MAIN_MENU,"Main Menu",sf::Color(253,132,0),sf::Color(0,253,0),50);
 	}
 	void USER_INTERFACE::UPDATE(INPUT& input){
 		if (input.ESCAPE){
@@ -596,6 +646,13 @@ void ASSETS::LOAD_ALL_ASSETS(){
 				break;
 			}
 		}
+		if (GLOBAL_VARIABLES.game_state==GAME_STATE::ESCAPE){
+			background_darkening+=GLOBAL_VARIABLES.background_darkening_speed;
+			if (background_darkening>GLOBAL_VARIABLES.background_darkening_limit){background_darkening=GLOBAL_VARIABLES.background_darkening_limit;}
+		} else {
+			background_darkening-=GLOBAL_VARIABLES.background_darkening_speed;
+			if (background_darkening<=0){background_darkening=0;}
+		}
 		for (auto& cur_button:buttons){
 			if (CHECK_IF_UPDATE_BUTTON(cur_button)){
 				cur_button.UPDATE(input);
@@ -603,7 +660,70 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		}
 	}
 
+	void USER_INTERFACE::DRAW_BACKGROUND_BLUR(sf::RenderWindow& window){
+		sf::Vector2f size=window.getView().getSize();
+		sf::Vector2f pos=window.getView().getCenter()-size/2.f;
+		float left=pos.x;
+		float right=left+size.x;
+		float top=pos.y;
+		float bottom=top+size.y;
+		sf::Color color(0,0,0,background_darkening);
+		sf::VertexArray va(sf::PrimitiveType::Triangles);
+
+		va.append(sf::Vertex({left,top},color,{0,0}));
+		va.append(sf::Vertex({right,top},color,{0,0}));
+		va.append(sf::Vertex({left,bottom},color,{0,0}));
+
+		va.append(sf::Vertex({left,bottom},color,{0,0}));
+		va.append(sf::Vertex({right,top},color,{0,0}));
+		va.append(sf::Vertex({right,bottom},color,{0,0}));
+
+		window.draw(va);
+	}
+
+	void USER_INTERFACE::DRAW_BACKGROUND(sf::RenderWindow& window){
+		float left=0;
+		float right=0;
+		float top=0;
+		float bottom=0;
+		float t_x_size=GLOBAL_ASSETS.ESCAPE_TEXTURE.getSize().x;
+		float t_y_size=GLOBAL_ASSETS.ESCAPE_TEXTURE.getSize().y;
+		sf::Color color=sf::Color::White;
+		sf::VertexArray va(sf::PrimitiveType::Triangles);
+
+		switch (GLOBAL_VARIABLES.game_state)
+		{
+		case GAME_STATE::ESCAPE:
+				left=750;
+				top=250;
+				right=left+500;
+				bottom=top+600;
+				va.append(sf::Vertex({left,top},color,{0,0}));
+				va.append(sf::Vertex({right,top},color,{t_x_size,0}));
+				va.append(sf::Vertex({left,bottom},color,{0,t_y_size}));
+
+				va.append(sf::Vertex({left,bottom},color,{0,t_y_size}));
+				va.append(sf::Vertex({right,top},color,{t_x_size,0}));
+				va.append(sf::Vertex({right,bottom},color,{t_x_size,t_y_size}));
+
+
+				window.draw(va,&GLOBAL_ASSETS.ESCAPE_TEXTURE);
+			break;
+		
+		default:
+			break;
+		}
+	
+		
+	
+
+		
+	}
+
 	void USER_INTERFACE::DRAW(sf::RenderWindow& window){
+		window.setView(GLOBAL_VARIABLES.default_view);
+		DRAW_BACKGROUND_BLUR(window);
+		DRAW_BACKGROUND(window);
 		for (auto& cur_button:buttons){
 			if (CHECK_IF_UPDATE_BUTTON(cur_button)){
 				cur_button.DRAW(window);
@@ -637,6 +757,9 @@ void ASSETS::LOAD_ALL_ASSETS(){
 				break;
 
 			case BUTTON_TYPE::ESCAPE_MAIN_MENU:
+				if (state==GAME_STATE::ESCAPE){function_return_bool=true;}
+				break;
+			case BUTTON_TYPE::ESCAPE_PAUSED:
 				if (state==GAME_STATE::ESCAPE){function_return_bool=true;}
 				break;
 			
@@ -1031,11 +1154,11 @@ void PLAYER::SETUP(int ind){
 			}
 
 			if (player1_rect.findIntersection(box2) && player2_rect.findIntersection(box2)){
-				scale-=scale*GLOBAL_VARIABLES.CAMERA_SPEED/5.f;
+				scale-=scale*GLOBAL_VARIABLES.CAMERA_SCALE_INCREASE_SPEED/5.f;
 				if (scale<1){scale=1;}
 			}
 			if (!player1_rect.findIntersection(box2) && !player2_rect.findIntersection(box2)){
-				scale+=scale*GLOBAL_VARIABLES.CAMERA_SPEED/10.f;
+				scale+=scale*GLOBAL_VARIABLES.CAMERA_SCALE_DECREASE_SPEED/5.f;
 			}
 	}
 
@@ -1098,11 +1221,10 @@ void PLAYER::SETUP(int ind){
 		SETUP();
 		GAME_LOAD();
 		float time_accumulator=0;
-		float tick_speed=1;
 		float delta_time=1.f/60.f;
 		sf::Clock delta_clock;
 		while (window.isOpen()){
-			float elapsed=delta_clock.restart().asSeconds()*tick_speed;
+			float elapsed=delta_clock.restart().asSeconds()*GLOBAL_VARIABLES.tick_speed;
 			time_accumulator+=elapsed;
 			for (;time_accumulator>=delta_time;time_accumulator-=delta_time){
 				UPDATE_INPUT();
@@ -1122,7 +1244,7 @@ void PLAYER::SETUP(int ind){
 		players.push_back(player1);
 		players.push_back(player2);
 		GLOBAL_ASSETS.LOAD_ALL_ASSETS();
-		window.setVerticalSyncEnabled(false);
+		window.setVerticalSyncEnabled(GLOBAL_VARIABLES.is_vsync_on);
 		performance_clocks.SETUP();
 		game_ui.SETUP();
 	}
@@ -1171,9 +1293,8 @@ void PLAYER::SETUP(int ind){
 		for (auto& cur_player:players){
 			cur_player.DRAW(window);
 		}
-		performance_clocks.DRAW(window);
 		game_ui.DRAW(window);
-
+		performance_clocks.DRAW(window);
 
 		window.display();	
 	}
