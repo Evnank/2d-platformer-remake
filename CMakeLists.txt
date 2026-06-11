@@ -12,7 +12,11 @@ FetchContent_Declare(SFML
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(main src/main.cpp)
+add_executable(main 
+    src/main.cpp
+    src/ASSETS.cpp
+    src/GLOBALS.cpp
+    )
 
 if(WIN32)
     target_link_options(main PRIVATE
