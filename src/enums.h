@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 enum class BLOCK_TYPE{
 	AIR,
 	WALL,
@@ -22,3 +24,12 @@ enum class GAME_STATE{
 	SETTINGS,
 	MAIN_MENU
 };
+
+enum class CMAERA_TYPE{
+	BOTH,
+	PLAYER1,
+	PLAYER2
+};
+
+
+BLOCK_TYPE STRING_TO_BLOCK_TYPE(std::string the_string);

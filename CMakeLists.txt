@@ -16,6 +16,15 @@ add_executable(main
     src/main.cpp
     src/ASSETS.cpp
     src/GLOBALS.cpp
+    src/INPUT.cpp
+    src/UI_BUTTON.cpp
+    src/enums.cpp
+    src/UI.cpp
+    src/ENTITY.cpp
+    src/PLAYER.cpp
+    src/CAMERA.cpp
+    src/PERFORMANCE_COUNTER.cpp
+    src/GAME.cpp
     )
 
 if(WIN32)
