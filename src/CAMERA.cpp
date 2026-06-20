@@ -32,12 +32,15 @@ void CAMERA::UPDATE(std::vector<PLAYER>& players){
 			if (players[1].coords.y-position.y>boundry_y){
 				position.y+=(players[1].coords.y-position.y-boundry_y)*CONSTANTS_GLOBAL.CAMERA_SPEED;
 			}
-
-			if (player1_rect.findIntersection(box2) && player2_rect.findIntersection(box2)){
-				scale-=scale*CONSTANTS_GLOBAL.CAMERA_SCALE_INCREASE_SPEED/5.f;
-				if (scale<1){scale=1;}
-			}
-			if (!player1_rect.findIntersection(box2) && !player2_rect.findIntersection(box2)){
-				scale+=scale*CONSTANTS_GLOBAL.CAMERA_SCALE_DECREASE_SPEED/5.f;
-			}
+			
+			for (int i=0;i<CONSTANTS_GLOBAL.CAMERA_GENERAL_SCALE_MULT;i++){
+				box2=sf::FloatRect(position-freedom2*scale,freedom2*scale*2.f);
+				if (player1_rect.findIntersection(box2) && player2_rect.findIntersection(box2)){
+					scale-=scale*CONSTANTS_GLOBAL.CAMERA_SCALE_INCREASE_SPEED;
+					if (scale<1){scale=1;}
+				}
+				if (!player1_rect.findIntersection(box2) && !player2_rect.findIntersection(box2)){
+					scale+=scale*CONSTANTS_GLOBAL.CAMERA_SCALE_DECREASE_SPEED;
+				}
+			}	
 	}
