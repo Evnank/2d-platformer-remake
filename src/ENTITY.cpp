@@ -1,5 +1,4 @@
 #include "ENTITY.h"
-#include "GLOBALS.h"
 
 void ENTITY::SETUP(int setup_index,bool setup_looping,std::vector<sf::Vector2f> setup_coords,BLOCK_TYPE& setup_type){
 		coords.clear();

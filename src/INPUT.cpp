@@ -1,7 +1,6 @@
 #include <SFML/Graphics.hpp>
 
 #include "INPUT.h"
-#include "GLOBALS.h"
 
 
 void INPUT::read(sf::RenderWindow& window){

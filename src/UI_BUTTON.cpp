@@ -1,9 +1,4 @@
-#include <SFML/Graphics.hpp>
-#include "enums.h"
-#include "GLOBALS.h"
-#include "INPUT.h"
 #include "UI_BUTTON.h"
-
 
 
 void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTTON_TYPE setup_type, std::string setup_string,

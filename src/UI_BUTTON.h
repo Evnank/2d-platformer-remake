@@ -1,7 +1,6 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include "enums.h"
 #include "GLOBALS.h"
 #include "INPUT.h"
 
