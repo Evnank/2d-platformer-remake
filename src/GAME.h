@@ -18,7 +18,6 @@ struct GAME{
 	CAMERA camera;
 	std::vector<PLAYER> players;
 	PERFORMACE_COUNTER performance_clocks;
-	int current_level=1;
 	std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash> game_chunks;
 	std::unordered_map<int,bool> indexes_pressed;
 	std::vector <ENTITY> entities;
@@ -32,6 +31,8 @@ struct GAME{
 	void SETUP();
 
 	void UPDATE_INPUT();
+
+	void STEP_TICK();
 	
 	void UPDATE_PHYSICS();
 

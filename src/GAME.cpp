@@ -44,22 +44,30 @@ void GAME::RUN(){
 		switch (VARIABLES_GLOBAL.game_state)
 		{
 		case GAME_STATE::PLAYING:
-			for (auto& cur_player:players){
-				cur_player.UPDATE(input,game_chunks,entities);
-			}
-			UPDATE_ENTETIES();
-			for (auto& cur_player:players){
-				if (cur_player.died){cur_player.SETUP(cur_player.index);}
-			}
-			camera.UPDATE(players);
+			STEP_TICK();
 			break;
 			
 		default:
 			break;
 		}
+		if (VARIABLES_GLOBAL.load_level){
+			GAME_LOAD();
+			VARIABLES_GLOBAL.load_level=false;
+		}
 		
 
 		game_ui.UPDATE(input);
+	}
+
+	void GAME::STEP_TICK(){
+		for (auto& cur_player:players){
+			cur_player.UPDATE(input,game_chunks,entities);
+		}
+		UPDATE_ENTETIES();
+		for (auto& cur_player:players){
+			if (cur_player.died){cur_player.SETUP(cur_player.index);}
+		}
+		camera.UPDATE(players);
 	}
 
 	void GAME::UPDATE_ENTETIES(){
@@ -182,7 +190,7 @@ void GAME::GAME_LOAD(){
 		for (int i=0;i<2;i++){
 			players[i].SETUP(i);
 		}
-		std::string level_load_string="assets/levels/"+std::to_string(current_level)+".txt";
+		std::string level_load_string="assets/levels/"+std::to_string(VARIABLES_GLOBAL.current_level)+".txt";
 		std::ifstream input_file(level_load_string);
 
 		entities.clear();

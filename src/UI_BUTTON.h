@@ -7,18 +7,24 @@
 
 struct UI_BUTTON{
 	sf::FloatRect rect;
+	sf::FloatRect toggle_rect;
 	BUTTON_TYPE type=BUTTON_TYPE::NOTHING;
 	std::string text_string="";
 	sf::Color start_color;
 	sf::Color end_color;
 	int text_char_size=30;
-	sf::Color background_color2=sf::Color(100,100,100);
-	sf::Color background_color=sf::Color(80,80,80,0);
+	sf::Color background_color=sf::Color(100,100,100);
+	sf::Color background_color2=sf::Color(150,150,150);
 	float conversion_procentile=0;
 	float rinc=0;
 	float ginc=0;
 	float binc=0;
+	float line_width=10;
+	float distance_total;
 
+	float current_toggle_procentile=0;
+	bool is_toggled=false;
+	bool is_bool_button=false;
 	bool is_hovering=false;
 	sf::Color cur_color;
 
@@ -30,4 +36,8 @@ struct UI_BUTTON{
 	void UPDATE(INPUT& input);
 
 	void DRAW(sf::RenderWindow& window);
+
+	void DRAW_TOGGLE_BOX(sf::VertexArray& va);
+
+	void ADD_BOX(sf::VertexArray& va,float left,float right,float top,float bottom,sf::Color color);
 };

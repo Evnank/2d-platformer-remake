@@ -6,6 +6,7 @@ void USER_INTERFACE::SETUP(){
 		CREATE_BUTTON({850,500},{300,100},BUTTON_TYPE::ESCAPE_RESTART,"Restart",sf::Color(253,132,0),sf::Color(0,253,0),60);
 		CREATE_BUTTON({850,600},{300,100},BUTTON_TYPE::ESCAPE_SETTINGS,"Settings",sf::Color(253,132,0),sf::Color(0,253,0),60);
 		CREATE_BUTTON({850,700},{300,100},BUTTON_TYPE::ESCAPE_MAIN_MENU,"Main Menu",sf::Color(253,132,0),sf::Color(0,253,0),50);
+		CREATE_BUTTON({550,200},{300,100},BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE,"Editor",sf::Color(253,132,0),sf::Color(0,253,0),50);
 	}
 	void USER_INTERFACE::UPDATE(INPUT& input){
 		if (input.ESCAPE){
@@ -18,7 +19,11 @@ void USER_INTERFACE::SETUP(){
 				VARIABLES_GLOBAL.game_state=GAME_STATE::PLAYING;
 				break;
 			case GAME_STATE::SETTINGS:
-				VARIABLES_GLOBAL.game_state=GAME_STATE::MAIN_MENU;
+				if (VARIABLES_GLOBAL.is_settings_opened_from_menu){
+					VARIABLES_GLOBAL.game_state=GAME_STATE::MAIN_MENU;
+				} else{
+					VARIABLES_GLOBAL.game_state=GAME_STATE::ESCAPE;
+				}
 				break;
 			
 			
@@ -141,6 +146,9 @@ void USER_INTERFACE::SETUP(){
 				break;
 			case BUTTON_TYPE::ESCAPE_PAUSED:
 				if (state==GAME_STATE::ESCAPE){function_return_bool=true;}
+				break;
+			case BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE:
+				if (state==GAME_STATE::SETTINGS){function_return_bool=true;}
 				break;
 			
 			default:
