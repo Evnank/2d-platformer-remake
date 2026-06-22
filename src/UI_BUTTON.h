@@ -33,6 +33,10 @@ struct UI_BUTTON{
 	void SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTTON_TYPE setup_type, std::string setup_string,
 	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size);
 
+	void CENTER();
+
+	bool IS_PRESSED(INPUT& input);
+
 	void UPDATE(INPUT& input);
 
 	void DRAW(sf::RenderWindow& window);

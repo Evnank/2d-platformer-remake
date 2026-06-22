@@ -19,7 +19,13 @@ struct GLOBAL_VARIABLES{
 	bool SHOW_FPS=true;
 	bool is_full_screen_mode=false;
 	bool is_vsync_on=false;
-	bool EDITOR_TOGGLE=false;
+	bool EDITOR_TOGGLE_BUTTON=true;
 	bool load_level=false;
 	bool is_settings_opened_from_menu=false;
+	bool editor_open=false;
+
+	int editor_block_index=-1;
+	bool editor_is_entity=false;
+	bool editor_block_selecting=false;
+	BLOCK_TYPE cur_editor_block_type=BLOCK_TYPE::AIR;
 };

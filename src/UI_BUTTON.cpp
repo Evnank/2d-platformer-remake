@@ -18,14 +18,12 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 		text.setFillColor(cur_color);
 		text.setScale({0.7f,1.f});
 
-		text.setOrigin(text.getLocalBounds().position+text.getLocalBounds().size/2.f);
-
-		text.setPosition(rect.position+rect.size/2.f);
+		CENTER();
 
 		rinc=(end_color.r-start_color.r)/100.f;
 		ginc=(end_color.g-start_color.g)/100.f;
 		binc=(end_color.b-start_color.b)/100.f;
-		if (type==BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE){
+		if (type==BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE || type==BUTTON_TYPE::EDITOR_ENTITY_TOGGLE){
 			is_bool_button=true;
 		}
 
@@ -41,38 +39,20 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 		}
 	}
 
+	void UI_BUTTON::CENTER(){
+		text.setOrigin(text.getLocalBounds().position+text.getLocalBounds().size/2.f);
+		text.setPosition(rect.position+rect.size/2.f);
+	}
+
+	bool UI_BUTTON::IS_PRESSED(INPUT& input){
+		return (rect.contains(input.mouse_window_coords) && input.Mouse1);
+	}
+
 	void UI_BUTTON::UPDATE(INPUT& input){
 		if (rect.contains(input.mouse_window_coords)){
 			conversion_procentile+=CONSTANTS_GLOBAL.UI_BUTTON_COLOR_CHANGE_SPEED;
 			if (conversion_procentile>=100){conversion_procentile=100;}
 			is_hovering=true;
-			if (input.Mouse1){
-				switch (type)
-				{
-				case BUTTON_TYPE::ESCAPE_RESUME:
-					VARIABLES_GLOBAL.game_state=GAME_STATE::PLAYING;
-					break;
-				case BUTTON_TYPE::ESCAPE_RESTART:
-					VARIABLES_GLOBAL.game_state=GAME_STATE::PLAYING;
-					VARIABLES_GLOBAL.load_level=true;
-					break;
-				case BUTTON_TYPE::ESCAPE_SETTINGS:
-					VARIABLES_GLOBAL.game_state=GAME_STATE::SETTINGS;
-					VARIABLES_GLOBAL.is_settings_opened_from_menu=false;
-					break;
-				case BUTTON_TYPE::ESCAPE_MAIN_MENU:
-					//VARIABLES_GLOBAL.game_state=GAME_STATE::MAIN_MENU;
-					break;
-
-				case BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE:
-					is_toggled=!is_toggled;
-					VARIABLES_GLOBAL.EDITOR_TOGGLE=is_toggled;
-					break;
-		
-				default:
-					break;
-				}
-			}
 		} else {
 			conversion_procentile-=CONSTANTS_GLOBAL.UI_BUTTON_COLOR_CHANGE_SPEED;
 			if (conversion_procentile<=0){conversion_procentile=0;}
@@ -85,6 +65,98 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 			current_toggle_procentile-=CONSTANTS_GLOBAL.UI_BUTTON_COLOR_CHANGE_SPEED;
 			if (current_toggle_procentile<=0){current_toggle_procentile=0;}
 		}
+
+		switch (type)
+				{
+				case BUTTON_TYPE::ESCAPE_RESUME:
+					if (IS_PRESSED(input)){
+						VARIABLES_GLOBAL.game_state=GAME_STATE::PLAYING;
+					}		
+					break;
+
+				case BUTTON_TYPE::ESCAPE_RESTART:
+					if (IS_PRESSED(input)){
+						VARIABLES_GLOBAL.game_state=GAME_STATE::PLAYING;
+						VARIABLES_GLOBAL.load_level=true;	
+					}
+					break;
+
+				case BUTTON_TYPE::ESCAPE_SETTINGS:
+					if (IS_PRESSED(input)){
+						VARIABLES_GLOBAL.game_state=GAME_STATE::SETTINGS;
+						VARIABLES_GLOBAL.is_settings_opened_from_menu=false;
+					}
+					break;
+
+				case BUTTON_TYPE::ESCAPE_MAIN_MENU:
+					if (IS_PRESSED(input)){
+						//VARIABLES_GLOBAL.game_state=GAME_STATE::MAIN_MENU;
+					}			
+					break;
+
+				case BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE:
+					is_toggled=VARIABLES_GLOBAL.EDITOR_TOGGLE_BUTTON;
+					if (IS_PRESSED(input)){
+						is_toggled=!is_toggled;	
+					}	
+					VARIABLES_GLOBAL.EDITOR_TOGGLE_BUTTON=is_toggled;
+					break;
+
+
+				case BUTTON_TYPE::EDITOR_ENTITY_TOGGLE:
+					if (IS_PRESSED(input)){
+						is_toggled=!is_toggled;
+					}
+					VARIABLES_GLOBAL.editor_is_entity=is_toggled;
+					break;
+
+
+				case BUTTON_TYPE::EDITOR_BLOCK_SELECT:
+					is_toggled=VARIABLES_GLOBAL.editor_block_selecting;
+					if (IS_PRESSED(input)){
+						is_toggled=!is_toggled;
+					}
+					if (is_toggled && input.ESCAPE){
+						is_toggled=false;
+					}
+					VARIABLES_GLOBAL.editor_block_selecting=is_toggled;
+					if (is_toggled){conversion_procentile=100;}
+					break;
+
+				case BUTTON_TYPE::EDITOR_WALL:
+					if (IS_PRESSED(input)){
+						VARIABLES_GLOBAL.cur_editor_block_type=BLOCK_TYPE::WALL;
+						VARIABLES_GLOBAL.editor_block_selecting=false;
+					}
+					break;
+
+				case BUTTON_TYPE::EDITOR_INDEX_INCREASE:
+					if (IS_PRESSED(input)){
+						VARIABLES_GLOBAL.editor_block_index++;
+						if (VARIABLES_GLOBAL.editor_block_index>=100){VARIABLES_GLOBAL.editor_block_index=100;}
+					}
+					break;
+
+				case BUTTON_TYPE::EDITOR_INDEX_DECREASE:
+					if (IS_PRESSED(input)){
+						VARIABLES_GLOBAL.editor_block_index--;
+						if (VARIABLES_GLOBAL.editor_block_index<=-1){VARIABLES_GLOBAL.editor_block_index=-1;}
+					}
+					break;
+				
+				case BUTTON_TYPE::EDITOR_INDEX_SHOW:
+					text.setString("Index: "+std::to_string(VARIABLES_GLOBAL.editor_block_index));
+					CENTER();
+					break;
+
+				case BUTTON_TYPE::EDITOR_BLOCK_SHOW:
+					text.setString("Block: "+BLOCK_TYPE_TO_STRING(VARIABLES_GLOBAL.cur_editor_block_type));
+					CENTER();
+					break;
+		
+				default:
+					break;
+				}
 		
 		cur_color.r=start_color.r+rinc*conversion_procentile;
 		cur_color.g=start_color.g+ginc*conversion_procentile;
