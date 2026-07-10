@@ -111,9 +111,35 @@ void GAME::RUN(){
 				int x=std::floor(input.mouse_true_coords.x/CONSTANTS_GLOBAL.BLOCK_SIZE);
 				int y=std::floor(input.mouse_true_coords.y/CONSTANTS_GLOBAL.BLOCK_SIZE);
 				if (!VARIABLES_GLOBAL.editor_is_entity){
-						PLACE_BLOCK(x,y);
+					PLACE_BLOCK(x,y);
+				} else {
+					if (input.ENTER){
+						PLACE_ENTITY(x,y);
+					} else if (input.Mouse1){
+						
+					}
 				}
 			}
+		}
+	}
+
+	void GAME::PLACE_ENTITY(int x,int y){
+		sf::Vector2f cur_start_coords=sf::Vector2f{x*CONSTANTS_GLOBAL.BLOCK_SIZE,y*CONSTANTS_GLOBAL.BLOCK_SIZE};
+		bool can_place_entity_there=true;
+		for (auto& cur_entity:entities){
+			if (cur_entity.coords[0]==cur_start_coords){
+				can_place_entity_there=false;
+				VARIABLES_GLOBAL.editor_request_to_place_entity=true;
+			}
+		}
+
+		if (can_place_entity_there || VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
+			VARIABLES_GLOBAL.editor_confirmation_to_place_entity=false;
+			ENTITY new_entity;
+			std::vector<sf::Vector2f> cur_setup_coords;
+			cur_setup_coords.push_back(cur_start_coords);
+			new_entity.SETUP(VARIABLES_GLOBAL.editor_block_index,true,cur_setup_coords,VARIABLES_GLOBAL.cur_editor_block_type);
+			entities.push_back(new_entity);
 		}
 	}
 
@@ -140,12 +166,87 @@ void GAME::RUN(){
 		for (auto& cur_player:players){
 			cur_player.DRAW(window);
 		}
+		DRAW_EDITOR();
 		game_ui.DRAW(window);
 		performance_clocks.DRAW(window);
 
 		window.display();	
 	}
 
+	void GAME::DRAW_EDITOR(){
+			if (VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
+				sf::VertexArray draw_array(sf::PrimitiveType::Triangles);
+			
+			for (auto& cur_entity:entities){
+				DRAW_ENTITY_OUTLINE(cur_entity,draw_array);
+			}
+			for (auto& cur_entity:entities){
+				DRAW_ENTITY_CONNECTIONS(cur_entity,draw_array);
+			}
+			window.draw(draw_array);
+		}
+	}
+
+	void GAME::DRAW_BOX(sf::VertexArray& draw_array,sf::Vector2f coords1,sf::Vector2f coords2,sf::Vector2f coords3,sf::Vector2f coords4,sf::Color color){
+		draw_array.append(sf::Vertex({coords1},color,{0.f,0.f}));
+		draw_array.append(sf::Vertex({coords2},color,{0.f,0.f}));
+		draw_array.append(sf::Vertex({coords3},color,{0.f,0.f}));
+		draw_array.append(sf::Vertex({coords3},color,{0.f,0.f}));
+		draw_array.append(sf::Vertex({coords2},color,{0.f,0.f}));
+		draw_array.append(sf::Vertex({coords4},color,{0.f,0.f}));
+	}
+
+	void GAME::DRAW_ENTITY_OUTLINE(ENTITY& cur_entity,sf::VertexArray& draw_array){
+		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
+		float wideness=5;
+		sf::Color outline_color(0,255,0,40);
+		for (auto& cur_coords:cur_entity.coords){
+			sf::Vector2f coords1=cur_coords+sf::Vector2f{0.f+wideness,0.f};
+			sf::Vector2f coords2=cur_coords+sf::Vector2f{b_size-wideness,0.f};
+			sf::Vector2f coords3=cur_coords+sf::Vector2f{0.f+wideness,wideness};
+			sf::Vector2f coords4=cur_coords+sf::Vector2f{b_size-wideness,wideness};
+			DRAW_BOX(draw_array,coords1,coords2,coords3,coords4,outline_color);
+
+			coords1=cur_coords+sf::Vector2f{0.f,0.f};
+			coords2=cur_coords+sf::Vector2f{0.f,b_size};
+			coords3=cur_coords+sf::Vector2f{wideness,0.f};
+			coords4=cur_coords+sf::Vector2f{wideness,b_size};
+			DRAW_BOX(draw_array,coords1,coords2,coords3,coords4,outline_color);
+
+			coords1=cur_coords+sf::Vector2f{0.f+wideness,b_size-wideness};
+			coords2=cur_coords+sf::Vector2f{b_size-wideness,b_size-wideness};
+			coords3=cur_coords+sf::Vector2f{0.f+wideness,b_size};
+			coords4=cur_coords+sf::Vector2f{b_size-wideness,b_size};
+			DRAW_BOX(draw_array,coords1,coords2,coords3,coords4,outline_color);
+
+			coords1=cur_coords+sf::Vector2f{b_size-wideness,0.f};
+			coords2=cur_coords+sf::Vector2f{b_size-wideness,b_size};
+			coords3=cur_coords+sf::Vector2f{b_size,0.f};
+			coords4=cur_coords+sf::Vector2f{b_size,b_size};
+			DRAW_BOX(draw_array,coords1,coords2,coords3,coords4,outline_color);			
+		}
+	}
+
+	void GAME::DRAW_ENTITY_CONNECTIONS(ENTITY& cur_entity,sf::VertexArray& draw_array){
+		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
+		float wideness=5;
+		sf::Color outline_color(0,0,255);
+		for (int i=0;i<cur_entity.coords.size();i++){
+			int g=(i+1)%cur_entity.coords.size();
+			sf::Vector2f point1=cur_entity.coords[i]+sf::Vector2f(b_size/2.f,b_size/2.f);
+			sf::Vector2f point2=cur_entity.coords[g]+sf::Vector2f(b_size/2.f,b_size/2.f);
+			sf::Vector2f dif=point2-point1;
+			sf::Vector2f norm=dif.normalized();
+			//i stopped here, i have no idea how to draw a line 
+
+
+			sf::Vector2f coords1=point1-norm*wideness;
+			sf::Vector2f coords2=point1+norm*wideness;
+			sf::Vector2f coords3=point2-norm*wideness;
+			sf::Vector2f coords4=point2+norm*wideness;
+			DRAW_BOX(draw_array,coords1,coords2,coords3,coords4,outline_color);	
+		}
+	}
 
 	void GAME::DRAW_CHUNKS(){
 		window.setView(camera.getview());

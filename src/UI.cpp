@@ -1,28 +1,31 @@
 #include "UI.h"
 
 void USER_INTERFACE::SETUP(){
+	//escape menu
 		CREATE_BUTTON({1000,280},{0,100},BUTTON_TYPE::ESCAPE_PAUSED,"PAUSED",sf::Color(255,255,255),sf::Color(255,255,255),110);
 		CREATE_BUTTON({850,400},{300,100},BUTTON_TYPE::ESCAPE_RESUME,"Resume",sf::Color(253,132,0),sf::Color(0,253,0),60);
 		CREATE_BUTTON({850,500},{300,100},BUTTON_TYPE::ESCAPE_RESTART,"Restart",sf::Color(253,132,0),sf::Color(0,253,0),60);
 		CREATE_BUTTON({850,600},{300,100},BUTTON_TYPE::ESCAPE_SETTINGS,"Settings",sf::Color(253,132,0),sf::Color(0,253,0),60);
 		CREATE_BUTTON({850,700},{300,100},BUTTON_TYPE::ESCAPE_MAIN_MENU,"Main Menu",sf::Color(253,132,0),sf::Color(0,253,0),50);
 		CREATE_BUTTON({550,200},{400,100},BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE,"Editor mode",sf::Color(253,132,0),sf::Color(0,253,0),50);
-
+	//editor menu
 		CREATE_BUTTON({200,10},{0,100},BUTTON_TYPE::EDITOR_BLOCK_SELECT,"EDITOR",sf::Color(255,255,255),sf::Color(255,255,255),70);
 		CREATE_BUTTON({20,120},{250,100},BUTTON_TYPE::EDITOR_ENTITY_TOGGLE,"Is entity",sf::Color(253,132,0),sf::Color(0,253,0),30);
 		CREATE_BUTTON({20,220},{350,100},BUTTON_TYPE::EDITOR_BLOCK_SELECT,"Select block",sf::Color(253,132,0),sf::Color(0,253,0),50);
 
-		CREATE_BUTTON({20,320},{350,100},BUTTON_TYPE::EDITOR_WALL,"WALL",sf::Color(253,132,0),sf::Color(0,253,0),50);
+		CREATE_BUTTON({20,520},{350,100},BUTTON_TYPE::EDITOR_BLOCK_SHOW,"",sf::Color(255,255,255),sf::Color(255,255,255),70);
 
 		CREATE_BUTTON({20,320},{350,100},BUTTON_TYPE::EDITOR_INDEX_SHOW,"",sf::Color(255,255,255),sf::Color(255,255,255),70);
 		CREATE_BUTTON({20,420},{175,100},BUTTON_TYPE::EDITOR_INDEX_INCREASE,"+",sf::Color(253,132,0),sf::Color(0,253,0),70);
 		CREATE_BUTTON({195,420},{175,100},BUTTON_TYPE::EDITOR_INDEX_DECREASE,"-",sf::Color(253,132,0),sf::Color(0,253,0),70);
+	//editor menu block selecting
+		CREATE_BUTTON({20,320},{350,100},BUTTON_TYPE::EDITOR_WALL,"WALL",sf::Color(253,132,0),sf::Color(0,253,0),50);
 
-		CREATE_BUTTON({20,520},{350,100},BUTTON_TYPE::EDITOR_BLOCK_SHOW,"",sf::Color(255,255,255),sf::Color(255,255,255),70);
-
-
+	//editor on screen info
 		CREATE_BUTTON({150,70},{0,100},BUTTON_TYPE::EDITOR_INFO,"",sf::Color(255,255,255),sf::Color(255,255,255),50);
-		
+
+		CREATE_BUTTON({1000,30},{0,100},BUTTON_TYPE::EDITOR_ENTITY_PLACE_CONFIRM,
+			"   are you sure?\nspace to confrim ",sf::Color(255,255,255),sf::Color(255,255,255),45);	
 	}
 	void USER_INTERFACE::UPDATE(INPUT& input){
 		if (input.ESCAPE){
@@ -34,6 +37,9 @@ void USER_INTERFACE::SETUP(){
 					VARIABLES_GLOBAL.editor_block_selecting=false;
 				} else if(VARIABLES_GLOBAL.editor_open){
 					VARIABLES_GLOBAL.editor_open=false;
+				} else if(VARIABLES_GLOBAL.editor_request_to_place_entity){
+					VARIABLES_GLOBAL.editor_request_to_place_entity=false;
+					VARIABLES_GLOBAL.editor_confirmation_to_place_entity=false;
 				} else {
 					VARIABLES_GLOBAL.game_state=GAME_STATE::ESCAPE;
 				}
@@ -57,6 +63,7 @@ void USER_INTERFACE::SETUP(){
 		}
 		if (input.TAB && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
 			VARIABLES_GLOBAL.editor_open=!VARIABLES_GLOBAL.editor_open;
+			VARIABLES_GLOBAL.editor_request_to_place_entity=false;
 		}
 		if (VARIABLES_GLOBAL.game_state==GAME_STATE::ESCAPE || VARIABLES_GLOBAL.game_state==GAME_STATE::SETTINGS){
 			background_darkening+=CONSTANTS_GLOBAL.background_darkening_speed;
@@ -129,6 +136,21 @@ void USER_INTERFACE::SETUP(){
 				top=0;
 				right=left+400;
 				bottom=top+800;
+				va.append(sf::Vertex({left,top},color,{0,0}));
+				va.append(sf::Vertex({right,top},color,{0,0}));
+				va.append(sf::Vertex({left,bottom},color,{0,0}));
+
+				va.append(sf::Vertex({left,bottom},color,{0,0}));
+				va.append(sf::Vertex({right,top},color,{0,0}));
+				va.append(sf::Vertex({right,bottom},color,{0,0}));
+
+				window.draw(va);
+			} else if (VARIABLES_GLOBAL.editor_request_to_place_entity){
+				color=sf::Color(100,100,100,100);
+				left=800;
+				top=0;
+				right=left+400;
+				bottom=top+200;
 				va.append(sf::Vertex({left,top},color,{0,0}));
 				va.append(sf::Vertex({right,top},color,{0,0}));
 				va.append(sf::Vertex({left,bottom},color,{0,0}));
@@ -221,6 +243,11 @@ void USER_INTERFACE::SETUP(){
 			case BUTTON_TYPE::EDITOR_INFO:
 				if (state==GAME_STATE::PLAYING && !VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){return true;}
 				break;
+			case BUTTON_TYPE::EDITOR_ENTITY_PLACE_CONFIRM:
+				if (state==GAME_STATE::PLAYING && !VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON && 
+					VARIABLES_GLOBAL.editor_request_to_place_entity){return true;}
+				break;
+			
 			
 			default:
 				break;

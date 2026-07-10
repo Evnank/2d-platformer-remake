@@ -25,9 +25,11 @@ struct GLOBAL_VARIABLES{
 	bool editor_open=false;
 
 	sf::Vector2f editor_block_hover;
+	bool editor_request_to_place_entity=false;
+	bool editor_confirmation_to_place_entity=false;
 
 	int editor_block_index=-1;
 	bool editor_is_entity=false;
 	bool editor_block_selecting=false;
-	BLOCK_TYPE cur_editor_block_type=BLOCK_TYPE::AIR;
+	BLOCK_TYPE cur_editor_block_type=BLOCK_TYPE::WALL;
 };

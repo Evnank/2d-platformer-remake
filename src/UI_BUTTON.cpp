@@ -161,6 +161,12 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					std::string("\nIndex: ")+std::to_string(VARIABLES_GLOBAL.editor_block_index)+std::string("\n")+is_entity_on_string());
 					CENTER();
 					break;
+				case BUTTON_TYPE::EDITOR_ENTITY_PLACE_CONFIRM:
+					if (input.SPACE){
+						VARIABLES_GLOBAL.editor_confirmation_to_place_entity=true;
+						VARIABLES_GLOBAL.editor_request_to_place_entity=false;
+					}
+					break;
 		
 				default:
 					break;
