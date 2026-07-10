@@ -19,10 +19,12 @@ struct GLOBAL_VARIABLES{
 	bool SHOW_FPS=true;
 	bool is_full_screen_mode=false;
 	bool is_vsync_on=false;
-	bool EDITOR_TOGGLE_BUTTON=true;
+	bool EDITOR_ON_BUTTON=true;
 	bool load_level=false;
 	bool is_settings_opened_from_menu=false;
 	bool editor_open=false;
+
+	sf::Vector2f editor_block_hover;
 
 	int editor_block_index=-1;
 	bool editor_is_entity=false;

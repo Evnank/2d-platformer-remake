@@ -45,6 +45,7 @@ void GAME::RUN(){
 		{
 		case GAME_STATE::PLAYING:
 			STEP_TICK();
+			UPDATE_EDITOR();
 			break;
 			
 		default:
@@ -54,7 +55,6 @@ void GAME::RUN(){
 			GAME_LOAD();
 			VARIABLES_GLOBAL.load_level=false;
 		}
-		
 
 		game_ui.UPDATE(input);
 	}
@@ -104,6 +104,34 @@ void GAME::RUN(){
 		}
 	}
 
+
+	void GAME::UPDATE_EDITOR(){
+		if (VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
+			if (!VARIABLES_GLOBAL.editor_open){
+				int x=std::floor(input.mouse_true_coords.x/CONSTANTS_GLOBAL.BLOCK_SIZE);
+				int y=std::floor(input.mouse_true_coords.y/CONSTANTS_GLOBAL.BLOCK_SIZE);
+				if (!VARIABLES_GLOBAL.editor_is_entity){
+						PLACE_BLOCK(x,y);
+				}
+			}
+		}
+	}
+
+	void GAME::PLACE_BLOCK(int x,int y){
+		int chunkx=std::floor(float(x)/CONSTANTS_GLOBAL.CHUNK_SIZE);
+		int chunky=std::floor(float(y)/CONSTANTS_GLOBAL.CHUNK_SIZE);
+		int blockx=x-chunkx*CONSTANTS_GLOBAL.CHUNK_SIZE;
+		int blocky=y-chunky*CONSTANTS_GLOBAL.CHUNK_SIZE;
+		auto& cur_chunk=game_chunks[{chunkx,chunky}];
+		auto& cur_block=cur_chunk.chunk_blocks[blockx+blocky*CONSTANTS_GLOBAL.CHUNK_SIZE];
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+			cur_block.index=VARIABLES_GLOBAL.editor_block_index;
+			cur_block.type=VARIABLES_GLOBAL.cur_editor_block_type;
+		} else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right)){
+			cur_block.index=-1;
+			cur_block.type=BLOCK_TYPE::AIR;
+		}
+	}
 
 	void GAME::DRAW(){
 		window.clear();

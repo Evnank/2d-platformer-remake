@@ -7,3 +7,5 @@
 extern GLOBAL_CONSTANTS CONSTANTS_GLOBAL;
 extern GLOBAL_VARIABLES VARIABLES_GLOBAL;
 extern ASSETS GLOBAL_ASSETS;
+
+std::string is_entity_on_string();

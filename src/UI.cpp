@@ -19,6 +19,9 @@ void USER_INTERFACE::SETUP(){
 		CREATE_BUTTON({195,420},{175,100},BUTTON_TYPE::EDITOR_INDEX_DECREASE,"-",sf::Color(253,132,0),sf::Color(0,253,0),70);
 
 		CREATE_BUTTON({20,520},{350,100},BUTTON_TYPE::EDITOR_BLOCK_SHOW,"",sf::Color(255,255,255),sf::Color(255,255,255),70);
+
+
+		CREATE_BUTTON({150,70},{0,100},BUTTON_TYPE::EDITOR_INFO,"",sf::Color(255,255,255),sf::Color(255,255,255),50);
 		
 	}
 	void USER_INTERFACE::UPDATE(INPUT& input){
@@ -52,7 +55,7 @@ void USER_INTERFACE::SETUP(){
 				break;
 			}
 		}
-		if (input.TAB && VARIABLES_GLOBAL.EDITOR_TOGGLE_BUTTON){
+		if (input.TAB && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
 			VARIABLES_GLOBAL.editor_open=!VARIABLES_GLOBAL.editor_open;
 		}
 		if (VARIABLES_GLOBAL.game_state==GAME_STATE::ESCAPE || VARIABLES_GLOBAL.game_state==GAME_STATE::SETTINGS){
@@ -214,6 +217,9 @@ void USER_INTERFACE::SETUP(){
 				break;
 			case BUTTON_TYPE::EDITOR_BLOCK_SHOW:
 				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && !VARIABLES_GLOBAL.editor_block_selecting){return true;}
+				break;
+			case BUTTON_TYPE::EDITOR_INFO:
+				if (state==GAME_STATE::PLAYING && !VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){return true;}
 				break;
 			
 			default:

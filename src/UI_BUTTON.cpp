@@ -48,6 +48,8 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 		return (rect.contains(input.mouse_window_coords) && input.Mouse1);
 	}
 
+	
+
 	void UI_BUTTON::UPDATE(INPUT& input){
 		if (rect.contains(input.mouse_window_coords)){
 			conversion_procentile+=CONSTANTS_GLOBAL.UI_BUTTON_COLOR_CHANGE_SPEED;
@@ -95,11 +97,11 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					break;
 
 				case BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE:
-					is_toggled=VARIABLES_GLOBAL.EDITOR_TOGGLE_BUTTON;
+					is_toggled=VARIABLES_GLOBAL.EDITOR_ON_BUTTON;
 					if (IS_PRESSED(input)){
 						is_toggled=!is_toggled;	
 					}	
-					VARIABLES_GLOBAL.EDITOR_TOGGLE_BUTTON=is_toggled;
+					VARIABLES_GLOBAL.EDITOR_ON_BUTTON=is_toggled;
 					break;
 
 
@@ -151,6 +153,12 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 				case BUTTON_TYPE::EDITOR_BLOCK_SHOW:
 					text.setString("Block: "+BLOCK_TYPE_TO_STRING(VARIABLES_GLOBAL.cur_editor_block_type));
+					CENTER();
+					break;
+
+				case BUTTON_TYPE::EDITOR_INFO:
+					text.setString(std::string("EDITOR: ON\nBlock: ")+BLOCK_TYPE_TO_STRING(VARIABLES_GLOBAL.cur_editor_block_type)+
+					std::string("\nIndex: ")+std::to_string(VARIABLES_GLOBAL.editor_block_index)+std::string("\n")+is_entity_on_string());
 					CENTER();
 					break;
 		

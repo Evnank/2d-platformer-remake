@@ -38,6 +38,10 @@ struct GAME{
 
 	void UPDATE_ENTETIES();
 
+	void UPDATE_EDITOR();
+
+	void PLACE_BLOCK(int x,int y);
+
 	void DRAW();
 
 
