@@ -40,6 +40,8 @@ struct GAME{
 
 	void UPDATE_EDITOR();
 
+	void SELECT_ENTITY(int x,int y);
+
 	void PLACE_ENTITY(int x,int y);
 
 	void PLACE_BLOCK(int x,int y);
@@ -49,6 +51,8 @@ struct GAME{
 	void DRAW_EDITOR();
 
 	void DRAW_BOX(sf::VertexArray& draw_array,sf::Vector2f coords1,sf::Vector2f coords2,sf::Vector2f coords3,sf::Vector2f coords4,sf::Color color);
+
+	void DRAW_LINE(sf::VertexArray& draw_array,sf::Vector2f point1,sf::Vector2f point2,sf::Color color);
 
 	void DRAW_ENTITY_OUTLINE(ENTITY& cur_entity,sf::VertexArray& draw_array);
 

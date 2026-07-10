@@ -26,6 +26,9 @@ struct GLOBAL_CONSTANTS{
 	float background_darkening_speed=30;
 	float background_darkening_limit=180;
 
+	float editor_line_thickness=5;
+	float editor_arrow_length=25;
+
 	sf::Vector2u desktop=sf::VideoMode::getDesktopMode().size;
 	unsigned int screen_width=desktop.x*0.8f;
 	unsigned int screen_height=desktop.y*0.8f;

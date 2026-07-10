@@ -31,5 +31,8 @@ struct GLOBAL_VARIABLES{
 	int editor_block_index=-1;
 	bool editor_is_entity=false;
 	bool editor_block_selecting=false;
+
+	bool editor_is_entity_selected=false;
+	int editor_entity_selected_index=0;
 	BLOCK_TYPE cur_editor_block_type=BLOCK_TYPE::WALL;
 };
