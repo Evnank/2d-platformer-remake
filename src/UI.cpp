@@ -9,15 +9,26 @@ void USER_INTERFACE::SETUP(){
 		CREATE_BUTTON({850,700},{300,100},BUTTON_TYPE::ESCAPE_MAIN_MENU,"Main Menu",sf::Color(253,132,0),sf::Color(0,253,0),50);
 		CREATE_BUTTON({550,200},{400,100},BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE,"Editor mode",sf::Color(253,132,0),sf::Color(0,253,0),50);
 	//editor menu
-		CREATE_BUTTON({200,10},{0,100},BUTTON_TYPE::EDITOR_BLOCK_SELECT,"EDITOR",sf::Color(255,255,255),sf::Color(255,255,255),70);
+		CREATE_BUTTON({200,10},{0,100},BUTTON_TYPE::EDITOR_PLAIN_TEXT,"EDITOR",sf::Color(255,255,255),sf::Color(255,255,255),70);
+
 		CREATE_BUTTON({20,120},{250,100},BUTTON_TYPE::EDITOR_ENTITY_TOGGLE,"Is entity",sf::Color(253,132,0),sf::Color(0,253,0),30);
+
 		CREATE_BUTTON({20,220},{350,100},BUTTON_TYPE::EDITOR_BLOCK_SELECT,"Select block",sf::Color(253,132,0),sf::Color(0,253,0),50);
+
+		CREATE_BUTTON({20,320},{350,100},BUTTON_TYPE::EDITOR_INDEX_SHOW,"",sf::Color(255,255,255),sf::Color(255,255,255),70);
+
+		CREATE_BUTTON({20,420},{175,100},BUTTON_TYPE::EDITOR_INDEX_INCREASE,"+",sf::Color(253,132,0),sf::Color(0,253,0),70);
+		CREATE_BUTTON({195,420},{175,100},BUTTON_TYPE::EDITOR_INDEX_DECREASE,"-",sf::Color(253,132,0),sf::Color(0,253,0),70);
 
 		CREATE_BUTTON({20,520},{350,100},BUTTON_TYPE::EDITOR_BLOCK_SHOW,"",sf::Color(255,255,255),sf::Color(255,255,255),70);
 
-		CREATE_BUTTON({20,320},{350,100},BUTTON_TYPE::EDITOR_INDEX_SHOW,"",sf::Color(255,255,255),sf::Color(255,255,255),70);
-		CREATE_BUTTON({20,420},{175,100},BUTTON_TYPE::EDITOR_INDEX_INCREASE,"+",sf::Color(253,132,0),sf::Color(0,253,0),70);
-		CREATE_BUTTON({195,420},{175,100},BUTTON_TYPE::EDITOR_INDEX_DECREASE,"-",sf::Color(253,132,0),sf::Color(0,253,0),70);
+		CREATE_BUTTON({20,620},{250,100},BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON,"free move ",sf::Color(253,132,0),sf::Color(0,253,0),30);
+
+		CREATE_BUTTON({20,720},{350,100},BUTTON_TYPE::EDITOR_SELECTED_ENTITY_NUMBER,"",sf::Color(255,255,255),sf::Color(255,255,255),50);
+
+		
+		
+		
 	//editor menu block selecting
 		CREATE_BUTTON({20,320},{350,100},BUTTON_TYPE::EDITOR_WALL,"WALL",sf::Color(253,132,0),sf::Color(0,253,0),50);
 
@@ -25,7 +36,9 @@ void USER_INTERFACE::SETUP(){
 		CREATE_BUTTON({150,70},{0,100},BUTTON_TYPE::EDITOR_INFO,"",sf::Color(255,255,255),sf::Color(255,255,255),50);
 
 		CREATE_BUTTON({1000,30},{0,100},BUTTON_TYPE::EDITOR_ENTITY_PLACE_CONFIRM,
-			"   are you sure?\nspace to confrim ",sf::Color(255,255,255),sf::Color(255,255,255),45);	
+			"   are you sure?\nSPACE to confrim ",sf::Color(255,255,255),sf::Color(255,255,255),45);
+			
+		
 	}
 	void USER_INTERFACE::UPDATE(INPUT& input){
 		if (input.ESCAPE){
@@ -62,8 +75,8 @@ void USER_INTERFACE::SETUP(){
 			}
 		}
 		if (input.TAB && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
-			VARIABLES_GLOBAL.editor_open=!VARIABLES_GLOBAL.editor_open;
-			VARIABLES_GLOBAL.editor_request_to_place_entity=false;
+				VARIABLES_GLOBAL.editor_open=!VARIABLES_GLOBAL.editor_open;
+				VARIABLES_GLOBAL.editor_request_to_place_entity=false;	
 		}
 		if (VARIABLES_GLOBAL.game_state==GAME_STATE::ESCAPE || VARIABLES_GLOBAL.game_state==GAME_STATE::SETTINGS){
 			background_darkening+=CONSTANTS_GLOBAL.background_darkening_speed;
@@ -135,7 +148,7 @@ void USER_INTERFACE::SETUP(){
 				left=0;
 				top=0;
 				right=left+400;
-				bottom=top+800;
+				bottom=top+1000;
 				va.append(sf::Vertex({left,top},color,{0,0}));
 				va.append(sf::Vertex({right,top},color,{0,0}));
 				va.append(sf::Vertex({left,bottom},color,{0,0}));
@@ -223,7 +236,7 @@ void USER_INTERFACE::SETUP(){
 				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_ENTITY_TOGGLE:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open){return true;}
+				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_WALL:
 				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.editor_block_selecting){return true;}
@@ -246,6 +259,16 @@ void USER_INTERFACE::SETUP(){
 			case BUTTON_TYPE::EDITOR_ENTITY_PLACE_CONFIRM:
 				if (state==GAME_STATE::PLAYING && !VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON && 
 					VARIABLES_GLOBAL.editor_request_to_place_entity){return true;}
+				break;
+			case BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON:
+				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON && 
+					!VARIABLES_GLOBAL.editor_block_selecting){return true;}
+				break;
+			case BUTTON_TYPE::EDITOR_PLAIN_TEXT:
+				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){return true;}
+				break;
+			case BUTTON_TYPE::EDITOR_SELECTED_ENTITY_NUMBER:
+				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){return true;}
 				break;
 			
 			

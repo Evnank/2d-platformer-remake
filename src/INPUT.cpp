@@ -4,13 +4,16 @@
 
 
 void INPUT::read(sf::RenderWindow& window){
-		Mouse1=false;Mouse2=false;
+		Mouse1=false; Mouse2=false;
+		mouse_wheel_movement=0;
 		SPACE=false;
-		ESCAPE=false;LSHIFT=false;TAB=false;ENTER=false;PageUp=false;
-		F=false;R=false;M=false;
-		F1=false;F2=false;F9=false,F11=false;
-		player1_left=false;player1_right=false;player1_jump=false;
-		player2_left=false;player2_right=false;player2_jump=false;
+		ESCAPE=false; LSHIFT=false; TAB=false; ENTER=false; PageUp=false;
+		F=false; R=false; M=false;
+		F1=false; F2=false; F9=false; F11=false;
+		player1_left=false; player1_right=false; player1_jump=false;
+		player2_left=false; player2_right=false; player2_jump=false;
+		W=false; A=false; S=false; D=false;
+		left=false; right=false; up=false; down=false;
 		mouse_true_coords=window.mapPixelToCoords(sf::Mouse::getPosition(window));
 		window.setView(CONSTANTS_GLOBAL.default_view);
 		mouse_window_coords=window.mapPixelToCoords(sf::Mouse::getPosition(window));
@@ -34,10 +37,23 @@ void INPUT::read(sf::RenderWindow& window){
 				if (key->code == sf::Keyboard::Key::F2){F2=true;}
 				if (key->code == sf::Keyboard::Key::F9){F9=true;}
 				if (key->code == sf::Keyboard::Key::F11){F11=true;}
+
+				if (key->code == sf::Keyboard::Key::W){W=true;}
+				if (key->code == sf::Keyboard::Key::A){A=true;}
+				if (key->code == sf::Keyboard::Key::S){S=true;}
+				if (key->code == sf::Keyboard::Key::D){D=true;}
+
+				if (key->code == sf::Keyboard::Key::Left){left=true;}
+				if (key->code == sf::Keyboard::Key::Right){right=true;}
+				if (key->code == sf::Keyboard::Key::Up){up=true;}
+				if (key->code == sf::Keyboard::Key::Down){down=true;}
 			}
 			if (const auto* mouse=event->getIf<sf::Event::MouseButtonPressed>()){
 				if (mouse->button == sf::Mouse::Button::Left){Mouse1=true;}
 				if (mouse->button == sf::Mouse::Button::Right){Mouse2=true;}
+			}
+			if (const auto* mouse=event->getIf<sf::Event::MouseWheelScrolled>()){
+				mouse_wheel_movement=mouse->delta;
 			}
 		}
 		player1_left=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player1_left_bind);

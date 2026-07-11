@@ -36,6 +36,8 @@ struct GAME{
 	
 	void UPDATE_PHYSICS();
 
+	void EDITOR_MOVEMENT();
+
 	void UPDATE_ENTETIES();
 
 	void UPDATE_EDITOR();
@@ -55,6 +57,8 @@ struct GAME{
 	void DRAW_LINE(sf::VertexArray& draw_array,sf::Vector2f point1,sf::Vector2f point2,sf::Color color);
 
 	void DRAW_ENTITY_OUTLINE(ENTITY& cur_entity,sf::VertexArray& draw_array);
+
+	void DRAW_BOX_AROUND_BLOCK(sf::Vector2f cur_coords,sf::VertexArray& draw_array,sf::Color outline_color);
 
 	void DRAW_ENTITY_CONNECTIONS(ENTITY& cur_entity,sf::VertexArray& draw_array);
 

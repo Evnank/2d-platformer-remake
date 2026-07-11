@@ -23,7 +23,8 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 		rinc=(end_color.r-start_color.r)/100.f;
 		ginc=(end_color.g-start_color.g)/100.f;
 		binc=(end_color.b-start_color.b)/100.f;
-		if (type==BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE || type==BUTTON_TYPE::EDITOR_ENTITY_TOGGLE){
+		if (type==BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE || type==BUTTON_TYPE::EDITOR_ENTITY_TOGGLE||
+		type==BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON){
 			is_bool_button=true;
 		}
 
@@ -106,7 +107,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 
 				case BUTTON_TYPE::EDITOR_ENTITY_TOGGLE:
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input) && VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
 						is_toggled=!is_toggled;
 					}
 					VARIABLES_GLOBAL.editor_is_entity=is_toggled;
@@ -165,9 +166,38 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					if (input.SPACE){
 						VARIABLES_GLOBAL.editor_confirmation_to_place_entity=true;
 						VARIABLES_GLOBAL.editor_request_to_place_entity=false;
+					} else {
+						if (input.Mouse1 || input.Mouse2){
+							VARIABLES_GLOBAL.editor_confirmation_to_place_entity=false;
+							VARIABLES_GLOBAL.editor_request_to_place_entity=false;
+						}
 					}
 					break;
-		
+				case BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON:
+					is_toggled=VARIABLES_GLOBAL.editor_special_movement;
+					if (IS_PRESSED(input)){
+						is_toggled=!is_toggled;
+					}
+					VARIABLES_GLOBAL.editor_special_movement=is_toggled;
+					if (is_toggled){conversion_procentile=100;}
+					break;
+				case BUTTON_TYPE::EDITOR_PLAIN_TEXT:
+					if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
+						text.setString("EDITOR");
+					} else {
+						text.setString("CUSTOMIZE");
+					}
+					CENTER();
+					break;
+				case BUTTON_TYPE::EDITOR_SELECTED_ENTITY_NUMBER:
+				{
+					int size_of_current_vector=VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size();
+					int cur_index_of_vector=VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes;
+						text.setString("selected: "+std::to_string(cur_index_of_vector+1)+"/"+std::to_string(size_of_current_vector));
+					
+					CENTER();
+					break;
+				}
 				default:
 					break;
 				}

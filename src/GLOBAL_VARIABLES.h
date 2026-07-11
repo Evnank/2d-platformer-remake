@@ -28,11 +28,13 @@ struct GLOBAL_VARIABLES{
 	bool editor_request_to_place_entity=false;
 	bool editor_confirmation_to_place_entity=false;
 
+	bool editor_special_movement=false;
+
 	int editor_block_index=-1;
 	bool editor_is_entity=false;
 	bool editor_block_selecting=false;
 
-	bool editor_is_entity_selected=false;
-	int editor_entity_selected_index=0;
+	int editor_index_in_vector_of_selected_entity_indexes;
+	std::vector <int> editor_vector_of_selected_entity_indexes;
 	BLOCK_TYPE cur_editor_block_type=BLOCK_TYPE::WALL;
 };

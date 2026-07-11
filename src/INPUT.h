@@ -14,6 +14,12 @@ struct INPUT{
 	bool F,R,M;
 
 	bool ESCAPE,LSHIFT,TAB,ENTER,PageUp;
+
+	bool W,A,S,D;
+
+	bool left,right,up,down;
+
+	int mouse_wheel_movement=0;
 	
 	bool F1,F2,F9,F11;
 

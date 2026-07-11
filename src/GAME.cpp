@@ -44,7 +44,11 @@ void GAME::RUN(){
 		switch (VARIABLES_GLOBAL.game_state)
 		{
 		case GAME_STATE::PLAYING:
-			STEP_TICK();
+			if (VARIABLES_GLOBAL.editor_special_movement){
+				EDITOR_MOVEMENT();
+			} else {
+				STEP_TICK();
+			}
 			UPDATE_EDITOR();
 			break;
 			
@@ -57,6 +61,28 @@ void GAME::RUN(){
 		}
 
 		game_ui.UPDATE(input);
+	}
+
+	void GAME::EDITOR_MOVEMENT(){
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)){
+			camera.position.x+=camera.scale*CONSTANTS_GLOBAL.editor_camera_movement_speed;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)){
+			camera.position.x-=camera.scale*CONSTANTS_GLOBAL.editor_camera_movement_speed;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)){
+			camera.position.y+=camera.scale*CONSTANTS_GLOBAL.editor_camera_movement_speed;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)){
+			camera.position.y-=camera.scale*CONSTANTS_GLOBAL.editor_camera_movement_speed;
+		}
+		int m_wheel=input.mouse_wheel_movement;
+		for (;m_wheel>0;m_wheel--){
+			camera.scale/=1.1f;
+		}
+		for (;m_wheel<0;m_wheel++){
+			camera.scale*=1.1f;
+		}
 	}
 
 	void GAME::STEP_TICK(){
@@ -107,38 +133,75 @@ void GAME::RUN(){
 
 	void GAME::UPDATE_EDITOR(){
 		if (VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
-			if (!VARIABLES_GLOBAL.editor_open){
+			if ( ! VARIABLES_GLOBAL.editor_open){
 				int x=std::floor(input.mouse_true_coords.x/CONSTANTS_GLOBAL.BLOCK_SIZE);
 				int y=std::floor(input.mouse_true_coords.y/CONSTANTS_GLOBAL.BLOCK_SIZE);
 				if (!VARIABLES_GLOBAL.editor_is_entity){
 					PLACE_BLOCK(x,y);
 				} else {
-					if (input.ENTER){
+					if (input.ENTER || VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
 						PLACE_ENTITY(x,y);
-					} else if (input.Mouse1){
+					} else if (input.Mouse1 && VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
 						SELECT_ENTITY(x,y);
+					} 
+				}
+			} else {
+				if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){
+					if (input.left){
+						VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes-=1;
+						if (VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes<0){
+							VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes=VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()-1;
+						}
+					} else if (input.right){
+						VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes+=1;
+						if (VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes>=VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()){
+							VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes=0;
+						}
 					}
 				}
+			}
+			if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0 && input.Mouse2){
+				VARIABLES_GLOBAL.editor_open=false;
+				VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.clear();
 			}
 		}
 	}
 
 	void GAME::SELECT_ENTITY(int x,int y){
+		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
+		sf::Vector2f cur_start_coords=sf::Vector2f{x*CONSTANTS_GLOBAL.BLOCK_SIZE,y*CONSTANTS_GLOBAL.BLOCK_SIZE};
+		VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes=0;
+		VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.clear();
+		for (int i=0;i<entities.size();i++){
+			auto& cur_entity=entities[i];
+			sf::FloatRect cur_entity_rect(cur_entity.current_coordinates,{b_size,b_size});
+			if (cur_entity_rect.contains(input.mouse_true_coords)){
+				VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.push_back(i);
+				continue;
+			}
+			for (auto& cur_part_coords:cur_entity.coords){
+				if (cur_part_coords==cur_start_coords){
+					VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.push_back(i);
+					break;
+				}
+			}
+		}
+		if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){
+			VARIABLES_GLOBAL.editor_open=true;
+		} else {
+			VARIABLES_GLOBAL.editor_open=false;
+		}
 		
 	}
 
 	void GAME::PLACE_ENTITY(int x,int y){
 		sf::Vector2f cur_start_coords=sf::Vector2f{x*CONSTANTS_GLOBAL.BLOCK_SIZE,y*CONSTANTS_GLOBAL.BLOCK_SIZE};
-		bool can_place_entity_there=true;
-		for (auto& cur_entity:entities){
-			if (cur_entity.coords[0]==cur_start_coords){
-				can_place_entity_there=false;
-				VARIABLES_GLOBAL.editor_request_to_place_entity=true;
-			}
-		}
 
-		if (can_place_entity_there || VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
+		VARIABLES_GLOBAL.editor_request_to_place_entity=true;
+
+		if (VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
 			VARIABLES_GLOBAL.editor_confirmation_to_place_entity=false;
+			VARIABLES_GLOBAL.editor_request_to_place_entity=false;
 			ENTITY new_entity;
 			std::vector<sf::Vector2f> cur_setup_coords;
 			cur_setup_coords.push_back(cur_start_coords);
@@ -180,7 +243,7 @@ void GAME::RUN(){
 	void GAME::DRAW_EDITOR(){
 			if (VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
 				sf::VertexArray draw_array(sf::PrimitiveType::Triangles);
-			if (!VARIABLES_GLOBAL.editor_is_entity_selected){
+			if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
 				for (auto& cur_entity:entities){
 					DRAW_ENTITY_OUTLINE(cur_entity,draw_array);
 				}
@@ -188,8 +251,11 @@ void GAME::RUN(){
 					DRAW_ENTITY_CONNECTIONS(cur_entity,draw_array);
 				}
 			} else {
-				DRAW_ENTITY_OUTLINE(entities[VARIABLES_GLOBAL.editor_entity_selected_index],draw_array);
-				DRAW_ENTITY_CONNECTIONS(entities[VARIABLES_GLOBAL.editor_entity_selected_index],draw_array);
+				DRAW_ENTITY_OUTLINE(entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[
+					VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]],draw_array);
+
+				DRAW_ENTITY_CONNECTIONS(entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[
+					VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]],draw_array);
 			}
 			
 			window.draw(draw_array);
@@ -252,31 +318,39 @@ void GAME::RUN(){
 		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 		float wideness=5;
 		sf::Color outline_color(0,255,0,80);
+		sf::Color outline_color2(0,0,255,120);
+		DRAW_BOX_AROUND_BLOCK(cur_entity.current_coordinates,draw_array,outline_color2);
 		for (auto& cur_coords:cur_entity.coords){
-			sf::Vector2f coords1=cur_coords+sf::Vector2f{0.f+wideness,0.f};
-			sf::Vector2f coords2=cur_coords+sf::Vector2f{b_size-wideness,0.f};
-			sf::Vector2f coords3=cur_coords+sf::Vector2f{0.f+wideness,wideness};
-			sf::Vector2f coords4=cur_coords+sf::Vector2f{b_size-wideness,wideness};
-			DRAW_BOX(draw_array,coords1,coords2,coords3,coords4,outline_color);
-
-			coords1=cur_coords+sf::Vector2f{0.f,0.f};
-			coords2=cur_coords+sf::Vector2f{0.f,b_size};
-			coords3=cur_coords+sf::Vector2f{wideness,0.f};
-			coords4=cur_coords+sf::Vector2f{wideness,b_size};
-			DRAW_BOX(draw_array,coords1,coords2,coords3,coords4,outline_color);
-
-			coords1=cur_coords+sf::Vector2f{0.f+wideness,b_size-wideness};
-			coords2=cur_coords+sf::Vector2f{b_size-wideness,b_size-wideness};
-			coords3=cur_coords+sf::Vector2f{0.f+wideness,b_size};
-			coords4=cur_coords+sf::Vector2f{b_size-wideness,b_size};
-			DRAW_BOX(draw_array,coords1,coords2,coords3,coords4,outline_color);
-
-			coords1=cur_coords+sf::Vector2f{b_size-wideness,0.f};
-			coords2=cur_coords+sf::Vector2f{b_size-wideness,b_size};
-			coords3=cur_coords+sf::Vector2f{b_size,0.f};
-			coords4=cur_coords+sf::Vector2f{b_size,b_size};
-			DRAW_BOX(draw_array,coords1,coords2,coords3,coords4,outline_color);			
+			DRAW_BOX_AROUND_BLOCK(cur_coords,draw_array,outline_color);	
 		}
+	}
+
+	void GAME::DRAW_BOX_AROUND_BLOCK(sf::Vector2f cur_coords,sf::VertexArray& draw_array,sf::Color outline_color){
+		float wideness=CONSTANTS_GLOBAL.editor_line_thickness;
+		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
+		sf::Vector2f coords1=cur_coords+sf::Vector2f{0.f+wideness,0.f};
+		sf::Vector2f coords2=cur_coords+sf::Vector2f{b_size-wideness,0.f};
+		sf::Vector2f coords3=cur_coords+sf::Vector2f{0.f+wideness,wideness};
+		sf::Vector2f coords4=cur_coords+sf::Vector2f{b_size-wideness,wideness};
+		DRAW_BOX(draw_array,coords1,coords2,coords3,coords4,outline_color);
+
+		coords1=cur_coords+sf::Vector2f{0.f,0.f};
+		coords2=cur_coords+sf::Vector2f{0.f,b_size};
+		coords3=cur_coords+sf::Vector2f{wideness,0.f};
+		coords4=cur_coords+sf::Vector2f{wideness,b_size};
+		DRAW_BOX(draw_array,coords1,coords2,coords3,coords4,outline_color);
+
+		coords1=cur_coords+sf::Vector2f{0.f+wideness,b_size-wideness};
+		coords2=cur_coords+sf::Vector2f{b_size-wideness,b_size-wideness};
+		coords3=cur_coords+sf::Vector2f{0.f+wideness,b_size};
+		coords4=cur_coords+sf::Vector2f{b_size-wideness,b_size};
+		DRAW_BOX(draw_array,coords1,coords2,coords3,coords4,outline_color);
+
+		coords1=cur_coords+sf::Vector2f{b_size-wideness,0.f};
+		coords2=cur_coords+sf::Vector2f{b_size-wideness,b_size};
+		coords3=cur_coords+sf::Vector2f{b_size,0.f};
+		coords4=cur_coords+sf::Vector2f{b_size,b_size};
+		DRAW_BOX(draw_array,coords1,coords2,coords3,coords4,outline_color);	
 	}
 
 
@@ -288,11 +362,11 @@ void GAME::RUN(){
 		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 		float c_size=CONSTANTS_GLOBAL.CHUNK_SIZE;
 		float bts=CONSTANTS_GLOBAL.BLOCK_TEXTURE_SIZE;
-		sf::Vector2f camera_left_up(camera.position-camera.size/2.f);
+		sf::Vector2f camera_left_up(camera.position-camera.size/2.f*camera.scale);
 		int chunk_left=int(std::floor(camera_left_up.x/(b_size*c_size)));
 		int chunk_up=int(std::floor(camera_left_up.y/(b_size*c_size)));
 
-		sf::Vector2f camera_right_down(camera.position+camera.size/2.f);
+		sf::Vector2f camera_right_down(camera.position+camera.size/2.f*camera.scale);
 		int chunk_right=int(camera_right_down.x/(b_size*c_size));
 		int chunk_down=int(camera_right_down.y/(b_size*c_size));
 
