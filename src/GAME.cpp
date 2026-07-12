@@ -133,9 +133,9 @@ void GAME::RUN(){
 
 	void GAME::UPDATE_EDITOR(){
 		if (VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
+			int x=std::floor(input.mouse_true_coords.x/CONSTANTS_GLOBAL.BLOCK_SIZE);
+			int y=std::floor(input.mouse_true_coords.y/CONSTANTS_GLOBAL.BLOCK_SIZE);
 			if ( ! VARIABLES_GLOBAL.editor_open){
-				int x=std::floor(input.mouse_true_coords.x/CONSTANTS_GLOBAL.BLOCK_SIZE);
-				int y=std::floor(input.mouse_true_coords.y/CONSTANTS_GLOBAL.BLOCK_SIZE);
 				if (!VARIABLES_GLOBAL.editor_is_entity){
 					PLACE_BLOCK(x,y);
 				} else {
@@ -145,10 +145,12 @@ void GAME::RUN(){
 						SELECT_ENTITY(x,y);
 					} 
 				}
-				if (VARIABLES_GLOBAL.editor_request_to_delete_last_point){
-					//EDITOR_DELETE_LAST_ENTITY_POINT();
-				}
 			} else {
+				if (VARIABLES_GLOBAL.editor_is_entity){
+					if (input.ENTER || VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
+						PLACE_ENTITY(x,y);
+					}
+				}
 				if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){
 					if (input.left){
 						VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes-=1;
@@ -163,12 +165,30 @@ void GAME::RUN(){
 					}
 				}
 			}
+			if (VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point){
+					EDITOR_DELETE_LAST_ENTITY_POINT();
+				}
 			if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0 && input.Mouse2){
 				VARIABLES_GLOBAL.editor_open=false;
 				VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.clear();
 			}
 		}
 	}	
+
+
+
+	void GAME::EDITOR_DELETE_LAST_ENTITY_POINT(){
+		VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point=false;
+		int the_index_of_cur_entity=VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes];
+		auto& cur_entity=entities[the_index_of_cur_entity];
+		if (cur_entity.coords.size()>1){
+			cur_entity.coords.pop_back();
+		} else {
+			entities.erase(entities.begin()+the_index_of_cur_entity);
+			VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.clear();
+			VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes=-1;
+		}
+	}
 
 
 

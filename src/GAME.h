@@ -42,6 +42,8 @@ struct GAME{
 
 	void UPDATE_EDITOR();
 
+	void EDITOR_DELETE_LAST_ENTITY_POINT();
+
 	void SELECT_ENTITY(int x,int y);
 
 	void PLACE_ENTITY(int x,int y);

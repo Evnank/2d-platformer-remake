@@ -175,22 +175,8 @@ void USER_INTERFACE::SETUP(){
 				va.append(sf::Vertex({right,top},color,{0,0}));
 				va.append(sf::Vertex({right,bottom},color,{0,0}));
 
-			} else if (VARIABLES_GLOBAL.editor_request_to_place_entity){
-				color=sf::Color(100,100,100,100);
-				left=800;
-				top=0;
-				right=left+400;
-				bottom=top+200;
-				va.append(sf::Vertex({left,top},color,{0,0}));
-				va.append(sf::Vertex({right,top},color,{0,0}));
-				va.append(sf::Vertex({left,bottom},color,{0,0}));
-
-				va.append(sf::Vertex({left,bottom},color,{0,0}));
-				va.append(sf::Vertex({right,top},color,{0,0}));
-				va.append(sf::Vertex({right,bottom},color,{0,0}));
-			}
-
-			if (VARIABLES_GLOBAL.editor_request_to_delete_last_point){
+			} 
+			if (VARIABLES_GLOBAL.editor_request_to_place_entity || VARIABLES_GLOBAL.editor_request_to_delete_last_point){
 				color=sf::Color(100,100,100,100);
 				left=800;
 				top=0;
