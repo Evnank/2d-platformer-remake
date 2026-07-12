@@ -12,7 +12,6 @@ void USER_INTERFACE::SETUP(){
 		CREATE_BUTTON({200,10},{0,100},BUTTON_TYPE::EDITOR_PLAIN_TEXT,"EDITOR",sf::Color(255,255,255),sf::Color(255,255,255),70);
 
 		CREATE_BUTTON({20,120},{250,100},BUTTON_TYPE::EDITOR_ENTITY_TOGGLE,"Is entity",sf::Color(253,132,0),sf::Color(0,253,0),30);
-		CREATE_BUTTON({20,120},{350,100},BUTTON_TYPE::EDITOR_DELETE_LAST_ENTITY_POINT,"Delete last point",sf::Color(253,132,0),sf::Color(0,253,0),40);
 
 		CREATE_BUTTON({20,220},{350,100},BUTTON_TYPE::EDITOR_BLOCK_SELECT,"Select block",sf::Color(253,132,0),sf::Color(0,253,0),50);
 
@@ -291,10 +290,6 @@ void USER_INTERFACE::SETUP(){
 			case BUTTON_TYPE::EDITOR_SELECTED_ENTITY_NUMBER:
 				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON &&
 				VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){return true;}
-				break;
-			case BUTTON_TYPE::EDITOR_DELETE_LAST_ENTITY_POINT:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON && 
-					VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){return true;}
 				break;
 			
 			

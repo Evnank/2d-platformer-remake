@@ -204,12 +204,6 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					}
 					CENTER();
 					break;
-				case BUTTON_TYPE::EDITOR_DELETE_LAST_ENTITY_POINT:
-					if (IS_PRESSED(input)){
-						VARIABLES_GLOBAL.editor_request_to_delete_last_point=true;
-					}
-					CENTER();
-					break;
 				case BUTTON_TYPE::EDITOR_SELECTED_ENTITY_NUMBER:
 				{
 					int size_of_current_vector=VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size();

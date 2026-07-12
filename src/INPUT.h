@@ -13,7 +13,7 @@ struct INPUT{
 
 	bool F,R,M;
 
-	bool ESCAPE,LSHIFT,TAB,ENTER,PageUp;
+	bool ESCAPE,LSHIFT,TAB,ENTER,PageUp,DELETE;
 
 	bool W,A,S,D;
 

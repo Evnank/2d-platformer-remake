@@ -1,5 +1,5 @@
 #include "GAME.h"
-
+#include <iostream>
 void GAME::RUN(){
 		SETUP();
 		GAME_LOAD();
@@ -139,9 +139,9 @@ void GAME::RUN(){
 				if (!VARIABLES_GLOBAL.editor_is_entity){
 					PLACE_BLOCK(x,y);
 				} else {
-					if (input.ENTER || VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
+					if (input.Mouse1 && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) || VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
 						PLACE_ENTITY(x,y);
-					} else if (input.Mouse1 && VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
+					} else if (input.Mouse1 && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
 						SELECT_ENTITY(x,y);
 					} 
 				}
@@ -164,10 +164,11 @@ void GAME::RUN(){
 						}
 					}
 				}
-			}
-			if (VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point){
-					EDITOR_DELETE_LAST_ENTITY_POINT();
+			}	
+				if (input.DELETE || VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point){
+					EDITOR_DELETE_LAST_ENTITY_POINT(x,y);
 				}
+					
 			if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0 && input.Mouse2){
 				VARIABLES_GLOBAL.editor_open=false;
 				VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.clear();
@@ -177,17 +178,43 @@ void GAME::RUN(){
 
 
 
-	void GAME::EDITOR_DELETE_LAST_ENTITY_POINT(){
-		VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point=false;
+	void GAME::EDITOR_DELETE_LAST_ENTITY_POINT(int x,int y){
+		sf::Vector2f cur_start_coords=sf::Vector2f{x*CONSTANTS_GLOBAL.BLOCK_SIZE,y*CONSTANTS_GLOBAL.BLOCK_SIZE};
 		int the_index_of_cur_entity=VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes];
 		auto& cur_entity=entities[the_index_of_cur_entity];
-		if (cur_entity.coords.size()>1){
-			cur_entity.coords.pop_back();
-		} else {
-			entities.erase(entities.begin()+the_index_of_cur_entity);
-			VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.clear();
-			VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes=-1;
+		int index_of_coords_to_delete=-1;
+
+		if (!VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point){
+			VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point=false;
+			if (cur_entity.coords.size()>1){
+				VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point=true;
+			} else {
+				VARIABLES_GLOBAL.editor_request_to_delete_last_point=true;
+			}
 		}
+
+		if (VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point){
+			VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point=false;
+			VARIABLES_GLOBAL.editor_request_to_delete_last_point=false;
+			for (int i=0;i<cur_entity.coords.size();i++){
+				if (cur_entity.coords[i]==cur_start_coords){
+					index_of_coords_to_delete=i;
+					break;
+				}
+			}
+			if (index_of_coords_to_delete!=-1){
+				if (cur_entity.coords.size()>1){
+				cur_entity.coords.erase(cur_entity.coords.begin()+index_of_coords_to_delete);
+				} else {
+					VARIABLES_GLOBAL.editor_open=false;
+					entities.erase(entities.begin()+the_index_of_cur_entity);
+					VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.clear();
+					VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes=-1;
+				}
+			}
+		}
+		
+		
 	}
 
 
@@ -221,9 +248,20 @@ void GAME::RUN(){
 	}
 
 	void GAME::PLACE_ENTITY(int x,int y){
+		input.Mouse1=false;
 		sf::Vector2f cur_start_coords=sf::Vector2f{x*CONSTANTS_GLOBAL.BLOCK_SIZE,y*CONSTANTS_GLOBAL.BLOCK_SIZE};
-
-		VARIABLES_GLOBAL.editor_request_to_place_entity=true;
+		if (!VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
+			VARIABLES_GLOBAL.editor_confirmation_to_place_entity=true;
+			for (auto& cur_entity:entities){
+				for (auto& the_coords:cur_entity.coords){
+					if (the_coords==cur_start_coords){
+						VARIABLES_GLOBAL.editor_request_to_place_entity=true;
+						VARIABLES_GLOBAL.editor_confirmation_to_place_entity=false;
+					}
+				}
+			}
+		}
+		
 
 		if (VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
 			VARIABLES_GLOBAL.editor_confirmation_to_place_entity=false;
