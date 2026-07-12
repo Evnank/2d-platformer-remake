@@ -8,7 +8,7 @@ struct USER_INTERFACE{
 
 	void SETUP();
 
-	void UPDATE(INPUT& input);
+	void UPDATE(INPUT& input,std::vector <ENTITY>& entities);
 
 	void DRAW_BACKGROUND_BLUR(sf::RenderWindow& window);
 

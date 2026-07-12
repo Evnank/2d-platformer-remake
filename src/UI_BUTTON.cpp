@@ -51,7 +51,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 	
 
-	void UI_BUTTON::UPDATE(INPUT& input){
+	void UI_BUTTON::UPDATE(INPUT& input,std::vector <ENTITY>& entities){
 		if (rect.contains(input.mouse_window_coords)){
 			conversion_procentile+=CONSTANTS_GLOBAL.UI_BUTTON_COLOR_CHANGE_SPEED;
 			if (conversion_procentile>=100){conversion_procentile=100;}
@@ -138,6 +138,11 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 						VARIABLES_GLOBAL.editor_block_index++;
 						if (VARIABLES_GLOBAL.editor_block_index>=100){VARIABLES_GLOBAL.editor_block_index=100;}
 					}
+					if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){
+						auto& cur_entity=entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]];
+						cur_entity.index=VARIABLES_GLOBAL.editor_block_index;
+					}
+					
 					break;
 
 				case BUTTON_TYPE::EDITOR_INDEX_DECREASE:
@@ -145,9 +150,18 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 						VARIABLES_GLOBAL.editor_block_index--;
 						if (VARIABLES_GLOBAL.editor_block_index<=-1){VARIABLES_GLOBAL.editor_block_index=-1;}
 					}
+					if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){
+						auto& cur_entity=entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]];
+						cur_entity.index=VARIABLES_GLOBAL.editor_block_index;
+					}
+					
 					break;
 				
 				case BUTTON_TYPE::EDITOR_INDEX_SHOW:
+					if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){
+						auto& cur_entity=entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]];
+						VARIABLES_GLOBAL.editor_block_index=cur_entity.index;
+					}
 					text.setString("Index: "+std::to_string(VARIABLES_GLOBAL.editor_block_index));
 					CENTER();
 					break;
@@ -166,11 +180,12 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					if (input.SPACE){
 						VARIABLES_GLOBAL.editor_confirmation_to_place_entity=true;
 						VARIABLES_GLOBAL.editor_request_to_place_entity=false;
-					} else {
-						if (input.Mouse1 || input.Mouse2){
-							VARIABLES_GLOBAL.editor_confirmation_to_place_entity=false;
-							VARIABLES_GLOBAL.editor_request_to_place_entity=false;
-						}
+					} 
+					break;
+				case BUTTON_TYPE::EDITOR_ENTITY_DELETE_LAST_POINT_CONFIRM:
+					if (input.SPACE){
+						VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point=true;
+						VARIABLES_GLOBAL.editor_request_to_delete_last_point=false;
 					}
 					break;
 				case BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON:
@@ -186,6 +201,12 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 						text.setString("EDITOR");
 					} else {
 						text.setString("CUSTOMIZE");
+					}
+					CENTER();
+					break;
+				case BUTTON_TYPE::EDITOR_DELETE_LAST_ENTITY_POINT:
+					if (IS_PRESSED(input)){
+						VARIABLES_GLOBAL.editor_request_to_delete_last_point=true;
 					}
 					CENTER();
 					break;

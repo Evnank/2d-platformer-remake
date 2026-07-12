@@ -33,6 +33,8 @@ struct GLOBAL_VARIABLES{
 	int editor_block_index=-1;
 	bool editor_is_entity=false;
 	bool editor_block_selecting=false;
+	bool editor_request_to_delete_last_point=false;
+	bool editor_confirmation_to_delete_last_point=false;
 
 	int editor_index_in_vector_of_selected_entity_indexes;
 	std::vector <int> editor_vector_of_selected_entity_indexes;

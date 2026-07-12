@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include "GLOBALS.h"
 #include "INPUT.h"
+#include "ENTITY.h"
 
 
 struct UI_BUTTON{
@@ -37,7 +38,7 @@ struct UI_BUTTON{
 
 	bool IS_PRESSED(INPUT& input);
 
-	void UPDATE(INPUT& input);
+	void UPDATE(INPUT& input,std::vector <ENTITY>& entities);
 
 	void DRAW(sf::RenderWindow& window);
 

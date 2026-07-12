@@ -60,7 +60,7 @@ void GAME::RUN(){
 			VARIABLES_GLOBAL.load_level=false;
 		}
 
-		game_ui.UPDATE(input);
+		game_ui.UPDATE(input,entities);
 	}
 
 	void GAME::EDITOR_MOVEMENT(){
@@ -145,6 +145,9 @@ void GAME::RUN(){
 						SELECT_ENTITY(x,y);
 					} 
 				}
+				if (VARIABLES_GLOBAL.editor_request_to_delete_last_point){
+					//EDITOR_DELETE_LAST_ENTITY_POINT();
+				}
 			} else {
 				if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){
 					if (input.left){
@@ -165,7 +168,10 @@ void GAME::RUN(){
 				VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.clear();
 			}
 		}
-	}
+	}	
+
+
+
 
 	void GAME::SELECT_ENTITY(int x,int y){
 		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
@@ -202,11 +208,16 @@ void GAME::RUN(){
 		if (VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
 			VARIABLES_GLOBAL.editor_confirmation_to_place_entity=false;
 			VARIABLES_GLOBAL.editor_request_to_place_entity=false;
-			ENTITY new_entity;
-			std::vector<sf::Vector2f> cur_setup_coords;
-			cur_setup_coords.push_back(cur_start_coords);
-			new_entity.SETUP(VARIABLES_GLOBAL.editor_block_index,true,cur_setup_coords,VARIABLES_GLOBAL.cur_editor_block_type);
-			entities.push_back(new_entity);
+			if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
+				ENTITY new_entity;
+				std::vector<sf::Vector2f> cur_setup_coords;
+				cur_setup_coords.push_back(cur_start_coords);
+				new_entity.SETUP(VARIABLES_GLOBAL.editor_block_index,true,cur_setup_coords,VARIABLES_GLOBAL.cur_editor_block_type);
+				entities.push_back(new_entity);
+			} else {
+				auto& cur_entity=entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]];
+				cur_entity.coords.push_back(cur_start_coords);
+			}
 		}
 	}
 
@@ -241,6 +252,7 @@ void GAME::RUN(){
 	}
 
 	void GAME::DRAW_EDITOR(){
+			std::vector <sf::Text> texts;
 			if (VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
 				sf::VertexArray draw_array(sf::PrimitiveType::Triangles);
 			if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
@@ -250,16 +262,34 @@ void GAME::RUN(){
 				for (auto& cur_entity:entities){
 					DRAW_ENTITY_CONNECTIONS(cur_entity,draw_array);
 				}
+				for (auto& cur_entity:entities){
+					DRAW_ENTITY_NUMBERS(cur_entity,texts);
+				}
 			} else {
 				DRAW_ENTITY_OUTLINE(entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[
 					VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]],draw_array);
 
 				DRAW_ENTITY_CONNECTIONS(entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[
 					VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]],draw_array);
+
+				DRAW_ENTITY_NUMBERS(entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[
+					VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]],texts);
 			}
+			EDITOR_DRAW_CURSOR(draw_array,sf::Color(255,0,0,150));
 			
 			window.draw(draw_array);
+			for (auto& cur_text:texts){
+				window.draw(cur_text);
+			}
 		}
+	}
+
+	void GAME::EDITOR_DRAW_CURSOR(sf::VertexArray& draw_array,sf::Color outline_color_cursor){
+		int x=std::floor(input.mouse_true_coords.x/CONSTANTS_GLOBAL.BLOCK_SIZE)*CONSTANTS_GLOBAL.BLOCK_SIZE;
+		int y=std::floor(input.mouse_true_coords.y/CONSTANTS_GLOBAL.BLOCK_SIZE)*CONSTANTS_GLOBAL.BLOCK_SIZE;
+		sf::Vector2f cur_mouse_block_coords(static_cast<float>(x),static_cast<float>(y));
+
+		DRAW_BOX_AROUND_BLOCK(cur_mouse_block_coords,draw_array,outline_color_cursor);
 	}
 
 	void GAME::DRAW_BOX(sf::VertexArray& draw_array,sf::Vector2f coords1,sf::Vector2f coords2,sf::Vector2f coords3,sf::Vector2f coords4,sf::Color color){
@@ -287,7 +317,18 @@ void GAME::RUN(){
 	}
 
 	
+	void GAME::DRAW_ENTITY_NUMBERS(ENTITY& cur_entity,std::vector <sf::Text>& texts){
+		sf::Text number_text(GLOBAL_ASSETS.conthrax_font);
+		number_text.setCharacterSize(30);
+		for (int i=0;i<cur_entity.coords.size();i++){
+			number_text.setString(std::to_string(i+1));
+			number_text.setOrigin(number_text.getGlobalBounds().size/2.f+sf::Vector2f{0.f,5.f});
+			number_text.setPosition(cur_entity.coords[i]+sf::Vector2f(CONSTANTS_GLOBAL.BLOCK_SIZE,CONSTANTS_GLOBAL.BLOCK_SIZE)/2.f);
+			texts.push_back(number_text);
+		}
+	}
 
+	
 	void GAME::DRAW_ENTITY_CONNECTIONS(ENTITY& cur_entity,sf::VertexArray& draw_array){
 		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 		float wideness=CONSTANTS_GLOBAL.editor_line_thickness;
@@ -308,7 +349,7 @@ void GAME::RUN(){
 			DRAW_LINE(draw_array,point1,point2,connection_color);
 
 			DRAW_LINE(draw_array,point2,point3,arrow_color);
-			DRAW_LINE(draw_array,point2,point4,arrow_color);		
+			DRAW_LINE(draw_array,point2,point4,arrow_color);
 		}
 	}
 

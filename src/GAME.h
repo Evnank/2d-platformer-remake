@@ -52,9 +52,13 @@ struct GAME{
 
 	void DRAW_EDITOR();
 
+	void EDITOR_DRAW_CURSOR(sf::VertexArray& draw_array,sf::Color outline_color_cursor);
+
 	void DRAW_BOX(sf::VertexArray& draw_array,sf::Vector2f coords1,sf::Vector2f coords2,sf::Vector2f coords3,sf::Vector2f coords4,sf::Color color);
 
 	void DRAW_LINE(sf::VertexArray& draw_array,sf::Vector2f point1,sf::Vector2f point2,sf::Color color);
+
+	void DRAW_ENTITY_NUMBERS(ENTITY& cur_entity,std::vector <sf::Text>& texts);
 
 	void DRAW_ENTITY_OUTLINE(ENTITY& cur_entity,sf::VertexArray& draw_array);
 
