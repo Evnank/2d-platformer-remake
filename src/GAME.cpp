@@ -135,22 +135,18 @@ void GAME::RUN(){
 		if (VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
 			int x=std::floor(input.mouse_true_coords.x/CONSTANTS_GLOBAL.BLOCK_SIZE);
 			int y=std::floor(input.mouse_true_coords.y/CONSTANTS_GLOBAL.BLOCK_SIZE);
-			if ( ! VARIABLES_GLOBAL.editor_open){
-				if (!VARIABLES_GLOBAL.editor_is_entity){
-					PLACE_BLOCK(x,y);
-				} else {
-					if (input.Mouse1 && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) || VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
-						PLACE_ENTITY(x,y);
-					} else if (input.Mouse1 && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
-						SELECT_ENTITY(x,y);
-					} 
-				}
-			} else {
-				if (VARIABLES_GLOBAL.editor_is_entity){
-					if (input.ENTER || VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
-						PLACE_ENTITY(x,y);
+				if (MOUSE_NOT_ON_EDITOR()){
+					if (!VARIABLES_GLOBAL.editor_is_entity){
+						PLACE_BLOCK(x,y);
+					} else {
+						if (input.Mouse1 && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) || VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
+							PLACE_ENTITY(x,y);
+						} else if (input.Mouse1 && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
+							SELECT_ENTITY(x,y);
+						} 
 					}
 				}
+			
 				if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){
 					if (input.left){
 						VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes-=1;
@@ -164,57 +160,67 @@ void GAME::RUN(){
 						}
 					}
 				}
-			}	
-				if (input.DELETE || VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point){
+			
+				if (input.Mouse2){
 					EDITOR_DELETE_LAST_ENTITY_POINT(x,y);
 				}
-					
-			if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0 && input.Mouse2){
-				VARIABLES_GLOBAL.editor_open=false;
-				VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.clear();
-			}
 		}
 	}	
 
 
+	bool GAME::MOUSE_NOT_ON_EDITOR(){
+		sf::FloatRect editor_text_rect({-50.f,-50.f},{450,1050});
+		if (editor_text_rect.contains(input.mouse_window_coords)){
+			return false;
+		}
+			return true;	
+	}
+
 
 	void GAME::EDITOR_DELETE_LAST_ENTITY_POINT(int x,int y){
 		sf::Vector2f cur_start_coords=sf::Vector2f{x*CONSTANTS_GLOBAL.BLOCK_SIZE,y*CONSTANTS_GLOBAL.BLOCK_SIZE};
-		int the_index_of_cur_entity=VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes];
-		auto& cur_entity=entities[the_index_of_cur_entity];
 		int index_of_coords_to_delete=-1;
-
-		if (!VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point){
-			VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point=false;
-			if (cur_entity.coords.size()>1){
-				VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point=true;
-			} else {
-				VARIABLES_GLOBAL.editor_request_to_delete_last_point=true;
-			}
-		}
-
-		if (VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point){
-			VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point=false;
-			VARIABLES_GLOBAL.editor_request_to_delete_last_point=false;
-			for (int i=0;i<cur_entity.coords.size();i++){
-				if (cur_entity.coords[i]==cur_start_coords){
-					index_of_coords_to_delete=i;
-					break;
+		if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
+			for (int i=0;i<entities.size();i++){
+				index_of_coords_to_delete=-1;
+				auto& cur_entity=entities[i];
+				for (int g=0;g<cur_entity.coords.size();g++){
+					if (cur_entity.coords[g]==cur_start_coords){
+						index_of_coords_to_delete=g;
+					}
+				}
+				if (index_of_coords_to_delete!=-1){
+					if (cur_entity.coords.size()>1){
+						cur_entity.coords.erase(cur_entity.coords.begin()+index_of_coords_to_delete);
+					} else {
+						VARIABLES_GLOBAL.editor_open=false;
+						entities.erase(entities.begin()+i);
+						SELECT_ENTITY(x,y);
+					}
+				}
+			}	
+		} else {
+			index_of_coords_to_delete=-1;
+			int the_index_of_the_entity_selected=VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes];
+			auto& cur_entity=entities[the_index_of_the_entity_selected];
+			for (int g=0;g<cur_entity.coords.size();g++){
+				if (cur_entity.coords[g]==cur_start_coords){
+					index_of_coords_to_delete=g;
 				}
 			}
 			if (index_of_coords_to_delete!=-1){
 				if (cur_entity.coords.size()>1){
-				cur_entity.coords.erase(cur_entity.coords.begin()+index_of_coords_to_delete);
+					cur_entity.coords.erase(cur_entity.coords.begin()+index_of_coords_to_delete);
 				} else {
 					VARIABLES_GLOBAL.editor_open=false;
-					entities.erase(entities.begin()+the_index_of_cur_entity);
-					VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.clear();
-					VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes=-1;
+					entities.erase(entities.begin()+the_index_of_the_entity_selected);
+					SELECT_ENTITY(x,y);
 				}
+			} else {
+				SELECT_ENTITY(x,y);
 			}
+			
 		}
-		
-		
 	}
 
 
@@ -250,32 +256,16 @@ void GAME::RUN(){
 	void GAME::PLACE_ENTITY(int x,int y){
 		input.Mouse1=false;
 		sf::Vector2f cur_start_coords=sf::Vector2f{x*CONSTANTS_GLOBAL.BLOCK_SIZE,y*CONSTANTS_GLOBAL.BLOCK_SIZE};
-		if (!VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
-			VARIABLES_GLOBAL.editor_confirmation_to_place_entity=true;
-			for (auto& cur_entity:entities){
-				for (auto& the_coords:cur_entity.coords){
-					if (the_coords==cur_start_coords){
-						VARIABLES_GLOBAL.editor_request_to_place_entity=true;
-						VARIABLES_GLOBAL.editor_confirmation_to_place_entity=false;
-					}
-				}
-			}
-		}
-		
-
-		if (VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
-			VARIABLES_GLOBAL.editor_confirmation_to_place_entity=false;
-			VARIABLES_GLOBAL.editor_request_to_place_entity=false;
-			if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
-				ENTITY new_entity;
-				std::vector<sf::Vector2f> cur_setup_coords;
-				cur_setup_coords.push_back(cur_start_coords);
-				new_entity.SETUP(VARIABLES_GLOBAL.editor_block_index,true,cur_setup_coords,VARIABLES_GLOBAL.cur_editor_block_type);
-				entities.push_back(new_entity);
-			} else {
-				auto& cur_entity=entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]];
-				cur_entity.coords.push_back(cur_start_coords);
-			}
+		if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
+			ENTITY new_entity;
+			std::vector<sf::Vector2f> cur_setup_coords;
+			cur_setup_coords.push_back(cur_start_coords);
+			new_entity.SETUP(VARIABLES_GLOBAL.editor_block_index,true,cur_setup_coords,VARIABLES_GLOBAL.cur_editor_block_type);
+			entities.push_back(new_entity);
+			SELECT_ENTITY(x,y);
+		} else {
+			auto& cur_entity=entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]];
+			cur_entity.coords.push_back(cur_start_coords);
 		}
 	}
 
