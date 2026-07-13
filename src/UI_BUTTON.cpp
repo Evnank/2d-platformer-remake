@@ -24,7 +24,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 		ginc=(end_color.g-start_color.g)/100.f;
 		binc=(end_color.b-start_color.b)/100.f;
 		if (type==BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE || type==BUTTON_TYPE::EDITOR_ENTITY_TOGGLE||
-		type==BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON){
+		type==BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON || type==BUTTON_TYPE::EDITOR_SPECIAL_PAUSE_BUTTON){
 			is_bool_button=true;
 		}
 
@@ -182,6 +182,14 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 						is_toggled=!is_toggled;
 					}
 					VARIABLES_GLOBAL.editor_special_movement=is_toggled;
+					if (is_toggled){conversion_procentile=100;}
+					break;
+				case BUTTON_TYPE::EDITOR_SPECIAL_PAUSE_BUTTON:
+					is_toggled=VARIABLES_GLOBAL.editor_game_pause;
+					if (IS_PRESSED(input)){
+						is_toggled=!is_toggled;
+					}
+					VARIABLES_GLOBAL.editor_game_pause=is_toggled;
 					if (is_toggled){conversion_procentile=100;}
 					break;
 				case BUTTON_TYPE::EDITOR_PLAIN_TEXT:

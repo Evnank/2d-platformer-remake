@@ -88,6 +88,7 @@ void GAME::RUN(){
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && sf::Mouse::isButtonPressed(sf::Mouse::Button::Right)){
 			sf::Vector2f dif_between_mouse_coords=VARIABLES_GLOBAL.editor_stored_mouse_true_coords-input.mouse_true_coords;
 			camera.position=dif_between_mouse_coords+VARIABLES_GLOBAL.editor_stored_camera_true_coords;
+			input.mouse_true_coords+=dif_between_mouse_coords;
 		} 
 		VARIABLES_GLOBAL.editor_stored_mouse_true_coords=input.mouse_true_coords;
 		VARIABLES_GLOBAL.editor_stored_camera_true_coords=camera.position;
@@ -260,6 +261,15 @@ void GAME::RUN(){
 		} else {
 			VARIABLES_GLOBAL.editor_open=false;
 		}
+		if (VARIABLES_GLOBAL.editor_request_from_place_block_to_select_block_to_select_block_with_index!=-1){
+			for (int i=0;i<VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size();i++){
+				if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[i]==
+					VARIABLES_GLOBAL.editor_request_from_place_block_to_select_block_to_select_block_with_index){
+						VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes=i;
+						break;
+					}
+			}
+		}
 		
 	}
 
@@ -272,6 +282,8 @@ void GAME::RUN(){
 			cur_setup_coords.push_back(cur_start_coords);
 			new_entity.SETUP(VARIABLES_GLOBAL.editor_block_index,true,cur_setup_coords,VARIABLES_GLOBAL.cur_editor_block_type);
 			entities.push_back(new_entity);
+			VARIABLES_GLOBAL.editor_request_from_place_block_to_select_block_to_select_block_with_index=entities.size()-1;
+
 			SELECT_ENTITY(x,y);
 		} else {
 			auto& cur_entity=entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]];

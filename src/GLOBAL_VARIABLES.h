@@ -31,6 +31,8 @@ struct GLOBAL_VARIABLES{
 	sf::Vector2f editor_stored_mouse_true_coords;
 	sf::Vector2f editor_stored_camera_true_coords;
 
+	int editor_request_from_place_block_to_select_block_to_select_block_with_index=-1;
+
 	int editor_block_index=-1;
 	bool editor_is_entity=false;
 	bool editor_block_selecting=false;
