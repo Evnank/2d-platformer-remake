@@ -24,7 +24,8 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 		ginc=(end_color.g-start_color.g)/100.f;
 		binc=(end_color.b-start_color.b)/100.f;
 		if (type==BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE || type==BUTTON_TYPE::EDITOR_ENTITY_TOGGLE||
-		type==BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON || type==BUTTON_TYPE::EDITOR_SPECIAL_PAUSE_BUTTON){
+		type==BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON || type==BUTTON_TYPE::EDITOR_SPECIAL_PAUSE_BUTTON ||
+		type==BUTTON_TYPE::EDITOR_IS_LOOPING_TOGGLE){
 			is_bool_button=true;
 		}
 
@@ -111,6 +112,17 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 						is_toggled=!is_toggled;
 					}
 					VARIABLES_GLOBAL.editor_is_entity=is_toggled;
+					break;
+				case BUTTON_TYPE::EDITOR_IS_LOOPING_TOGGLE:
+					if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){
+						bool& cur_toggle=
+						entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]].IS_LOOPING;
+						is_toggled=cur_toggle;
+						if (IS_PRESSED(input)){
+							is_toggled=!is_toggled;
+							cur_toggle=is_toggled;
+						}
+					}
 					break;
 
 

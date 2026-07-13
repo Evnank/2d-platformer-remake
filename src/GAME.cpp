@@ -172,7 +172,7 @@ void GAME::RUN(){
 					}
 				}
 			
-				if (input.Mouse2 && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
+				if (input.Mouse2 && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && VARIABLES_GLOBAL.editor_is_entity){
 					EDITOR_DELETE_LAST_ENTITY_POINT(x,y);
 				}
 		}

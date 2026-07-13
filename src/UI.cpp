@@ -12,6 +12,7 @@ void USER_INTERFACE::SETUP(){
 		CREATE_BUTTON({200,10},{0,100},BUTTON_TYPE::EDITOR_PLAIN_TEXT,"EDITOR",sf::Color(255,255,255),sf::Color(255,255,255),70);
 
 		CREATE_BUTTON({20,120},{250,100},BUTTON_TYPE::EDITOR_ENTITY_TOGGLE,"Is entity",sf::Color(253,132,0),sf::Color(0,253,0),30);
+		CREATE_BUTTON({20,120},{250,100},BUTTON_TYPE::EDITOR_IS_LOOPING_TOGGLE,"IS LOOPING",sf::Color(253,132,0),sf::Color(0,253,0),35);
 
 		CREATE_BUTTON({20,220},{350,100},BUTTON_TYPE::EDITOR_BLOCK_SELECT,"Select block",sf::Color(253,132,0),sf::Color(0,253,0),50);
 
@@ -35,7 +36,7 @@ void USER_INTERFACE::SETUP(){
 		CREATE_BUTTON({20,320},{350,100},BUTTON_TYPE::EDITOR_WALL,"WALL",sf::Color(253,132,0),sf::Color(0,253,0),50);
 
 	//editor on screen info
-		CREATE_BUTTON({150,70},{0,100},BUTTON_TYPE::EDITOR_INFO,"",sf::Color(255,255,255),sf::Color(255,255,255),50);
+		CREATE_BUTTON({160,70},{0,100},BUTTON_TYPE::EDITOR_INFO,"",sf::Color(253,132,0),sf::Color(0,253,0),50);
 			
 	}
 	void USER_INTERFACE::UPDATE(INPUT& input,std::vector <ENTITY>& entities){
@@ -218,6 +219,9 @@ void USER_INTERFACE::SETUP(){
 				break;
 			case BUTTON_TYPE::EDITOR_ENTITY_TOGGLE:
 				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){return true;}
+				break;
+			case BUTTON_TYPE::EDITOR_IS_LOOPING_TOGGLE:
+				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_WALL:
 				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.editor_block_selecting){return true;}

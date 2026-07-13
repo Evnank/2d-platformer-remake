@@ -26,7 +26,7 @@ struct GLOBAL_VARIABLES{
 
 	sf::Vector2f editor_block_hover;
 
-	bool editor_special_movement=false;
+	bool editor_special_movement=true;
 	bool editor_game_pause=false;
 	sf::Vector2f editor_stored_mouse_true_coords;
 	sf::Vector2f editor_stored_camera_true_coords;
