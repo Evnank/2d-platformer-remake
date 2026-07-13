@@ -34,13 +34,7 @@ void USER_INTERFACE::SETUP(){
 
 	//editor on screen info
 		CREATE_BUTTON({150,70},{0,100},BUTTON_TYPE::EDITOR_INFO,"",sf::Color(255,255,255),sf::Color(255,255,255),50);
-
-		CREATE_BUTTON({1000,30},{0,100},BUTTON_TYPE::EDITOR_ENTITY_PLACE_CONFIRM,
-			"   are you sure?\nSPACE to confrim ",sf::Color(255,255,255),sf::Color(255,255,255),45);
-		CREATE_BUTTON({1000,30},{0,100},BUTTON_TYPE::EDITOR_ENTITY_DELETE_LAST_POINT_CONFIRM,
-			"   are you sure?\nSPACE to confrim ",sf::Color(255,255,255),sf::Color(255,255,255),45);
 			
-		
 	}
 	void USER_INTERFACE::UPDATE(INPUT& input,std::vector <ENTITY>& entities){
 		if (input.ESCAPE){
@@ -54,14 +48,6 @@ void USER_INTERFACE::SETUP(){
 					VARIABLES_GLOBAL.editor_open=false;
 				} else {
 					VARIABLES_GLOBAL.game_state=GAME_STATE::ESCAPE;
-				}
-				if(VARIABLES_GLOBAL.editor_request_to_place_entity){
-					VARIABLES_GLOBAL.editor_request_to_place_entity=false;
-					VARIABLES_GLOBAL.editor_confirmation_to_place_entity=false;
-				} 
-				if(VARIABLES_GLOBAL.editor_request_to_delete_last_point){
-					VARIABLES_GLOBAL.editor_request_to_delete_last_point=false;
-					VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point=false;
 				}
 
 				break;
@@ -82,16 +68,7 @@ void USER_INTERFACE::SETUP(){
 			}
 		}
 		if (input.TAB && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
-				VARIABLES_GLOBAL.editor_open=!VARIABLES_GLOBAL.editor_open;
-				VARIABLES_GLOBAL.editor_request_to_place_entity=false;	
-				VARIABLES_GLOBAL.editor_request_to_delete_last_point=false;	
-		}
-		if (input.Mouse1 || input.Mouse2){
-			VARIABLES_GLOBAL.editor_request_to_place_entity=false;
-			VARIABLES_GLOBAL.editor_confirmation_to_place_entity=false;
-
-			VARIABLES_GLOBAL.editor_request_to_delete_last_point=false;
-			VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point=false;
+			VARIABLES_GLOBAL.editor_open=!VARIABLES_GLOBAL.editor_open;
 		}
 
 
@@ -175,20 +152,6 @@ void USER_INTERFACE::SETUP(){
 				va.append(sf::Vertex({right,bottom},color,{0,0}));
 
 			}
-			if (VARIABLES_GLOBAL.editor_request_to_place_entity){
-				color=sf::Color(100,100,100,100);
-				left=800;
-				top=0;
-				right=left+400;
-				bottom=top+200;
-				va.append(sf::Vertex({left,top},color,{0,0}));
-				va.append(sf::Vertex({right,top},color,{0,0}));
-				va.append(sf::Vertex({left,bottom},color,{0,0}));
-
-				va.append(sf::Vertex({left,bottom},color,{0,0}));
-				va.append(sf::Vertex({right,top},color,{0,0}));
-				va.append(sf::Vertex({right,bottom},color,{0,0}));
-			}
 			window.draw(va);
 			break;
 
@@ -271,14 +234,6 @@ void USER_INTERFACE::SETUP(){
 				break;
 			case BUTTON_TYPE::EDITOR_INFO:
 				if (state==GAME_STATE::PLAYING && !VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){return true;}
-				break;
-			case BUTTON_TYPE::EDITOR_ENTITY_PLACE_CONFIRM:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.EDITOR_ON_BUTTON && 
-					VARIABLES_GLOBAL.editor_request_to_place_entity){return true;}
-				break;
-			case BUTTON_TYPE::EDITOR_ENTITY_DELETE_LAST_POINT_CONFIRM:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.EDITOR_ON_BUTTON && 
-					VARIABLES_GLOBAL.editor_request_to_delete_last_point){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON:
 				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON && 

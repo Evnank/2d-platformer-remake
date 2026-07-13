@@ -25,16 +25,15 @@ struct GLOBAL_VARIABLES{
 	bool editor_open=false;
 
 	sf::Vector2f editor_block_hover;
-	bool editor_request_to_place_entity=false;
-	bool editor_confirmation_to_place_entity=false;
 
 	bool editor_special_movement=false;
+	bool editor_game_pause=false;
+	sf::Vector2f editor_stored_mouse_true_coords;
+	sf::Vector2f editor_stored_camera_true_coords;
 
 	int editor_block_index=-1;
 	bool editor_is_entity=false;
 	bool editor_block_selecting=false;
-	bool editor_request_to_delete_last_point=false;
-	bool editor_confirmation_to_delete_last_point=false;
 
 	int editor_index_in_vector_of_selected_entity_indexes;
 	std::vector <int> editor_vector_of_selected_entity_indexes;

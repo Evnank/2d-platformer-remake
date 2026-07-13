@@ -176,18 +176,6 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					std::string("\nIndex: ")+std::to_string(VARIABLES_GLOBAL.editor_block_index)+std::string("\n")+is_entity_on_string());
 					CENTER();
 					break;
-				case BUTTON_TYPE::EDITOR_ENTITY_PLACE_CONFIRM:
-					if (input.SPACE){
-						VARIABLES_GLOBAL.editor_confirmation_to_place_entity=true;
-						VARIABLES_GLOBAL.editor_request_to_place_entity=false;
-					} 
-					break;
-				case BUTTON_TYPE::EDITOR_ENTITY_DELETE_LAST_POINT_CONFIRM:
-					if (input.SPACE){
-						VARIABLES_GLOBAL.editor_confirmation_to_delete_last_point=true;
-						VARIABLES_GLOBAL.editor_request_to_delete_last_point=false;
-					}
-					break;
 				case BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON:
 					is_toggled=VARIABLES_GLOBAL.editor_special_movement;
 					if (IS_PRESSED(input)){

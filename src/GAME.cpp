@@ -46,7 +46,8 @@ void GAME::RUN(){
 		case GAME_STATE::PLAYING:
 			if (VARIABLES_GLOBAL.editor_special_movement){
 				EDITOR_MOVEMENT();
-			} else {
+			}
+			if (!VARIABLES_GLOBAL.editor_game_pause){
 				STEP_TICK();
 			}
 			UPDATE_EDITOR();
@@ -83,17 +84,26 @@ void GAME::RUN(){
 		for (;m_wheel<0;m_wheel++){
 			camera.scale*=1.1f;
 		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && sf::Mouse::isButtonPressed(sf::Mouse::Button::Right)){
+			sf::Vector2f dif_between_mouse_coords=VARIABLES_GLOBAL.editor_stored_mouse_true_coords-input.mouse_true_coords;
+			camera.position=dif_between_mouse_coords+VARIABLES_GLOBAL.editor_stored_camera_true_coords;
+		} 
+		VARIABLES_GLOBAL.editor_stored_mouse_true_coords=input.mouse_true_coords;
+		VARIABLES_GLOBAL.editor_stored_camera_true_coords=camera.position;
 	}
 
 	void GAME::STEP_TICK(){
-		for (auto& cur_player:players){
-			cur_player.UPDATE(input,game_chunks,entities);
-		}
+			for (auto& cur_player:players){
+				cur_player.UPDATE(input,game_chunks,entities);
+			}
 		UPDATE_ENTETIES();
 		for (auto& cur_player:players){
 			if (cur_player.died){cur_player.SETUP(cur_player.index);}
 		}
-		camera.UPDATE(players);
+		if (!VARIABLES_GLOBAL.editor_special_movement){
+			camera.UPDATE(players);
+		}
 	}
 
 	void GAME::UPDATE_ENTETIES(){
@@ -139,7 +149,7 @@ void GAME::RUN(){
 					if (!VARIABLES_GLOBAL.editor_is_entity){
 						PLACE_BLOCK(x,y);
 					} else {
-						if (input.Mouse1 && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) || VARIABLES_GLOBAL.editor_confirmation_to_place_entity){
+						if (input.Mouse1 && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
 							PLACE_ENTITY(x,y);
 						} else if (input.Mouse1 && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
 							SELECT_ENTITY(x,y);
@@ -161,7 +171,7 @@ void GAME::RUN(){
 					}
 				}
 			
-				if (input.Mouse2){
+				if (input.Mouse2 && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
 					EDITOR_DELETE_LAST_ENTITY_POINT(x,y);
 				}
 		}
