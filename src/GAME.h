@@ -42,6 +42,12 @@ struct GAME{
 
 	void UPDATE_EDITOR();
 
+	void UPDATE_CURSOR_COLOR();
+
+	void EDITOR_MOVE_BLOCKS(int x,int y);
+
+	void EDITOR_MOVE_SELECT_BLOCK(int x,int y);
+
 	bool MOUSE_NOT_ON_EDITOR();
 
 	void EDITOR_DELETE_LAST_ENTITY_POINT(int x,int y);

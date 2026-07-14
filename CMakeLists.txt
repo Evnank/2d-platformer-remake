@@ -25,6 +25,7 @@ add_executable(main
     src/CAMERA.cpp
     src/PERFORMANCE_COUNTER.cpp
     src/GAME.cpp
+    src/CTRL_Z.cpp
     )
 
 if(WIN32)

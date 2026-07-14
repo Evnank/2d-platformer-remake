@@ -24,7 +24,11 @@ struct GLOBAL_VARIABLES{
 	bool is_settings_opened_from_menu=false;
 	bool editor_open=false;
 
-	sf::Vector2f editor_block_hover;
+	int editor_entity_to_move_index=-1;
+	int editor_entity_coords_to_move_index=-1;
+	sf::Vector2f editor_block_to_move_coords={-15000.f,-15000.f};
+	sf::Color mouse_cursor_color;
+
 
 	bool editor_special_movement=true;
 	bool editor_game_pause=false;

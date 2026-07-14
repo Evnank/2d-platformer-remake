@@ -44,9 +44,6 @@ void GAME::RUN(){
 		switch (VARIABLES_GLOBAL.game_state)
 		{
 		case GAME_STATE::PLAYING:
-			if (VARIABLES_GLOBAL.editor_special_movement){
-				EDITOR_MOVEMENT();
-			}
 			if (!VARIABLES_GLOBAL.editor_game_pause){
 				STEP_TICK();
 			}
@@ -85,7 +82,8 @@ void GAME::RUN(){
 			camera.scale*=1.1f;
 		}
 
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && sf::Mouse::isButtonPressed(sf::Mouse::Button::Right)){
+		if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl) &&
+		 sf::Mouse::isButtonPressed(sf::Mouse::Button::Right)){
 			sf::Vector2f dif_between_mouse_coords=VARIABLES_GLOBAL.editor_stored_mouse_true_coords-input.mouse_true_coords;
 			camera.position=dif_between_mouse_coords+VARIABLES_GLOBAL.editor_stored_camera_true_coords;
 			input.mouse_true_coords+=dif_between_mouse_coords;
@@ -146,15 +144,27 @@ void GAME::RUN(){
 		if (VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
 			int x=std::floor(input.mouse_true_coords.x/CONSTANTS_GLOBAL.BLOCK_SIZE);
 			int y=std::floor(input.mouse_true_coords.y/CONSTANTS_GLOBAL.BLOCK_SIZE);
-				if (MOUSE_NOT_ON_EDITOR()){
+				if (MOUSE_NOT_ON_EDITOR() || !VARIABLES_GLOBAL.editor_open){
+					if (VARIABLES_GLOBAL.editor_special_movement){
+							EDITOR_MOVEMENT();
+						}
 					if (!VARIABLES_GLOBAL.editor_is_entity){
-						PLACE_BLOCK(x,y);
+						if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
+							PLACE_BLOCK(x,y);
+						}
 					} else {
-						if (input.Mouse1 && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
-							PLACE_ENTITY(x,y);
-						} else if (input.Mouse1 && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
-							SELECT_ENTITY(x,y);
+						if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
+							if (input.Mouse1){
+								PLACE_ENTITY(x,y);
+							} else if (input.Mouse2){
+									EDITOR_DELETE_LAST_ENTITY_POINT(x,y);
+							}
+						} else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl)){
+							if (input.Mouse1){
+								SELECT_ENTITY(x,y);
+							}
 						} 
+						EDITOR_MOVE_BLOCKS(x,y);
 					}
 				}
 			
@@ -172,11 +182,116 @@ void GAME::RUN(){
 					}
 				}
 			
-				if (input.Mouse2 && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && VARIABLES_GLOBAL.editor_is_entity){
+				if (input.Mouse2 && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && VARIABLES_GLOBAL.editor_is_entity){
 					EDITOR_DELETE_LAST_ENTITY_POINT(x,y);
 				}
+				UPDATE_CURSOR_COLOR();
 		}
 	}	
+
+
+	void GAME::UPDATE_CURSOR_COLOR(){
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
+			VARIABLES_GLOBAL.mouse_cursor_color=sf::Color(255,0,0);
+		} else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl)){
+			VARIABLES_GLOBAL.mouse_cursor_color=sf::Color(255,255,0);
+		} else {
+			VARIABLES_GLOBAL.mouse_cursor_color=sf::Color(0,255,0);
+		}
+	}
+
+
+	void GAME::EDITOR_MOVE_BLOCKS(int x,int y){
+		sf::Vector2f cur_mouse_coords=sf::Vector2f{x*CONSTANTS_GLOBAL.BLOCK_SIZE,y*CONSTANTS_GLOBAL.BLOCK_SIZE};
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && input.Mouse1){
+			EDITOR_MOVE_SELECT_BLOCK(x,y);
+		}
+		if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl) || !sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) || 
+		sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
+			VARIABLES_GLOBAL.editor_entity_to_move_index=-1;
+			VARIABLES_GLOBAL.editor_entity_coords_to_move_index=-1;
+			VARIABLES_GLOBAL.editor_block_to_move_coords={-15000.f,-15000.f};
+		}
+
+		if (VARIABLES_GLOBAL.editor_is_entity){
+			if (VARIABLES_GLOBAL.editor_entity_to_move_index!=-1){
+				auto& cur_entity_coords=entities[VARIABLES_GLOBAL.editor_entity_to_move_index].coords[VARIABLES_GLOBAL.editor_entity_coords_to_move_index];
+				if (cur_entity_coords!=cur_mouse_coords){
+					cur_entity_coords=cur_mouse_coords;
+				}
+			}	
+		} else {
+			if (VARIABLES_GLOBAL.editor_block_to_move_coords!=sf::Vector2f{-15000.f,-15000.f}){
+				int cur_chunkx=std::floor(VARIABLES_GLOBAL.editor_block_to_move_coords.x/CONSTANTS_GLOBAL.CHUNK_SIZE);
+				int cur_chunky=std::floor(VARIABLES_GLOBAL.editor_block_to_move_coords.y/CONSTANTS_GLOBAL.CHUNK_SIZE);
+				int curx_inside=VARIABLES_GLOBAL.editor_block_to_move_coords.x-cur_chunkx*CONSTANTS_GLOBAL.CHUNK_SIZE;
+				int cury_inside=VARIABLES_GLOBAL.editor_block_to_move_coords.y-cur_chunky*CONSTANTS_GLOBAL.CHUNK_SIZE;
+				GAME_CHUNK& cur_chunk=game_chunks[{cur_chunkx,cur_chunky}];
+				STATIC_BLOCK& cur_block_from=cur_chunk.chunk_blocks[curx_inside+cury_inside*CONSTANTS_GLOBAL.CHUNK_SIZE];
+
+				cur_chunkx=std::floor(x/CONSTANTS_GLOBAL.CHUNK_SIZE);
+				cur_chunky=std::floor(y/CONSTANTS_GLOBAL.CHUNK_SIZE);
+				curx_inside=x-cur_chunkx*CONSTANTS_GLOBAL.CHUNK_SIZE;
+				cury_inside=y-cur_chunky*CONSTANTS_GLOBAL.CHUNK_SIZE;
+				cur_chunk=game_chunks[{cur_chunkx,cur_chunky}];
+				STATIC_BLOCK& cur_block_to=cur_chunk.chunk_blocks[curx_inside+cury_inside*CONSTANTS_GLOBAL.CHUNK_SIZE];
+
+				cur_block_to=cur_block_from;
+				cur_block_from.type=BLOCK_TYPE::AIR;
+				cur_block_from.index=-1;	
+				VARIABLES_GLOBAL.editor_block_to_move_coords={float(x),float(y)};
+			}
+		}
+
+	}
+
+
+	void GAME::EDITOR_MOVE_SELECT_BLOCK(int x,int y){
+		sf::Vector2f cur_mouse_coords=sf::Vector2f{x*CONSTANTS_GLOBAL.BLOCK_SIZE,y*CONSTANTS_GLOBAL.BLOCK_SIZE};
+		if (VARIABLES_GLOBAL.editor_is_entity){
+			if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
+				for (int i=0;i<entities.size();i++){
+					auto& cur_entity=entities[i];
+					for (int g=0;g<cur_entity.coords.size();g++){
+						auto& cur_coords=cur_entity.coords[g];
+						if (cur_coords==cur_mouse_coords){
+							VARIABLES_GLOBAL.editor_entity_to_move_index=i;
+							VARIABLES_GLOBAL.editor_entity_coords_to_move_index=g;
+							return;
+						}
+					}
+				}
+			} else {
+				int index_of_entity_selected=VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes];
+				auto& cur_entity=entities[index_of_entity_selected];
+				for (int g=0;g<cur_entity.coords.size();g++){
+					auto& cur_coords=cur_entity.coords[g];
+					if (cur_coords==cur_mouse_coords){
+						VARIABLES_GLOBAL.editor_entity_to_move_index=index_of_entity_selected;
+						VARIABLES_GLOBAL.editor_entity_coords_to_move_index=g;
+						return;
+					}
+				}
+			}
+		} else {
+			VARIABLES_GLOBAL.editor_entity_to_move_index=-1;
+			VARIABLES_GLOBAL.editor_entity_coords_to_move_index=-1;
+			int cur_chunkx=std::floor(float(x)/CONSTANTS_GLOBAL.CHUNK_SIZE);
+			int cur_chunky=std::floor(float(y)/CONSTANTS_GLOBAL.CHUNK_SIZE);
+			int curx_inside=x-cur_chunkx*CONSTANTS_GLOBAL.CHUNK_SIZE;
+			int cury_inside=y-cur_chunky*CONSTANTS_GLOBAL.CHUNK_SIZE;
+			if (game_chunks.find({cur_chunkx,cur_chunky})==game_chunks.end()){
+				VARIABLES_GLOBAL.editor_block_to_move_coords={-15000.f,-15000.f};
+				return;
+			} else {
+				GAME_CHUNK& cur_chunk=game_chunks[{cur_chunkx,cur_chunky}];
+				BLOCK_TYPE& type=cur_chunk.chunk_blocks[curx_inside+cury_inside*CONSTANTS_GLOBAL.CHUNK_SIZE].type;
+				if (type!=BLOCK_TYPE::AIR){
+					VARIABLES_GLOBAL.editor_block_to_move_coords={float(x),float(y)};
+				}	
+			}
+		}
+	}
 
 
 	bool GAME::MOUSE_NOT_ON_EDITOR(){
@@ -228,7 +343,7 @@ void GAME::RUN(){
 					SELECT_ENTITY(x,y);
 				}
 			} else {
-				SELECT_ENTITY(x,y);
+				//SELECT_ENTITY(x,y);
 			}
 			
 		}
@@ -301,7 +416,7 @@ void GAME::RUN(){
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
 			cur_block.index=VARIABLES_GLOBAL.editor_block_index;
 			cur_block.type=VARIABLES_GLOBAL.cur_editor_block_type;
-		} else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right)){
+		} else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
 			cur_block.index=-1;
 			cur_block.type=BLOCK_TYPE::AIR;
 		}
@@ -345,7 +460,7 @@ void GAME::RUN(){
 				DRAW_ENTITY_NUMBERS(entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[
 					VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]],texts);
 			}
-			EDITOR_DRAW_CURSOR(draw_array,sf::Color(255,0,0,150));
+			EDITOR_DRAW_CURSOR(draw_array,VARIABLES_GLOBAL.mouse_cursor_color);
 			
 			window.draw(draw_array);
 			for (auto& cur_text:texts){
