@@ -83,4 +83,5 @@ struct GAME{
 
 	void GAME_LOAD();
 
+	STATIC_BLOCK& find_block_by_coords(int x,int y);
 };

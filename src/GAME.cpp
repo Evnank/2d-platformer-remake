@@ -164,8 +164,8 @@ void GAME::RUN(){
 								SELECT_ENTITY(x,y);
 							}
 						} 
-						EDITOR_MOVE_BLOCKS(x,y);
 					}
+					EDITOR_MOVE_BLOCKS(x,y);
 				}
 			
 				if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){
@@ -181,10 +181,7 @@ void GAME::RUN(){
 						}
 					}
 				}
-			
-				if (input.Mouse2 && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && VARIABLES_GLOBAL.editor_is_entity){
-					EDITOR_DELETE_LAST_ENTITY_POINT(x,y);
-				}
+
 				UPDATE_CURSOR_COLOR();
 		}
 	}	
@@ -210,7 +207,7 @@ void GAME::RUN(){
 		sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
 			VARIABLES_GLOBAL.editor_entity_to_move_index=-1;
 			VARIABLES_GLOBAL.editor_entity_coords_to_move_index=-1;
-			VARIABLES_GLOBAL.editor_block_to_move_coords={-15000.f,-15000.f};
+			VARIABLES_GLOBAL.editor_is_moving_block=false;
 		}
 
 		if (VARIABLES_GLOBAL.editor_is_entity){
@@ -221,34 +218,25 @@ void GAME::RUN(){
 				}
 			}	
 		} else {
-			if (VARIABLES_GLOBAL.editor_block_to_move_coords!=sf::Vector2f{-15000.f,-15000.f}){
-				int cur_chunkx=std::floor(VARIABLES_GLOBAL.editor_block_to_move_coords.x/CONSTANTS_GLOBAL.CHUNK_SIZE);
-				int cur_chunky=std::floor(VARIABLES_GLOBAL.editor_block_to_move_coords.y/CONSTANTS_GLOBAL.CHUNK_SIZE);
-				int curx_inside=VARIABLES_GLOBAL.editor_block_to_move_coords.x-cur_chunkx*CONSTANTS_GLOBAL.CHUNK_SIZE;
-				int cury_inside=VARIABLES_GLOBAL.editor_block_to_move_coords.y-cur_chunky*CONSTANTS_GLOBAL.CHUNK_SIZE;
-				GAME_CHUNK& cur_chunk=game_chunks[{cur_chunkx,cur_chunky}];
-				STATIC_BLOCK& cur_block_from=cur_chunk.chunk_blocks[curx_inside+cury_inside*CONSTANTS_GLOBAL.CHUNK_SIZE];
-
-				cur_chunkx=std::floor(x/CONSTANTS_GLOBAL.CHUNK_SIZE);
-				cur_chunky=std::floor(y/CONSTANTS_GLOBAL.CHUNK_SIZE);
-				curx_inside=x-cur_chunkx*CONSTANTS_GLOBAL.CHUNK_SIZE;
-				cury_inside=y-cur_chunky*CONSTANTS_GLOBAL.CHUNK_SIZE;
-				cur_chunk=game_chunks[{cur_chunkx,cur_chunky}];
-				STATIC_BLOCK& cur_block_to=cur_chunk.chunk_blocks[curx_inside+cury_inside*CONSTANTS_GLOBAL.CHUNK_SIZE];
-
-				cur_block_to=cur_block_from;
-				cur_block_from.type=BLOCK_TYPE::AIR;
-				cur_block_from.index=-1;	
-				VARIABLES_GLOBAL.editor_block_to_move_coords={float(x),float(y)};
+			if (VARIABLES_GLOBAL.editor_is_moving_block){
+				if (VARIABLES_GLOBAL.editor_block_to_move_coords!=sf::Vector2f{float(x),float(y)}){
+					STATIC_BLOCK& cur_block_from=find_block_by_coords(VARIABLES_GLOBAL.editor_block_to_move_coords.x,VARIABLES_GLOBAL.editor_block_to_move_coords.y);
+					STATIC_BLOCK& cur_block_to=find_block_by_coords(x,y);
+					std::cout<<"wtf\n";
+					cur_block_to=cur_block_from;
+					cur_block_from.type=BLOCK_TYPE::AIR;
+					cur_block_from.index=-1;
+					VARIABLES_GLOBAL.editor_block_to_move_coords={float(x),float(y)};
+				}
 			}
 		}
-
 	}
 
 
 	void GAME::EDITOR_MOVE_SELECT_BLOCK(int x,int y){
 		sf::Vector2f cur_mouse_coords=sf::Vector2f{x*CONSTANTS_GLOBAL.BLOCK_SIZE,y*CONSTANTS_GLOBAL.BLOCK_SIZE};
 		if (VARIABLES_GLOBAL.editor_is_entity){
+			VARIABLES_GLOBAL.editor_is_moving_block=false;
 			if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
 				for (int i=0;i<entities.size();i++){
 					auto& cur_entity=entities[i];
@@ -276,20 +264,12 @@ void GAME::RUN(){
 		} else {
 			VARIABLES_GLOBAL.editor_entity_to_move_index=-1;
 			VARIABLES_GLOBAL.editor_entity_coords_to_move_index=-1;
-			int cur_chunkx=std::floor(float(x)/CONSTANTS_GLOBAL.CHUNK_SIZE);
-			int cur_chunky=std::floor(float(y)/CONSTANTS_GLOBAL.CHUNK_SIZE);
-			int curx_inside=x-cur_chunkx*CONSTANTS_GLOBAL.CHUNK_SIZE;
-			int cury_inside=y-cur_chunky*CONSTANTS_GLOBAL.CHUNK_SIZE;
-			if (game_chunks.find({cur_chunkx,cur_chunky})==game_chunks.end()){
-				VARIABLES_GLOBAL.editor_block_to_move_coords={-15000.f,-15000.f};
-				return;
-			} else {
-				GAME_CHUNK& cur_chunk=game_chunks[{cur_chunkx,cur_chunky}];
-				BLOCK_TYPE& type=cur_chunk.chunk_blocks[curx_inside+cury_inside*CONSTANTS_GLOBAL.CHUNK_SIZE].type;
+			STATIC_BLOCK& cur_block=find_block_by_coords(x,y);
+				BLOCK_TYPE& type=cur_block.type;
 				if (type!=BLOCK_TYPE::AIR){
 					VARIABLES_GLOBAL.editor_block_to_move_coords={float(x),float(y)};
+					VARIABLES_GLOBAL.editor_is_moving_block=true;
 				}	
-			}
 		}
 	}
 
@@ -332,6 +312,7 @@ void GAME::RUN(){
 			for (int g=0;g<cur_entity.coords.size();g++){
 				if (cur_entity.coords[g]==cur_start_coords){
 					index_of_coords_to_delete=g;
+					break;
 				}
 			}
 			if (index_of_coords_to_delete!=-1){
@@ -342,10 +323,7 @@ void GAME::RUN(){
 					entities.erase(entities.begin()+the_index_of_the_entity_selected);
 					SELECT_ENTITY(x,y);
 				}
-			} else {
-				//SELECT_ENTITY(x,y);
-			}
-			
+			} 
 		}
 	}
 
@@ -725,3 +703,18 @@ void GAME::GAME_LOAD(){
 			}
 		}
 	}
+
+
+
+
+
+
+STATIC_BLOCK& GAME::find_block_by_coords(int x,int y){
+	int cur_chunkx=std::floor(x/CONSTANTS_GLOBAL.CHUNK_SIZE);	
+	int cur_chunky=std::floor(y/CONSTANTS_GLOBAL.CHUNK_SIZE);
+	int curx_inside=x-cur_chunkx*CONSTANTS_GLOBAL.CHUNK_SIZE;
+	int cury_inside=y-cur_chunky*CONSTANTS_GLOBAL.CHUNK_SIZE;
+	GAME_CHUNK& cur_chunk=game_chunks[{cur_chunkx,cur_chunky}];
+	STATIC_BLOCK& cur_block=cur_chunk.chunk_blocks[curx_inside+cury_inside*CONSTANTS_GLOBAL.CHUNK_SIZE];
+	return cur_block;
+}
