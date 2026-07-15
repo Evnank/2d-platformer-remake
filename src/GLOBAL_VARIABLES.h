@@ -28,7 +28,6 @@ struct GLOBAL_VARIABLES{
 	int editor_entity_coords_to_move_index=-1;
 	sf::Vector2f editor_block_to_move_coords;
 	bool editor_is_moving_block=false;
-	bool editor_just_picked_up_block;
 	sf::Color mouse_cursor_color;
 
 

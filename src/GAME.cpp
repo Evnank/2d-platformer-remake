@@ -208,6 +208,8 @@ void GAME::RUN(){
 			VARIABLES_GLOBAL.editor_entity_to_move_index=-1;
 			VARIABLES_GLOBAL.editor_entity_coords_to_move_index=-1;
 			VARIABLES_GLOBAL.editor_is_moving_block=false;
+			ctrl_z.editor_stored_block.type==BLOCK_TYPE::AIR;
+			ctrl_z.editor_stored_block.index=-1;
 		}
 
 		if (VARIABLES_GLOBAL.editor_is_entity){
@@ -229,12 +231,6 @@ void GAME::RUN(){
 					cur_block_to=cur_block_from;
 
 					cur_block_from=old_block;
-
-					if (VARIABLES_GLOBAL.editor_just_picked_up_block){
-						VARIABLES_GLOBAL.editor_just_picked_up_block=false;
-						cur_block_from.index=-1;
-						cur_block_from.type=BLOCK_TYPE::AIR;
-					}
 
 					VARIABLES_GLOBAL.editor_block_to_move_coords={float(x),float(y)};
 				}
@@ -277,7 +273,6 @@ void GAME::RUN(){
 			STATIC_BLOCK& cur_block=find_block_by_coords(x,y);
 				BLOCK_TYPE& type=cur_block.type;
 				if (type!=BLOCK_TYPE::AIR){
-					VARIABLES_GLOBAL.editor_just_picked_up_block=true;
 					VARIABLES_GLOBAL.editor_block_to_move_coords={float(x),float(y)};
 					VARIABLES_GLOBAL.editor_is_moving_block=true;
 				}	
