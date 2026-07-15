@@ -16,11 +16,10 @@ struct CTRL_Z_ACTION{
     int entity_coords_manipulation_index;
     BLOCK_TYPE changed_block_type_from=BLOCK_TYPE::AIR;
     BLOCK_TYPE changed_block_type_to=BLOCK_TYPE::AIR;
-    
-
 };
 
 
 struct CTRL_Z{
     std::vector<CTRL_Z_ACTION> actions;
+    STATIC_BLOCK editor_stored_block;
 };

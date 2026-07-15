@@ -6,6 +6,7 @@
 #include "UI.h"
 #include "CAMERA.h"
 #include "PERFORMANCE_COUNTER.h"
+#include "CTRL_Z.h"
 
 
 
@@ -22,6 +23,7 @@ struct GAME{
 	std::unordered_map<int,bool> indexes_pressed;
 	std::vector <ENTITY> entities;
 	USER_INTERFACE game_ui;
+	CTRL_Z ctrl_z;
 
 
 
