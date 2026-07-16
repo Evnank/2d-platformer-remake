@@ -26,6 +26,7 @@ add_executable(main
     src/PERFORMANCE_COUNTER.cpp
     src/GAME.cpp
     src/CTRL_Z.cpp
+    src/EDITOR.cpp
     )
 
 if(WIN32)

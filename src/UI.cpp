@@ -39,16 +39,16 @@ void USER_INTERFACE::SETUP(){
 		CREATE_BUTTON({160,70},{0,100},BUTTON_TYPE::EDITOR_INFO,"",sf::Color(253,132,0),sf::Color(0,253,0),50);
 			
 	}
-	void USER_INTERFACE::UPDATE(INPUT& input,std::vector <ENTITY>& entities){
+	void USER_INTERFACE::UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor){
 		if (input.ESCAPE){
 			switch (VARIABLES_GLOBAL.game_state)
 			{
 			case GAME_STATE::PLAYING:
 
-				if (VARIABLES_GLOBAL.editor_block_selecting){
-					VARIABLES_GLOBAL.editor_block_selecting=false;
-				} else if(VARIABLES_GLOBAL.editor_open){
-					VARIABLES_GLOBAL.editor_open=false;
+				if (editor.editor_block_selecting){
+					editor.editor_block_selecting=false;
+				} else if(editor.editor_open){
+					editor.editor_open=false;
 				} else {
 					VARIABLES_GLOBAL.game_state=GAME_STATE::ESCAPE;
 				}
@@ -71,7 +71,7 @@ void USER_INTERFACE::SETUP(){
 			}
 		}
 		if (input.TAB && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
-			VARIABLES_GLOBAL.editor_open=!VARIABLES_GLOBAL.editor_open;
+			editor.editor_open=!editor.editor_open;
 		}
 
 
@@ -83,8 +83,8 @@ void USER_INTERFACE::SETUP(){
 			if (background_darkening<=0){background_darkening=0;}
 		}
 		for (auto& cur_button:buttons){
-			if (CHECK_IF_UPDATE_BUTTON(cur_button)){
-				cur_button.UPDATE(input,entities);
+			if (CHECK_IF_UPDATE_BUTTON(cur_button,editor)){
+				cur_button.UPDATE(input,entities,editor);
 			}
 		}
 	}
@@ -110,7 +110,7 @@ void USER_INTERFACE::SETUP(){
 		window.draw(va);
 	}
 
-	void USER_INTERFACE::DRAW_BACKGROUND(sf::RenderWindow& window){
+	void USER_INTERFACE::DRAW_BACKGROUND(sf::RenderWindow& window,EDITOR& editor){
 		float left=0;
 		float right=0;
 		float top=0;
@@ -140,7 +140,7 @@ void USER_INTERFACE::SETUP(){
 			break;
 
 		case GAME_STATE::PLAYING:
-			if (VARIABLES_GLOBAL.editor_open){
+			if (editor.editor_open){
 				color=sf::Color(100,100,100,100);
 				left=0;
 				top=0;
@@ -168,12 +168,12 @@ void USER_INTERFACE::SETUP(){
 		
 	}
 
-	void USER_INTERFACE::DRAW(sf::RenderWindow& window){
+	void USER_INTERFACE::DRAW(sf::RenderWindow& window,EDITOR& editor){
 		window.setView(CONSTANTS_GLOBAL.default_view);
 		DRAW_BACKGROUND_BLUR(window);
-		DRAW_BACKGROUND(window);
+		DRAW_BACKGROUND(window,editor);
 		for (auto& cur_button:buttons){
-			if (CHECK_IF_UPDATE_BUTTON(cur_button)){
+			if (CHECK_IF_UPDATE_BUTTON(cur_button,editor)){
 				cur_button.DRAW(window);
 			}
 		}
@@ -186,7 +186,7 @@ void USER_INTERFACE::SETUP(){
 		buttons.push_back(cur_button);
 	}
 
-	bool USER_INTERFACE::CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button){
+	bool USER_INTERFACE::CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button,EDITOR& editor){
 		BUTTON_TYPE type=cur_button.type;
 		GAME_STATE state=VARIABLES_GLOBAL.game_state;
 			switch (type)
@@ -215,46 +215,46 @@ void USER_INTERFACE::SETUP(){
 
 
 			case BUTTON_TYPE::EDITOR_BLOCK_SELECT:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open){return true;}
+				if (state==GAME_STATE::PLAYING && editor.editor_open){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_ENTITY_TOGGLE:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){return true;}
+				if (state==GAME_STATE::PLAYING && editor.editor_open && editor.editor_vector_of_selected_entity_indexes.size()==0){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_IS_LOOPING_TOGGLE:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){return true;}
+				if (state==GAME_STATE::PLAYING && editor.editor_open && editor.editor_vector_of_selected_entity_indexes.size()!=0){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_WALL:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.editor_block_selecting){return true;}
+				if (state==GAME_STATE::PLAYING && editor.editor_open && editor.editor_block_selecting){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_INDEX_SHOW:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && !VARIABLES_GLOBAL.editor_block_selecting){return true;}
+				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_INDEX_INCREASE:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && !VARIABLES_GLOBAL.editor_block_selecting){return true;}
+				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_INDEX_DECREASE:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && !VARIABLES_GLOBAL.editor_block_selecting){return true;}
+				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_BLOCK_SHOW:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && !VARIABLES_GLOBAL.editor_block_selecting){return true;}
+				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_INFO:
-				if (state==GAME_STATE::PLAYING && !VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){return true;}
+				if (state==GAME_STATE::PLAYING && !editor.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON && 
-					!VARIABLES_GLOBAL.editor_block_selecting){return true;}
+				if (state==GAME_STATE::PLAYING && editor.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON && 
+					!editor.editor_block_selecting){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_SPECIAL_PAUSE_BUTTON:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON && 
-					!VARIABLES_GLOBAL.editor_block_selecting){return true;}
+				if (state==GAME_STATE::PLAYING && editor.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON && 
+					!editor.editor_block_selecting){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_PLAIN_TEXT:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){return true;}
+				if (state==GAME_STATE::PLAYING && editor.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_SELECTED_ENTITY_NUMBER:
-				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON &&
-				VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){return true;}
+				if (state==GAME_STATE::PLAYING && editor.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON &&
+				editor.editor_vector_of_selected_entity_indexes.size()!=0){return true;}
 				break;
 			
 			

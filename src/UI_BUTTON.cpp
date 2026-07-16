@@ -52,7 +52,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 	
 
-	void UI_BUTTON::UPDATE(INPUT& input,std::vector <ENTITY>& entities){
+	void UI_BUTTON::UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor){
 		if (rect.contains(input.mouse_window_coords)){
 			conversion_procentile+=CONSTANTS_GLOBAL.UI_BUTTON_COLOR_CHANGE_SPEED;
 			if (conversion_procentile>=100){conversion_procentile=100;}
@@ -108,15 +108,15 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 
 				case BUTTON_TYPE::EDITOR_ENTITY_TOGGLE:
-					if (IS_PRESSED(input) && VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
+					if (IS_PRESSED(input) && editor.editor_vector_of_selected_entity_indexes.size()==0){
 						is_toggled=!is_toggled;
 					}
-					VARIABLES_GLOBAL.editor_is_entity=is_toggled;
+					editor.editor_is_entity=is_toggled;
 					break;
 				case BUTTON_TYPE::EDITOR_IS_LOOPING_TOGGLE:
-					if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){
+					if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
 						bool& cur_toggle=
-						entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]].IS_LOOPING;
+						entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].IS_LOOPING;
 						is_toggled=cur_toggle;
 						if (IS_PRESSED(input)){
 							is_toggled=!is_toggled;
@@ -127,85 +127,85 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 
 				case BUTTON_TYPE::EDITOR_BLOCK_SELECT:
-					is_toggled=VARIABLES_GLOBAL.editor_block_selecting;
+					is_toggled=editor.editor_block_selecting;
 					if (IS_PRESSED(input)){
 						is_toggled=!is_toggled;
 					}
 					if (is_toggled && input.ESCAPE){
 						is_toggled=false;
 					}
-					VARIABLES_GLOBAL.editor_block_selecting=is_toggled;
+					editor.editor_block_selecting=is_toggled;
 					if (is_toggled){conversion_procentile=100;}
 					break;
 
 				case BUTTON_TYPE::EDITOR_WALL:
 					if (IS_PRESSED(input)){
-						VARIABLES_GLOBAL.cur_editor_block_type=BLOCK_TYPE::WALL;
-						VARIABLES_GLOBAL.editor_block_selecting=false;
+						editor.cur_editor_block_type=BLOCK_TYPE::WALL;
+						editor.editor_block_selecting=false;
 					}
 					break;
 
 				case BUTTON_TYPE::EDITOR_INDEX_INCREASE:
 					if (IS_PRESSED(input)){
-						VARIABLES_GLOBAL.editor_block_index++;
-						if (VARIABLES_GLOBAL.editor_block_index>=100){VARIABLES_GLOBAL.editor_block_index=100;}
+						editor.editor_block_index++;
+						if (editor.editor_block_index>=100){editor.editor_block_index=100;}
 					}
-					if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){
-						auto& cur_entity=entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]];
-						cur_entity.index=VARIABLES_GLOBAL.editor_block_index;
+					if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
+						auto& cur_entity=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]];
+						cur_entity.index=editor.editor_block_index;
 					}
 					
 					break;
 
 				case BUTTON_TYPE::EDITOR_INDEX_DECREASE:
 					if (IS_PRESSED(input)){
-						VARIABLES_GLOBAL.editor_block_index--;
-						if (VARIABLES_GLOBAL.editor_block_index<=-1){VARIABLES_GLOBAL.editor_block_index=-1;}
+						editor.editor_block_index--;
+						if (editor.editor_block_index<=-1){editor.editor_block_index=-1;}
 					}
-					if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){
-						auto& cur_entity=entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]];
-						cur_entity.index=VARIABLES_GLOBAL.editor_block_index;
+					if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
+						auto& cur_entity=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]];
+						cur_entity.index=editor.editor_block_index;
 					}
 					
 					break;
 				
 				case BUTTON_TYPE::EDITOR_INDEX_SHOW:
-					if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()!=0){
-						auto& cur_entity=entities[VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes[VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes]];
-						VARIABLES_GLOBAL.editor_block_index=cur_entity.index;
+					if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
+						auto& cur_entity=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]];
+						editor.editor_block_index=cur_entity.index;
 					}
-					text.setString("Index: "+std::to_string(VARIABLES_GLOBAL.editor_block_index));
+					text.setString("Index: "+std::to_string(editor.editor_block_index));
 					CENTER();
 					break;
 
 				case BUTTON_TYPE::EDITOR_BLOCK_SHOW:
-					text.setString("Block: "+BLOCK_TYPE_TO_STRING(VARIABLES_GLOBAL.cur_editor_block_type));
+					text.setString("Block: "+BLOCK_TYPE_TO_STRING(editor.cur_editor_block_type));
 					CENTER();
 					break;
 
 				case BUTTON_TYPE::EDITOR_INFO:
-					text.setString(std::string("EDITOR: ON\nBlock: ")+BLOCK_TYPE_TO_STRING(VARIABLES_GLOBAL.cur_editor_block_type)+
-					std::string("\nIndex: ")+std::to_string(VARIABLES_GLOBAL.editor_block_index)+std::string("\n")+is_entity_on_string());
+					text.setString(std::string("EDITOR: ON\nBlock: ")+BLOCK_TYPE_TO_STRING(editor.cur_editor_block_type)+
+					std::string("\nIndex: ")+std::to_string(editor.editor_block_index)+std::string("\n")+is_entity_on_string(editor.editor_is_entity));
 					CENTER();
 					break;
 				case BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON:
-					is_toggled=VARIABLES_GLOBAL.editor_special_movement;
+					is_toggled=editor.editor_special_movement;
 					if (IS_PRESSED(input)){
 						is_toggled=!is_toggled;
 					}
-					VARIABLES_GLOBAL.editor_special_movement=is_toggled;
+					editor.editor_special_movement=is_toggled;
 					if (is_toggled){conversion_procentile=100;}
 					break;
 				case BUTTON_TYPE::EDITOR_SPECIAL_PAUSE_BUTTON:
-					is_toggled=VARIABLES_GLOBAL.editor_game_pause;
+					is_toggled=editor.editor_game_pause;
 					if (IS_PRESSED(input)){
 						is_toggled=!is_toggled;
 					}
-					VARIABLES_GLOBAL.editor_game_pause=is_toggled;
+					editor.editor_game_pause=is_toggled;
 					if (is_toggled){conversion_procentile=100;}
 					break;
 				case BUTTON_TYPE::EDITOR_PLAIN_TEXT:
-					if (VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size()==0){
+					if (editor.editor_vector_of_selected_entity_indexes.size()==0){
 						text.setString("EDITOR");
 					} else {
 						text.setString("CUSTOMIZE");
@@ -214,8 +214,8 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					break;
 				case BUTTON_TYPE::EDITOR_SELECTED_ENTITY_NUMBER:
 				{
-					int size_of_current_vector=VARIABLES_GLOBAL.editor_vector_of_selected_entity_indexes.size();
-					int cur_index_of_vector=VARIABLES_GLOBAL.editor_index_in_vector_of_selected_entity_indexes;
+					int size_of_current_vector=editor.editor_vector_of_selected_entity_indexes.size();
+					int cur_index_of_vector=editor.editor_index_in_vector_of_selected_entity_indexes;
 						text.setString("selected: "+std::to_string(cur_index_of_vector+1)+"/"+std::to_string(size_of_current_vector));
 					
 					CENTER();

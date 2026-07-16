@@ -8,18 +8,17 @@
 
 struct CTRL_Z_ACTION{
     CTRL_Z_ACTION_TYPE type=CTRL_Z_ACTION_TYPE::NOTHING;
-    sf::Vector2f block_moved_from;
-    sf::Vector2f block_moved_to;
+    sf::Vector2f block_1_coords;
+    sf::Vector2f block_2_coords;
 
-    sf::Vector2f entity_moved_from;
-    sf::Vector2f entity_moved_to;
-    int entity_manipulation_index;
-    int entity_coords_manipulation_index;
+    STATIC_BLOCK old_block_1;
+    STATIC_BLOCK new_block_1;
 
-    int index_changed_from;
-    int index_changed_to;
-    BLOCK_TYPE changed_block_type_from=BLOCK_TYPE::AIR;
-    BLOCK_TYPE changed_block_type_to=BLOCK_TYPE::AIR;
+    STATIC_BLOCK old_block_2;
+    STATIC_BLOCK new_block_2;
+
+    ENTITY old_entity;
+    ENTITY new_ENTITY;
 
     void GO_BACKWARDS(std::vector<ENTITY>& entities,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
 };

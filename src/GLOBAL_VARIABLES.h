@@ -22,27 +22,5 @@ struct GLOBAL_VARIABLES{
 	bool EDITOR_ON_BUTTON=true;
 	bool load_level=false;
 	bool is_settings_opened_from_menu=false;
-	bool editor_open=false;
-
-	int editor_entity_to_move_index=-1;
-	int editor_entity_coords_to_move_index=-1;
-	sf::Vector2f editor_block_to_move_coords;
-	bool editor_is_moving_block=false;
-	sf::Color mouse_cursor_color;
-
-
-	bool editor_special_movement=true;
-	bool editor_game_pause=false;
-	sf::Vector2f editor_stored_mouse_true_coords;
-	sf::Vector2f editor_stored_camera_true_coords;
-
-	int editor_request_from_place_block_to_select_block_to_select_block_with_index=-1;
-
-	int editor_block_index=-1;
-	bool editor_is_entity=false;
-	bool editor_block_selecting=false;
-
-	int editor_index_in_vector_of_selected_entity_indexes;
-	std::vector <int> editor_vector_of_selected_entity_indexes;
-	BLOCK_TYPE cur_editor_block_type=BLOCK_TYPE::WALL;
+	
 };

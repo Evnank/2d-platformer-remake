@@ -4,6 +4,7 @@
 #include "GLOBALS.h"
 #include "INPUT.h"
 #include "ENTITY.h"
+#include "EDITOR.h"
 
 
 struct UI_BUTTON{
@@ -38,7 +39,7 @@ struct UI_BUTTON{
 
 	bool IS_PRESSED(INPUT& input);
 
-	void UPDATE(INPUT& input,std::vector <ENTITY>& entities);
+	void UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor);
 
 	void DRAW(sf::RenderWindow& window);
 
