@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <cmath>
 #include "GLOBALS.h"
 
 
@@ -19,3 +20,6 @@ struct PairHash {
         return (std::size_t)p.first ^ ((std::size_t)p.second << 16);
     }
 };
+
+
+STATIC_BLOCK& find_block_by_coords(int x,int y,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);

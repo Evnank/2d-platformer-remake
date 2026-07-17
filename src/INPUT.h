@@ -11,7 +11,7 @@ struct INPUT{
 
 	bool SPACE;
 
-	bool F,R,M;
+	bool F,R,M,Z,Y;
 
 	bool ESCAPE,LSHIFT,TAB,ENTER,PageUp,DELETE;
 

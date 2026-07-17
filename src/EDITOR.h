@@ -66,7 +66,5 @@ struct EDITOR{
 
 	void DRAW_ENTITY_CONNECTIONS(ENTITY& cur_entity,sf::VertexArray& draw_array);
 
-    STATIC_BLOCK& find_block_by_coords(int x,int y,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
-
     void DRAW_EDITOR(std::vector <ENTITY>& entities,sf::RenderWindow& window,INPUT& input);
 };

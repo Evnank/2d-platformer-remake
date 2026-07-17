@@ -75,6 +75,12 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 				}
 
 				UPDATE_CURSOR_COLOR();
+				ctrl_z.UPDATE(input,entities,game_chunks);
+				if (ctrl_z.request_to_select_entity){
+					ctrl_z.request_to_select_entity=false;
+					SELECT_ENTITY(x,y,entities,input);
+				}
+				
 		}
 	}	
 
@@ -106,9 +112,16 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 
 		if (editor_is_entity){
 			if (editor_entity_to_move_index!=-1){
-				auto& cur_entity_coords=entities[editor_entity_to_move_index].coords[editor_entity_coords_to_move_index];
+				auto& cur_entity=entities[editor_entity_to_move_index];
+				auto& cur_entity_coords=cur_entity.coords[editor_entity_coords_to_move_index];
 				if (cur_entity_coords!=cur_mouse_coords){
+					ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_ENTITY;
+					ctrl_z.current_ctrl_z_action.old_entity=cur_entity;
+					ctrl_z.current_ctrl_z_action.index_of_entity_changed=editor_entity_to_move_index;
+
 					cur_entity_coords=cur_mouse_coords;
+
+					ctrl_z.current_ctrl_z_action.new_entity=cur_entity;
 				}
 			}	
 		} else {
@@ -117,14 +130,29 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 					STATIC_BLOCK& cur_block_from=find_block_by_coords(editor_block_to_move_coords.x,editor_block_to_move_coords.y,game_chunks);
 					STATIC_BLOCK& cur_block_to=find_block_by_coords(x,y,game_chunks);
 
+
+					ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_STATIC_BLOCK;
+					ctrl_z.current_ctrl_z_action.is_2_blocks_changing=true;
+
+					ctrl_z.current_ctrl_z_action.block_1_coords=editor_block_to_move_coords;
+					ctrl_z.current_ctrl_z_action.block_2_coords=sf::Vector2f{float(x),float(y)};
+
+					ctrl_z.current_ctrl_z_action.old_block_1=cur_block_from;
+					ctrl_z.current_ctrl_z_action.old_block_2=cur_block_to;
+
+
+
+
 					STATIC_BLOCK old_block=ctrl_z.editor_stored_block;
 					ctrl_z.editor_stored_block=cur_block_to;
-
 					cur_block_to=cur_block_from;
-
 					cur_block_from=old_block;
-
 					editor_block_to_move_coords={float(x),float(y)};
+
+
+
+					ctrl_z.current_ctrl_z_action.new_block_1=cur_block_from;
+					ctrl_z.current_ctrl_z_action.new_block_2=cur_block_to;
 				}
 			}
 		}
@@ -195,8 +223,17 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 				}
 				if (index_of_coords_to_delete!=-1){
 					if (cur_entity.coords.size()>1){
+						ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_ENTITY;
+						ctrl_z.current_ctrl_z_action.old_entity=cur_entity;
+						ctrl_z.current_ctrl_z_action.index_of_entity_changed=i;
+
 						cur_entity.coords.erase(cur_entity.coords.begin()+index_of_coords_to_delete);
+
+						ctrl_z.current_ctrl_z_action.new_entity=cur_entity;
 					} else {
+						ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::DELETE_ENTITTY;
+						ctrl_z.current_ctrl_z_action.old_entity=cur_entity;
+
 						editor_open=false;
 						entities.erase(entities.begin()+i);
 						SELECT_ENTITY(x,y,entities,input);
@@ -268,6 +305,8 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 		input.Mouse1=false;
 		sf::Vector2f cur_start_coords=sf::Vector2f{x*CONSTANTS_GLOBAL.BLOCK_SIZE,y*CONSTANTS_GLOBAL.BLOCK_SIZE};
 		if (editor_vector_of_selected_entity_indexes.size()==0){
+			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::PLACE_ENTITY;
+
 			ENTITY new_entity;
 			std::vector<sf::Vector2f> cur_setup_coords;
 			cur_setup_coords.push_back(cur_start_coords);
@@ -275,27 +314,42 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 			entities.push_back(new_entity);
 			editor_request_from_place_block_to_select_block_to_select_block_with_index=entities.size()-1;
 
+			ctrl_z.current_ctrl_z_action.new_entity=new_entity;
+
 			SELECT_ENTITY(x,y,entities,input);
 		} else {
-			auto& cur_entity=entities[editor_vector_of_selected_entity_indexes[editor_index_in_vector_of_selected_entity_indexes]];
+			int current_index_of_entity=editor_vector_of_selected_entity_indexes[editor_index_in_vector_of_selected_entity_indexes];
+			auto& cur_entity=entities[current_index_of_entity];
+
+			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_ENTITY;
+			ctrl_z.current_ctrl_z_action.old_entity=cur_entity;
+			ctrl_z.current_ctrl_z_action.index_of_entity_changed=current_index_of_entity;
+
 			cur_entity.coords.push_back(cur_start_coords);
+
+			ctrl_z.current_ctrl_z_action.new_entity=cur_entity;
 		}
 	}
 
 	void EDITOR::PLACE_BLOCK(int x,int y,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
-		int chunkx=std::floor(float(x)/CONSTANTS_GLOBAL.CHUNK_SIZE);
-		int chunky=std::floor(float(y)/CONSTANTS_GLOBAL.CHUNK_SIZE);
-		int blockx=x-chunkx*CONSTANTS_GLOBAL.CHUNK_SIZE;
-		int blocky=y-chunky*CONSTANTS_GLOBAL.CHUNK_SIZE;
-		auto& cur_chunk=game_chunks[{chunkx,chunky}];
-		auto& cur_block=cur_chunk.chunk_blocks[blockx+blocky*CONSTANTS_GLOBAL.CHUNK_SIZE];
+		auto& cur_block=find_block_by_coords(x,y,game_chunks);
+
+		ctrl_z.current_ctrl_z_action.block_1_coords={float(x),float(y)};
+		ctrl_z.current_ctrl_z_action.old_block_1=cur_block;
+
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_STATIC_BLOCK;
+
 			cur_block.index=editor_block_index;
 			cur_block.type=cur_editor_block_type;
 		} else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
+			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_STATIC_BLOCK;
+
 			cur_block.index=-1;
 			cur_block.type=BLOCK_TYPE::AIR;
 		}
+
+		ctrl_z.current_ctrl_z_action.new_block_1=cur_block;
 	}
 
 
@@ -441,14 +495,3 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 		coords4=cur_coords+sf::Vector2f{b_size,b_size};
 		DRAW_BOX(draw_array,coords1,coords2,coords3,coords4,outline_color);	
 	}
-
-
-    STATIC_BLOCK& EDITOR::find_block_by_coords(int x,int y,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
-	    int cur_chunkx=std::floor(x/CONSTANTS_GLOBAL.CHUNK_SIZE);	
-	    int cur_chunky=std::floor(y/CONSTANTS_GLOBAL.CHUNK_SIZE);
-	    int curx_inside=x-cur_chunkx*CONSTANTS_GLOBAL.CHUNK_SIZE;
-	    int cury_inside=y-cur_chunky*CONSTANTS_GLOBAL.CHUNK_SIZE;
-	     GAME_CHUNK& cur_chunk=game_chunks[{cur_chunkx,cur_chunky}];
-	    STATIC_BLOCK& cur_block=cur_chunk.chunk_blocks[curx_inside+cury_inside*CONSTANTS_GLOBAL.CHUNK_SIZE];
-	    return cur_block;
-    }

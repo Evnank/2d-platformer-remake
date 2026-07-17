@@ -8,7 +8,7 @@ void INPUT::read(sf::RenderWindow& window){
 		mouse_wheel_movement=0;
 		SPACE=false;
 		ESCAPE=false; LSHIFT=false; TAB=false; ENTER=false; PageUp=false; DELETE=false;
-		F=false; R=false; M=false;
+		F=false; R=false; M=false; Z=false;Y=false;
 		F1=false; F2=false; F9=false; F11=false;
 		player1_left=false; player1_right=false; player1_jump=false;
 		player2_left=false; player2_right=false; player2_jump=false;
@@ -33,6 +33,8 @@ void INPUT::read(sf::RenderWindow& window){
 				if (key->code == sf::Keyboard::Key::M){M=true;}
 				if (key->code == sf::Keyboard::Key::F){F=true;}
 				if (key->code == sf::Keyboard::Key::R){R=true;}
+				if (key->code == sf::Keyboard::Key::Z){Z=true;}
+				if (key->code == sf::Keyboard::Key::Y){Y=true;}
 
 				if (key->code == sf::Keyboard::Key::F1){F1=true;}
 				if (key->code == sf::Keyboard::Key::F2){F2=true;}

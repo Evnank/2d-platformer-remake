@@ -27,6 +27,7 @@ add_executable(main
     src/GAME.cpp
     src/CTRL_Z.cpp
     src/EDITOR.cpp
+    src/CHUNKS.cpp
     )
 
 if(WIN32)
