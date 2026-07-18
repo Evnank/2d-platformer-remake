@@ -271,3 +271,14 @@ void GAME::GAME_LOAD(){
 		}
 	}
 
+
+	void GAME::GAME_SAVE(){
+		std::string level_save_string="assets/levels/"+std::to_string(VARIABLES_GLOBAL.current_level)+".txt";
+		std::ofstream save_stream(level_save_string);
+		for (auto& cur_chunk:game_chunks){
+			//auto& block_vector=cur_chunk.second.chunk_blocks;
+			
+			//for (auto& cur_block:)
+		}
+		
+	}

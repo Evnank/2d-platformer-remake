@@ -48,4 +48,6 @@ struct GAME{
 	std::unordered_map<BLOCK_TYPE,sf::VertexArray>& draw_arrays,BLOCK_TYPE& cur_block_type);
 
 	void GAME_LOAD();
+
+	void GAME_SAVE();
 };

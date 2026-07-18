@@ -383,6 +383,7 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 			for (auto& cur_text:texts){
 				window.draw(cur_text);
 			}
+			ctrl_z.DRAW(window);
 		}
 	}
 

@@ -35,12 +35,17 @@ struct CTRL_Z{
     STATIC_BLOCK editor_stored_block;
     int current_action_index=-1;
     bool request_to_select_entity=false;
+    sf::Text text{GLOBAL_ASSETS.conthrax_font};
 
     void UPDATE(INPUT& input,std::vector<ENTITY>& entities,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
 
     void UPDATE_INPUT(INPUT& input,std::vector<ENTITY>& entities,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
 
-    void DRAW(){
-        
+    void DRAW(sf::RenderWindow& window){
+        text.setPosition({0.f,1000.f});
+        text.setCharacterSize(50);
+        text.setString("EDIT: "+std::to_string(current_action_index+1)+"/"+std::to_string(actions.size()));
+        window.setView(CONSTANTS_GLOBAL.default_view);
+        window.draw(text);
     }
 };
