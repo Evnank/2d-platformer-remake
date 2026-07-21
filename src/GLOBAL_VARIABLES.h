@@ -21,6 +21,7 @@ struct GLOBAL_VARIABLES{
 	bool is_vsync_on=false;
 	bool EDITOR_ON_BUTTON=true;
 	bool load_level=false;
+	bool save_level=false;
 	bool is_settings_opened_from_menu=false;
 	
 };

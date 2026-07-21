@@ -47,7 +47,7 @@ struct GAME{
 	void APPEND_VERTEXES(float left,float right,float up,float down,
 	std::unordered_map<BLOCK_TYPE,sf::VertexArray>& draw_arrays,BLOCK_TYPE& cur_block_type);
 
-	void GAME_LOAD();
+	void GAME_LOAD_LEVEL();
 
-	void GAME_SAVE();
+	void GAME_SAVE_LEVEL();
 };

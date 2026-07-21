@@ -2,7 +2,7 @@
 #include <iostream>
 void GAME::RUN(){
 		SETUP();
-		GAME_LOAD();
+		GAME_LOAD_LEVEL();
 		float time_accumulator=0;
 		float delta_time=1.f/60.f;
 		sf::Clock delta_clock;
@@ -54,9 +54,14 @@ void GAME::RUN(){
 			break;
 		}
 		if (VARIABLES_GLOBAL.load_level){
-			GAME_LOAD();
+			GAME_LOAD_LEVEL();
 			VARIABLES_GLOBAL.load_level=false;
 		}
+		if (VARIABLES_GLOBAL.save_level || input.F9){
+			GAME_SAVE_LEVEL();
+			VARIABLES_GLOBAL.save_level=false;
+		}
+
 
 		game_ui.UPDATE(input,entities,editor);
 	}
@@ -193,7 +198,9 @@ void GAME::APPEND_VERTEXES(float left,float right,float up,float down,
 	}
 
 
-void GAME::GAME_LOAD(){
+void GAME::GAME_LOAD_LEVEL(){
+	CTRL_Z new_ctrl_z;
+	editor.ctrl_z=new_ctrl_z;
 		for (int i=0;i<2;i++){
 			players[i].SETUP(i);
 		}
@@ -272,13 +279,36 @@ void GAME::GAME_LOAD(){
 	}
 
 
-	void GAME::GAME_SAVE(){
+	void GAME::GAME_SAVE_LEVEL(){
 		std::string level_save_string="assets/levels/"+std::to_string(VARIABLES_GLOBAL.current_level)+".txt";
 		std::ofstream save_stream(level_save_string);
 		for (auto& cur_chunk:game_chunks){
-			//auto& block_vector=cur_chunk.second.chunk_blocks;
-			
-			//for (auto& cur_block:)
+			auto& block_vector=cur_chunk.second.chunk_blocks;
+			for (int x=0;x<CONSTANTS_GLOBAL.CHUNK_SIZE;x++){
+				for (int y=0;y<CONSTANTS_GLOBAL.CHUNK_SIZE;y++){
+					auto& cur_block=block_vector[x+y*CONSTANTS_GLOBAL.CHUNK_SIZE];
+					if (cur_block.type!=BLOCK_TYPE::AIR){
+						int block_x=cur_chunk.first.first*CONSTANTS_GLOBAL.CHUNK_SIZE+x;
+						int block_y=cur_chunk.first.second*CONSTANTS_GLOBAL.CHUNK_SIZE+y;
+						save_stream<<"type: "<<BLOCK_TYPE_TO_STRING(cur_block.type)<<"   is_entity: 0   index: "<<cur_block.index<<"   cords: "<<block_x<<" "<<block_y<<"\n";
+					}
+				}
+			}
 		}
-		
+		for (auto& cur_entity:entities){
+			save_stream<<"type: "<<BLOCK_TYPE_TO_STRING(cur_entity.type)<<"   is_entity: 1   index: "<<cur_entity.index<<"   points: ";
+			save_stream<<cur_entity.coords.size()<<"   loop: ";
+			if (cur_entity.IS_LOOPING){
+				save_stream<<1;
+			} else {
+				save_stream<<0;
+			}
+			for (int i=0;i<cur_entity.coords.size();i++){
+				auto& cur_cord=cur_entity.coords[i];
+				int x=std::floor(cur_cord.x/CONSTANTS_GLOBAL.BLOCK_SIZE);
+				int y=std::floor(cur_cord.y/CONSTANTS_GLOBAL.BLOCK_SIZE);
+				save_stream<<"  cords"<<i<<": "<<x<<" "<<y;
+			}
+			save_stream<<"\n";
+		}
 	}

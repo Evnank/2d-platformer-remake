@@ -8,7 +8,7 @@
 
 struct STATIC_BLOCK{
 	BLOCK_TYPE type=BLOCK_TYPE::AIR;
-	int index=0;
+	int index=-1;
 };
 
 struct GAME_CHUNK{

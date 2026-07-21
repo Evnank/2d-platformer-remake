@@ -337,16 +337,19 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 		ctrl_z.current_ctrl_z_action.block_1_coords={float(x),float(y)};
 		ctrl_z.current_ctrl_z_action.old_block_1=cur_block;
 
-		if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
-			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_STATIC_BLOCK;
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && (cur_block.index!=editor_block_index || cur_block.type!=cur_editor_block_type)){
 
+			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_STATIC_BLOCK;
 			cur_block.index=editor_block_index;
 			cur_block.type=cur_editor_block_type;
-		} else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
-			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_STATIC_BLOCK;
 
+		} else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && 
+			(cur_block.index!=-1 || cur_block.type!=BLOCK_TYPE::AIR)){
+
+			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_STATIC_BLOCK;
 			cur_block.index=-1;
 			cur_block.type=BLOCK_TYPE::AIR;
+
 		}
 
 		ctrl_z.current_ctrl_z_action.new_block_1=cur_block;
