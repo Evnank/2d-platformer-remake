@@ -1,3 +1,15 @@
+type: wall   is_entity: 0   index: 1   cords: -6 -12
+type: wall   is_entity: 0   index: 1   cords: -6 -11
+type: wall   is_entity: 0   index: 1   cords: -5 -12
+type: wall   is_entity: 0   index: 1   cords: -5 -11
+type: wall   is_entity: 0   index: 1   cords: -4 -12
+type: wall   is_entity: 0   index: 1   cords: -4 -11
+type: wall   is_entity: 0   index: 1   cords: -3 -12
+type: wall   is_entity: 0   index: 1   cords: -3 -11
+type: wall   is_entity: 0   index: 1   cords: -2 -12
+type: wall   is_entity: 0   index: 1   cords: -2 -11
+type: wall   is_entity: 0   index: 1   cords: -1 -12
+type: wall   is_entity: 0   index: 1   cords: -1 -11
 type: wall   is_entity: 0   index: 1   cords: -5 -3
 type: wall   is_entity: 0   index: 1   cords: -5 -2
 type: wall   is_entity: 0   index: 1   cords: -5 -1
@@ -7,18 +19,6 @@ type: wall   is_entity: 0   index: 1   cords: -4 1
 type: wall   is_entity: 0   index: 1   cords: -3 1
 type: wall   is_entity: 0   index: 1   cords: -2 1
 type: wall   is_entity: 0   index: 1   cords: -1 1
-type: wall   is_entity: 0   index: 1   cords: 0 1
-type: wall   is_entity: 0   index: 1   cords: 1 1
-type: wall   is_entity: 0   index: 1   cords: 2 1
-type: wall   is_entity: 0   index: 1   cords: 3 1
-type: wall   is_entity: 0   index: 1   cords: 4 1
-type: wall   is_entity: 0   index: 1   cords: 5 0
-type: wall   is_entity: 0   index: 1   cords: 5 1
-type: wall   is_entity: 0   index: 1   cords: 5 -1
-type: wall   is_entity: 0   index: 1   cords: 6 -1
-type: wall   is_entity: 0   index: 1   cords: 7 -1
-type: wall   is_entity: 0   index: 1   cords: 8 -1
-type: wall   is_entity: 0   index: 1   cords: 9 -1
 type: wall   is_entity: 0   index: 1   cords: 10 -1
 type: wall   is_entity: 0   index: 1   cords: 11 -1
 type: wall   is_entity: 0   index: 1   cords: 12 -1
@@ -32,6 +32,25 @@ type: wall   is_entity: 0   index: 1   cords: 18 -4
 type: wall   is_entity: 0   index: 1   cords: 18 -3
 type: wall   is_entity: 0   index: 1   cords: 18 -2
 type: wall   is_entity: 0   index: 1   cords: 18 -1
+type: wall   is_entity: 0   index: 1   cords: 0 1
+type: wall   is_entity: 0   index: 1   cords: 1 1
+type: wall   is_entity: 0   index: 1   cords: 2 1
+type: wall   is_entity: 0   index: 1   cords: 3 1
+type: wall   is_entity: 0   index: 1   cords: 4 1
+type: wall   is_entity: 0   index: 1   cords: 5 0
+type: wall   is_entity: 0   index: 1   cords: 5 1
+type: wall   is_entity: 0   index: 1   cords: 5 -1
+type: wall   is_entity: 0   index: 1   cords: 6 -1
+type: wall   is_entity: 0   index: 1   cords: 7 -1
+type: wall   is_entity: 0   index: 1   cords: 8 -1
+type: wall   is_entity: 0   index: 1   cords: 9 -1
+type: wall   is_entity: 0   index: 1   cords: 0 -12
+type: wall   is_entity: 0   index: 1   cords: 0 -11
+type: wall   is_entity: 0   index: 1   cords: 1 -12
+type: wall   is_entity: 0   index: 1   cords: 1 -11
+type: wall   is_entity: 0   index: 1   cords: 2 -12
+type: wall   is_entity: 0   index: 1   cords: 2 -11
+type: wall   is_entity: 0   index: 1   cords: 3 -12
 type: wall   is_entity: 1   index: 1   points: 3   loop: 1  cords0: 7 -2  cords1: 15 -2  cords2: 10 -30
 type: wall   is_entity: 1   index: 1   points: 2   loop: 1  cords0: 3 -1  cords1: 2 -4
 type: wall   is_entity: 1   index: 1   points: 2   loop: 1  cords0: -4 0  cords1: 0 0

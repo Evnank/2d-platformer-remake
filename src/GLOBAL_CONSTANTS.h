@@ -26,6 +26,7 @@ struct GLOBAL_CONSTANTS{
 	float background_darkening_speed=30;
 	float background_darkening_limit=180;
 
+	float UI_EDITOR_SAVE_INDICATOR_FADE_SPEED=5;
 	float editor_line_thickness=5;
 	float editor_arrow_length=25;
 

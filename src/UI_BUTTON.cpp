@@ -221,6 +221,29 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					CENTER();
 					break;
 				}
+				case BUTTON_TYPE::EDITOR_SAVE_INDICATOR:
+				{
+					if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl) && input.S){
+						VARIABLES_GLOBAL.save_level=true;
+						fade_counter=255;
+						point_counter=0;
+					}
+					fade_counter-=CONSTANTS_GLOBAL.UI_EDITOR_SAVE_INDICATOR_FADE_SPEED;
+					if (fade_counter<0){fade_counter=0;}
+					cur_color.a=fade_counter;
+					if (point_counter<45){
+						point_counter++;
+					} else {
+						point_counter=0;
+					}
+					std::string cur_new_string="saving";
+					for (int i=0;i<point_counter;i+=15){
+						cur_new_string+=".";
+					}
+					text.setString(cur_new_string);
+					
+					break;
+				}
 				default:
 					break;
 				}

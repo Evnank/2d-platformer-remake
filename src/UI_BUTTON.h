@@ -18,6 +18,8 @@ struct UI_BUTTON{
 	sf::Color background_color=sf::Color(100,100,100);
 	sf::Color background_color2=sf::Color(150,150,150);
 	float conversion_procentile=0;
+	float fade_counter=0;
+	int point_counter=0;
 	float rinc=0;
 	float ginc=0;
 	float binc=0;

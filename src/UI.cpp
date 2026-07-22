@@ -29,6 +29,11 @@ void USER_INTERFACE::SETUP(){
 
 		CREATE_BUTTON({20,820},{350,100},BUTTON_TYPE::EDITOR_SELECTED_ENTITY_NUMBER,"",sf::Color(255,255,255),sf::Color(255,255,255),50);
 
+
+
+
+		CREATE_BUTTON({1700,920},{0,100},BUTTON_TYPE::EDITOR_SAVE_INDICATOR,"",sf::Color(255,255,255),sf::Color(255,255,255),50);
+
 		
 		
 		
@@ -255,6 +260,9 @@ void USER_INTERFACE::SETUP(){
 			case BUTTON_TYPE::EDITOR_SELECTED_ENTITY_NUMBER:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && VARIABLES_GLOBAL.EDITOR_ON_BUTTON &&
 				editor.editor_vector_of_selected_entity_indexes.size()!=0){return true;}
+				break;
+			case BUTTON_TYPE::EDITOR_SAVE_INDICATOR:
+				if (state==GAME_STATE::PLAYING && VARIABLES_GLOBAL.EDITOR_ON_BUTTON){return true;}
 				break;
 			
 			
