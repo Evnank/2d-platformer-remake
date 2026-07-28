@@ -315,6 +315,7 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 			editor_request_from_place_block_to_select_block_to_select_block_with_index=entities.size()-1;
 
 			ctrl_z.current_ctrl_z_action.new_entity=new_entity;
+			ctrl_z.current_ctrl_z_action.index_of_entity_changed=entities.size()-1;
 
 			SELECT_ENTITY(x,y,entities,input);
 		} else {
