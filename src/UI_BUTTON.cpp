@@ -104,6 +104,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 						is_toggled=!is_toggled;	
 					}	
 					VARIABLES_GLOBAL.EDITOR_ON_BUTTON=is_toggled;
+					editor.editor_special_movement=is_toggled;
 					break;
 
 

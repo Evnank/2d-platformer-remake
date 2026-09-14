@@ -6,6 +6,9 @@ enum class BLOCK_TYPE{
 	AIR,
 	WALL,
 	BUTTON,
+	LEVER,
+	BOOSTER_UP,
+	BOUNCY,
 	ERROR
 };
 
