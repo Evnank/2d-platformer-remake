@@ -115,13 +115,12 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 				auto& cur_entity=entities[editor_entity_to_move_index];
 				auto& cur_entity_coords=cur_entity.coords[editor_entity_coords_to_move_index];
 				if (cur_entity_coords!=cur_mouse_coords){
-					ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_ENTITY;
-					ctrl_z.current_ctrl_z_action.old_entity=cur_entity;
-					ctrl_z.current_ctrl_z_action.index_of_entity_changed=editor_entity_to_move_index;
+					ctrl_z.current_ctrl_z_action.entities_old=entities;
 
 					cur_entity_coords=cur_mouse_coords;
 
-					ctrl_z.current_ctrl_z_action.new_entity=cur_entity;
+					ctrl_z.current_ctrl_z_action.entities_new=entities;
+					ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::ENTITY;
 				}
 			}	
 		} else {
@@ -130,18 +129,9 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 					STATIC_BLOCK& cur_block_from=find_block_by_coords(editor_block_to_move_coords.x,editor_block_to_move_coords.y,game_chunks);
 					STATIC_BLOCK& cur_block_to=find_block_by_coords(x,y,game_chunks);
 
+					ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::BLOCK;
 
-					ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_STATIC_BLOCK;
-					ctrl_z.current_ctrl_z_action.is_2_blocks_changing=true;
-
-					ctrl_z.current_ctrl_z_action.block_1_coords=editor_block_to_move_coords;
-					ctrl_z.current_ctrl_z_action.block_2_coords=sf::Vector2f{float(x),float(y)};
-
-					ctrl_z.current_ctrl_z_action.old_block_1=cur_block_from;
-					ctrl_z.current_ctrl_z_action.old_block_2=cur_block_to;
-
-
-
+					ctrl_z.current_ctrl_z_action.game_chunks_old=game_chunks;
 
 					STATIC_BLOCK old_block=ctrl_z.editor_stored_block;
 					ctrl_z.editor_stored_block=cur_block_to;
@@ -149,10 +139,7 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 					cur_block_from=old_block;
 					editor_block_to_move_coords={float(x),float(y)};
 
-
-
-					ctrl_z.current_ctrl_z_action.new_block_1=cur_block_from;
-					ctrl_z.current_ctrl_z_action.new_block_2=cur_block_to;
+					ctrl_z.current_ctrl_z_action.game_chunks_new=game_chunks;
 				}
 			}
 		}
@@ -223,20 +210,21 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 				}
 				if (index_of_coords_to_delete!=-1){
 					if (cur_entity.coords.size()>1){
-						ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_ENTITY;
-						ctrl_z.current_ctrl_z_action.old_entity=cur_entity;
-						ctrl_z.current_ctrl_z_action.index_of_entity_changed=i;
+						ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::ENTITY;
+						ctrl_z.current_ctrl_z_action.entities_old=entities;
 
 						cur_entity.coords.erase(cur_entity.coords.begin()+index_of_coords_to_delete);
 
-						ctrl_z.current_ctrl_z_action.new_entity=cur_entity;
+						ctrl_z.current_ctrl_z_action.entities_new=entities;
 					} else {
-						ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::DELETE_ENTITTY;
-						ctrl_z.current_ctrl_z_action.old_entity=cur_entity;
+						ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::ENTITY;
+						ctrl_z.current_ctrl_z_action.entities_old=entities;
 
 						editor_open=false;
 						entities.erase(entities.begin()+i);
 						SELECT_ENTITY(x,y,entities,input);
+
+						ctrl_z.current_ctrl_z_action.entities_new=entities;
 					}
 				}
 			}	
@@ -305,7 +293,8 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 		input.Mouse1=false;
 		sf::Vector2f cur_start_coords=sf::Vector2f{x*CONSTANTS_GLOBAL.BLOCK_SIZE,y*CONSTANTS_GLOBAL.BLOCK_SIZE};
 		if (editor_vector_of_selected_entity_indexes.size()==0){
-			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::PLACE_ENTITY;
+			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::ENTITY;
+			ctrl_z.current_ctrl_z_action.entities_old=entities;
 
 			ENTITY new_entity;
 			std::vector<sf::Vector2f> cur_setup_coords;
@@ -314,46 +303,42 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 			entities.push_back(new_entity);
 			editor_request_from_place_block_to_select_block_to_select_block_with_index=entities.size()-1;
 
-			ctrl_z.current_ctrl_z_action.new_entity=new_entity;
-			ctrl_z.current_ctrl_z_action.index_of_entity_changed=entities.size()-1;
+			ctrl_z.current_ctrl_z_action.entities_new=entities;
 
 			SELECT_ENTITY(x,y,entities,input);
 		} else {
 			int current_index_of_entity=editor_vector_of_selected_entity_indexes[editor_index_in_vector_of_selected_entity_indexes];
 			auto& cur_entity=entities[current_index_of_entity];
 
-			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_ENTITY;
-			ctrl_z.current_ctrl_z_action.old_entity=cur_entity;
-			ctrl_z.current_ctrl_z_action.index_of_entity_changed=current_index_of_entity;
+			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::ENTITY;
+			ctrl_z.current_ctrl_z_action.entities_old=entities;
 
 			cur_entity.coords.push_back(cur_start_coords);
 
-			ctrl_z.current_ctrl_z_action.new_entity=cur_entity;
+			ctrl_z.current_ctrl_z_action.entities_new=entities;
 		}
 	}
 
 	void EDITOR::PLACE_BLOCK(int x,int y,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
 		auto& cur_block=find_block_by_coords(x,y,game_chunks);
 
-		ctrl_z.current_ctrl_z_action.block_1_coords={float(x),float(y)};
-		ctrl_z.current_ctrl_z_action.old_block_1=cur_block;
-
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && (cur_block.index!=editor_block_index || cur_block.type!=cur_editor_block_type)){
 
-			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_STATIC_BLOCK;
+			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::BLOCK;
+			ctrl_z.current_ctrl_z_action.game_chunks_old=game_chunks;
 			cur_block.index=editor_block_index;
 			cur_block.type=cur_editor_block_type;
+			ctrl_z.current_ctrl_z_action.game_chunks_new=game_chunks;
 
 		} else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && 
 			(cur_block.index!=-1 || cur_block.type!=BLOCK_TYPE::AIR)){
 
-			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::CHANGE_STATIC_BLOCK;
+			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::BLOCK;
+			ctrl_z.current_ctrl_z_action.game_chunks_old=game_chunks;
 			cur_block.index=-1;
 			cur_block.type=BLOCK_TYPE::AIR;
-
+			ctrl_z.current_ctrl_z_action.game_chunks_new=game_chunks;
 		}
-
-		ctrl_z.current_ctrl_z_action.new_block_1=cur_block;
 	}
 
 

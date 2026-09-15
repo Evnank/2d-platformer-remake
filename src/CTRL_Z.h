@@ -8,20 +8,11 @@
 #include "iostream"
 
 struct CTRL_Z_ACTION{
-    CTRL_Z_ACTION_TYPE type=CTRL_Z_ACTION_TYPE::NOTHING;
-    sf::Vector2f block_1_coords;
-    sf::Vector2f block_2_coords;
-
-    STATIC_BLOCK old_block_1;
-    STATIC_BLOCK new_block_1;
-
-    STATIC_BLOCK old_block_2;
-    STATIC_BLOCK new_block_2;
-
-    ENTITY old_entity;
-    ENTITY new_entity;
-    int index_of_entity_changed=0;
-    bool is_2_blocks_changing=false;
+    CTRL_Z_ACTION_TYPE type;
+    std::vector <ENTITY> entities_old;
+    std::vector <ENTITY> entities_new;
+    std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash> game_chunks_old;
+    std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash> game_chunks_new;
 
     void GO_BACKWARDS(std::vector<ENTITY>& entities,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,bool& request_to_select_entity);
 
