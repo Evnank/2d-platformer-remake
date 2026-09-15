@@ -221,6 +221,8 @@ void GAME::GAME_LOAD_LEVEL(){
 		int cury_inside;
 
 		int cur_index=1;
+		int cur_direction=0;
+		bool cur_is_surface=false;
 
 		bool is_entity=false;
 		int number_of_points=0;
@@ -243,6 +245,14 @@ void GAME::GAME_LOAD_LEVEL(){
 		//index reading
 			input_file>>spare_string;
 			input_file>>cur_index;
+		//direction reading
+			input_file>>spare_string;
+			input_file>>cur_direction;
+		//is surface reading
+			input_file>>spare_string;
+			int is_surface_bool_input;
+			input_file>>is_surface_bool_input;
+			cur_is_surface=(1==is_surface_bool_input);
 		//entity reading	
 			if (is_entity){
 				points.clear();
@@ -261,6 +271,8 @@ void GAME::GAME_LOAD_LEVEL(){
 				}
 				ENTITY cur_entity;
 				cur_entity.SETUP(cur_index,entity_loop,points,cur_block_type);
+				cur_entity.facing_direction=cur_direction;
+				cur_entity.is_surface=cur_is_surface;
 				entities.push_back(cur_entity);
 			} else {
 		//static block reading
@@ -290,13 +302,19 @@ void GAME::GAME_LOAD_LEVEL(){
 					if (cur_block.type!=BLOCK_TYPE::AIR){
 						int block_x=cur_chunk.first.first*CONSTANTS_GLOBAL.CHUNK_SIZE+x;
 						int block_y=cur_chunk.first.second*CONSTANTS_GLOBAL.CHUNK_SIZE+y;
-						save_stream<<"type: "<<BLOCK_TYPE_TO_STRING(cur_block.type)<<"   is_entity: 0   index: "<<cur_block.index<<"   cords: "<<block_x<<" "<<block_y<<"\n";
+						save_stream<<"type: "<<BLOCK_TYPE_TO_STRING(cur_block.type)<<"   is_entity: 0   index: "<<cur_block.index;
+						save_stream<<"   direction: "<<cur_block.facing_direction<<"   is_surface: ";
+						if (cur_block.is_surface){save_stream<<1;} else {save_stream<<0;}
+						save_stream<<"   cords: "<<block_x<<" "<<block_y<<"\n";
 					}
 				}
 			}
 		}
 		for (auto& cur_entity:entities){
-			save_stream<<"type: "<<BLOCK_TYPE_TO_STRING(cur_entity.type)<<"   is_entity: 1   index: "<<cur_entity.index<<"   points: ";
+			save_stream<<"type: "<<BLOCK_TYPE_TO_STRING(cur_entity.type)<<"   is_entity: 1   index: "<<cur_entity.index;
+			save_stream<<"   direction: "<<cur_entity.facing_direction<<"   is_surface: ";
+			if (cur_entity.is_surface){save_stream<<1;} else {save_stream<<0;}
+			save_stream<<"   points: ";
 			save_stream<<cur_entity.coords.size()<<"   loop: ";
 			if (cur_entity.IS_LOOPING){
 				save_stream<<1;
