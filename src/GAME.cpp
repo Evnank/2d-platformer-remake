@@ -249,53 +249,61 @@ void GAME::GAME_LOAD_LEVEL(){
 		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   cords   
 		//ENTITY:
 		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   points   loop   coords1,coords2...
-		while (input_file>>spare_string){
+		while (input_file>>cur_type_string){
 	//inputing the data of 1 block
 		//type of the block
-			input_file>>cur_type_string;
 			cur_block_type=STRING_TO_BLOCK_TYPE(cur_type_string);
+			//std::cout<<cur_type_string<<" ";
 		//is_entity
-			input_file>>spare_string;
 			int entity_bool_input;
 			input_file>>entity_bool_input;
 			is_entity=(entity_bool_input==1);
+			//std::cout<<entity_bool_input<<" ";
 		//index reading
-			input_file>>spare_string;
 			input_file>>cur_index;
+			//std::cout<<cur_index<<" ";
 		//direction reading
-			input_file>>spare_string;
 			input_file>>cur_direction;
+			//std::cout<<cur_direction<<" ";
 		//is surface reading
-			input_file>>spare_string;
 			int is_surface_bool_input;
 			input_file>>is_surface_bool_input;
 			cur_is_surface=(1==is_surface_bool_input);
+			//std::cout<<is_surface_bool_input<<" ";
+		//hor boost and vert boost
+		input_file>>cur_hor_boost>>cur_ver_boost;
+		//std::cout<<cur_hor_boost<<" "<<cur_ver_boost<<" ";
+		// bounciness
+		input_file>>cur_bounciness;
+		//std::cout<<cur_bounciness<<" ";
+		// break and respawn time
+		input_file>>cur_break_time>>cur_respawn_time;
+		//std::cout<<cur_break_time<<" "<<cur_respawn_time<<" ";
 		//entity reading	
 			if (is_entity){
 				points.clear();
 			// points amount
-				input_file>>spare_string;
 				input_file>>number_of_points;
+				//std::cout<<number_of_points<<" ";
 			//does it loop
-				input_file>>spare_string;
 				input_file>>entity_bool_input;
 				entity_loop=(entity_bool_input==1);
+				//std::cout<<entity_bool_input<<" ";
 
 				for (int i=0;i<number_of_points;i++){
-					input_file>>spare_string;
 					input_file>>cur_cordx>>cur_cordy;
+					//std::cout<<cur_cordx<<" "<<cur_cordy<<" ";
 					points.push_back(sf::Vector2f{cur_cordx*CONSTANTS_GLOBAL.BLOCK_SIZE,cur_cordy*CONSTANTS_GLOBAL.BLOCK_SIZE});
 				}
 				ENTITY cur_entity;
 				cur_entity.SETUP(cur_index,entity_loop,points,cur_block_type);
 				cur_entity.block.facing_direction=cur_direction;
-				cur_entity.is_surface=cur_is_surface;
+				cur_entity.block.is_surface=cur_is_surface;
 				entities.push_back(cur_entity);
 			} else {
 		//static block reading
-				input_file>>spare_string;
 				input_file>>cur_cordx>>cur_cordy;
-
+				//std::cout<<cur_cordx<<" "<<cur_cordy<<" ";
 				cur_chunkx=std::floor(cur_cordx/CONSTANTS_GLOBAL.CHUNK_SIZE);
 				cur_chunky=std::floor(cur_cordy/CONSTANTS_GLOBAL.CHUNK_SIZE);
 
@@ -304,6 +312,7 @@ void GAME::GAME_LOAD_LEVEL(){
 				game_chunks[{cur_chunkx,cur_chunky}].chunk_blocks[curx_inside+cury_inside*int(CONSTANTS_GLOBAL.CHUNK_SIZE)].type=cur_block_type;
 				game_chunks[{cur_chunkx,cur_chunky}].chunk_blocks[curx_inside+cury_inside*int(CONSTANTS_GLOBAL.CHUNK_SIZE)].index=cur_index;
 			}
+			//std::cout<<"\n";
 		}
 	}
 
@@ -322,21 +331,23 @@ void GAME::GAME_LOAD_LEVEL(){
 					if (cur_block.type!=BLOCK_TYPE::AIR){
 						int block_x=cur_chunk.first.first*CONSTANTS_GLOBAL.CHUNK_SIZE+x;
 						int block_y=cur_chunk.first.second*CONSTANTS_GLOBAL.CHUNK_SIZE+y;
-						save_stream<<"type: "<<BLOCK_TYPE_TO_STRING(cur_block.type)<<"   is_entity: 0   index: "<<cur_block.index;
-						save_stream<<"   direction: "<<cur_block.facing_direction<<"   is_surface: ";
+						save_stream<<BLOCK_TYPE_TO_STRING(cur_block.type)<<" 0 "<<cur_block.index;
+						save_stream<<" "<<cur_block.facing_direction<<" ";
 						if (cur_block.is_surface){save_stream<<1;} else {save_stream<<0;}
-
-						save_stream<<"   cords: "<<block_x<<" "<<block_y<<"\n";
+						save_stream<<" "<<cur_block.hor_boost<<" "<<cur_block.ver_boost<<" "<<cur_block.bounciness<<" "<<cur_block.break_timer<<" ";
+						save_stream<<cur_block.respawn_timer<<" ";
+						save_stream<<" "<<block_x<<" "<<block_y<<"\n";
 					}
 				}
 			}
 		}
 		for (auto& cur_entity:entities){
-			save_stream<<"type: "<<BLOCK_TYPE_TO_STRING(cur_entity.block.type)<<"   is_entity: 1   index: "<<cur_entity.block.index;
-			save_stream<<"   direction: "<<cur_entity.block.facing_direction<<"   is_surface: ";
-			if (cur_entity.is_surface){save_stream<<1;} else {save_stream<<0;}
-			save_stream<<"   points: ";
-			save_stream<<cur_entity.coords.size()<<"   loop: ";
+			save_stream<<BLOCK_TYPE_TO_STRING(cur_entity.block.type)<<" 1 "<<cur_entity.block.index;
+			save_stream<<" "<<cur_entity.block.facing_direction<<" ";
+			if (cur_entity.block.is_surface){save_stream<<1;} else {save_stream<<0;}
+			save_stream<<" "<<cur_entity.block.hor_boost<<" "<<cur_entity.block.ver_boost<<" "<<cur_entity.block.bounciness<<" "<<cur_entity.block.break_timer<<" ";
+			save_stream<<cur_entity.block.respawn_timer<<" ";
+			save_stream<<cur_entity.coords.size()<<" ";
 			if (cur_entity.IS_LOOPING){
 				save_stream<<1;
 			} else {
@@ -346,7 +357,7 @@ void GAME::GAME_LOAD_LEVEL(){
 				auto& cur_cord=cur_entity.coords[i];
 				int x=std::floor(cur_cord.x/CONSTANTS_GLOBAL.BLOCK_SIZE);
 				int y=std::floor(cur_cord.y/CONSTANTS_GLOBAL.BLOCK_SIZE);
-				save_stream<<"  cords"<<i<<": "<<x<<" "<<y;
+				save_stream<<" "<<x<<" "<<y;
 			}
 			save_stream<<"\n";
 		}

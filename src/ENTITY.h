@@ -7,7 +7,6 @@
 
 struct ENTITY{
 	STATIC_BLOCK block;
-	bool is_surface=false;
 	bool IS_LOOPING=false;
 	bool touched_player1_bottom=false;
 	bool touched_player2_bottom=false;
