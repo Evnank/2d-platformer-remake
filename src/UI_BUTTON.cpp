@@ -153,7 +153,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					}
 					if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
 						auto& cur_entity=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]];
-						cur_entity.index=editor.editor_block_index;
+						cur_entity.block.index=editor.editor_block_index;
 					}
 					
 					break;
@@ -165,7 +165,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					}
 					if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
 						auto& cur_entity=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]];
-						cur_entity.index=editor.editor_block_index;
+						cur_entity.block.index=editor.editor_block_index;
 					}
 					
 					break;
@@ -173,7 +173,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 				case BUTTON_TYPE::EDITOR_INDEX_SHOW:
 					if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
 						auto& cur_entity=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]];
-						editor.editor_block_index=cur_entity.index;
+						editor.editor_block_index=cur_entity.block.index;
 					}
 					text.setString("Index: "+std::to_string(editor.editor_block_index));
 					CENTER();

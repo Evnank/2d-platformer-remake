@@ -172,7 +172,7 @@ void GAME::RUN(){
 			float right=left+b_size;
 			float up=cur_entity.current_coordinates.y;
 			float down=up+b_size;
-			BLOCK_TYPE& cur_type=cur_entity.type;
+			BLOCK_TYPE& cur_type=cur_entity.block.type;
 			APPEND_VERTEXES(left,right,up,down,draw_arrays,cur_type);
 		}
 
@@ -213,25 +213,42 @@ void GAME::GAME_LOAD_LEVEL(){
 		std::string spare_string;
 		float cur_cordx;
 		float cur_cordy;
-
 		int cur_chunkx;
 		int cur_chunky;
-
 		int curx_inside;
 		int cury_inside;
-
-		int cur_index=1;
-		int cur_direction=0;
-		bool cur_is_surface=false;
-
+		//is entity
 		bool is_entity=false;
+		//index
+		int cur_index=1;
+		//direction
+		int cur_direction=0;
+		//is surface
+		bool cur_is_surface=false;
+		// horizontal boost
+		float cur_hor_boost;
+		//vertical boost
+		float cur_ver_boost;
+		//bounciness
+		float cur_bounciness;
+		//break time
+		float cur_break_time;
+		//respawn time
+		float cur_respawn_time;
+		//number of entity points
 		int number_of_points=0;
+		//does entity loop
 		bool entity_loop=false;
+
+
+		
 		std::vector<sf::Vector2f> points;
 		BLOCK_TYPE cur_block_type=BLOCK_TYPE::AIR;
 
-		//type: wall   is_entity: 0   index: 1   cords: 0 0
-		//type: wall   is_entity: 1   index: 1   points: 2   loop: 1   cords0: 0 0   cords1: 5 5
+		//BLOCK:
+		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   cords   
+		//ENTITY:
+		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   points   loop   coords1,coords2...
 		while (input_file>>spare_string){
 	//inputing the data of 1 block
 		//type of the block
@@ -271,7 +288,7 @@ void GAME::GAME_LOAD_LEVEL(){
 				}
 				ENTITY cur_entity;
 				cur_entity.SETUP(cur_index,entity_loop,points,cur_block_type);
-				cur_entity.facing_direction=cur_direction;
+				cur_entity.block.facing_direction=cur_direction;
 				cur_entity.is_surface=cur_is_surface;
 				entities.push_back(cur_entity);
 			} else {
@@ -290,7 +307,10 @@ void GAME::GAME_LOAD_LEVEL(){
 		}
 	}
 
-
+	//BLOCK:
+		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   cords   
+		//ENTITY:
+		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   points   loop   coords1,coords2...
 	void GAME::GAME_SAVE_LEVEL(){
 		std::string level_save_string="assets/levels/"+std::to_string(VARIABLES_GLOBAL.current_level)+".txt";
 		std::ofstream save_stream(level_save_string);
@@ -305,14 +325,15 @@ void GAME::GAME_LOAD_LEVEL(){
 						save_stream<<"type: "<<BLOCK_TYPE_TO_STRING(cur_block.type)<<"   is_entity: 0   index: "<<cur_block.index;
 						save_stream<<"   direction: "<<cur_block.facing_direction<<"   is_surface: ";
 						if (cur_block.is_surface){save_stream<<1;} else {save_stream<<0;}
+
 						save_stream<<"   cords: "<<block_x<<" "<<block_y<<"\n";
 					}
 				}
 			}
 		}
 		for (auto& cur_entity:entities){
-			save_stream<<"type: "<<BLOCK_TYPE_TO_STRING(cur_entity.type)<<"   is_entity: 1   index: "<<cur_entity.index;
-			save_stream<<"   direction: "<<cur_entity.facing_direction<<"   is_surface: ";
+			save_stream<<"type: "<<BLOCK_TYPE_TO_STRING(cur_entity.block.type)<<"   is_entity: 1   index: "<<cur_entity.block.index;
+			save_stream<<"   direction: "<<cur_entity.block.facing_direction<<"   is_surface: ";
 			if (cur_entity.is_surface){save_stream<<1;} else {save_stream<<0;}
 			save_stream<<"   points: ";
 			save_stream<<cur_entity.coords.size()<<"   loop: ";

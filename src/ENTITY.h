@@ -2,12 +2,11 @@
 
 #include <SFML/Graphics.hpp>
 #include "GLOBALS.h"
+#include "CHUNKS.h"
 
 
 struct ENTITY{
-	BLOCK_TYPE type=BLOCK_TYPE::AIR;
-	int index=-1;
-	int facing_direction=0;
+	STATIC_BLOCK block;
 	bool is_surface=false;
 	bool IS_LOOPING=false;
 	bool touched_player1_bottom=false;

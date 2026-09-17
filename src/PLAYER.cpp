@@ -133,7 +133,7 @@ void PLAYER::SETUP(int ind){
 			int b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 			sf::FloatRect player_rect{coords,size};
 			sf::FloatRect entity_rect{cur_entity.current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{float(b_size),float(b_size)}-sf::Vector2f{0,0.2}};
-			BLOCK_TYPE& type=cur_entity.type;
+			BLOCK_TYPE& type=cur_entity.block.type;
 			if (player_rect.findIntersection(entity_rect)){
 					switch (type){
 						case BLOCK_TYPE::WALL:
@@ -156,7 +156,7 @@ void PLAYER::SETUP(int ind){
 			sf::FloatRect player_rect{coords,size};
 			if (index==0){cur_entity.touched_player1_bottom=false;} else {cur_entity.touched_player2_bottom=false;}
 			sf::FloatRect entity_rect{cur_entity.current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{float(b_size),float(b_size)}-sf::Vector2f{0,0.2}};
-			BLOCK_TYPE& type=cur_entity.type;
+			BLOCK_TYPE& type=cur_entity.block.type;
 			if (player_rect.findIntersection(entity_rect)){
 					switch (type){
 						case BLOCK_TYPE::WALL:

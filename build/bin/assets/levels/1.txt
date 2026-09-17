@@ -1,4 +1,4 @@
-type: wall   is_entity: 0   index: 1   direction: 0   is_surface: 0   cords: -5 -3
+
 type: wall   is_entity: 0   index: 1   direction: 0   is_surface: 0   cords: -5 -2
 type: wall   is_entity: 0   index: 1   direction: 0   is_surface: 0   cords: -5 -1
 type: wall   is_entity: 0   index: 1   direction: 0   is_surface: 0   cords: -5 0

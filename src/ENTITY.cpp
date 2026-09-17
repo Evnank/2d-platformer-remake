@@ -2,11 +2,11 @@
 
 void ENTITY::SETUP(int setup_index,bool setup_looping,std::vector<sf::Vector2f> setup_coords,BLOCK_TYPE& setup_type){
 		coords.clear();
-		index=setup_index;
+		block.index=setup_index;
 		IS_LOOPING=setup_looping;
 		current_coordinates=setup_coords[0];
 		coords=setup_coords;
-		type=setup_type;
+		block.type=setup_type;
 		cur_speed={0.f,0.f};
 	}
 
