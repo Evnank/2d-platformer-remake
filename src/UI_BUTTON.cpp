@@ -47,7 +47,19 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 	}
 
 	bool UI_BUTTON::IS_PRESSED(INPUT& input){
-		return (rect.contains(input.mouse_window_coords) && input.Mouse1);
+		if (rect.contains(input.mouse_window_coords) && input.Mouse1){
+			input.Mouse1=false;
+			return true;
+		}
+		return false;
+	}
+
+	bool UI_BUTTON::IS_RELEASED(INPUT& input){
+		if (rect.contains(input.mouse_window_coords) && input.Mouse1_release){
+			input.Mouse1_release=false;
+			return true;
+		}
+		return false;
 	}
 
 	
@@ -94,9 +106,44 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 				case BUTTON_TYPE::ESCAPE_MAIN_MENU:
 					if (IS_PRESSED(input)){
-						//VARIABLES_GLOBAL.game_state=GAME_STATE::MAIN_MENU;
+						VARIABLES_GLOBAL.game_state=GAME_STATE::MAIN_MENU;
 					}			
 					break;
+
+
+
+				case BUTTON_TYPE::MAIN_MENU_CONTINUE:
+					if (IS_PRESSED(input)){
+						VARIABLES_GLOBAL.request_to_continue_from_last_level=true;
+					}			
+					break;
+				case BUTTON_TYPE::MAIN_MENU_SINGLEPLAYER:
+					if (IS_PRESSED(input)){
+						VARIABLES_GLOBAL.game_state=GAME_STATE::MAIN_MENU;
+					}			
+					break;
+				case BUTTON_TYPE::MAIN_MENU_MULTIPLAYER:
+					if (IS_PRESSED(input)){
+						VARIABLES_GLOBAL.game_state=GAME_STATE::MAIN_MENU;
+					}			
+					break;
+				case BUTTON_TYPE::MAIN_MENU_SETTINGS:
+					if (IS_PRESSED(input)){
+						VARIABLES_GLOBAL.game_state=GAME_STATE::SETTINGS;
+						VARIABLES_GLOBAL.is_settings_opened_from_menu=true;
+					}			
+					break;
+				case BUTTON_TYPE::MAIN_MENU_QUIT:
+					if (IS_PRESSED(input)){
+						VARIABLES_GLOBAL.request_to_quit_game=true;
+					}			
+					break;
+
+
+
+
+
+
 
 				case BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE:
 					is_toggled=VARIABLES_GLOBAL.EDITOR_ON_BUTTON;
@@ -106,6 +153,11 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					VARIABLES_GLOBAL.EDITOR_ON_BUTTON=is_toggled;
 					editor.editor_special_movement=is_toggled;
 					break;
+
+
+
+
+
 
 
 				case BUTTON_TYPE::EDITOR_ENTITY_TOGGLE:

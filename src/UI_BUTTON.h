@@ -41,6 +41,8 @@ struct UI_BUTTON{
 
 	bool IS_PRESSED(INPUT& input);
 
+	bool IS_RELEASED(INPUT& input);
+
 	void UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor);
 
 	void DRAW(sf::RenderWindow& window);

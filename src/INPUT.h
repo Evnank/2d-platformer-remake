@@ -9,6 +9,8 @@ struct INPUT{
 	sf::Vector2f mouse_window_coords;
 	bool Mouse1,Mouse2;
 
+	bool Mouse1_release,Mouse2_release;
+
 	bool SPACE;
 
 	bool F,R,M,Z,Y;

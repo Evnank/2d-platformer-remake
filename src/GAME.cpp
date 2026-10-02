@@ -61,6 +61,9 @@ void GAME::RUN(){
 			GAME_SAVE_LEVEL();
 			VARIABLES_GLOBAL.save_level=false;
 		}
+		if (VARIABLES_GLOBAL.request_to_quit_game){
+			window.close();
+		} 
 
 
 		game_ui.UPDATE(input,entities,editor);
@@ -118,12 +121,45 @@ void GAME::RUN(){
 
 	void GAME::DRAW(){
 		window.clear();
-		DRAW_CHUNKS();
-		window.setView(camera.getview());
-		for (auto& cur_player:players){
-			cur_player.DRAW(window);
+		switch (VARIABLES_GLOBAL.game_state)
+		{
+		case GAME_STATE::PLAYING:
+			DRAW_CHUNKS();
+			window.setView(camera.getview());
+			for (auto& cur_player:players){
+				cur_player.DRAW(window);
+			}
+			editor.DRAW_EDITOR(entities,window,input);
+			break;
+		case GAME_STATE::ESCAPE:
+			DRAW_CHUNKS();
+			window.setView(camera.getview());
+			for (auto& cur_player:players){
+				cur_player.DRAW(window);
+			}
+			editor.DRAW_EDITOR(entities,window,input);
+			break;
+		case GAME_STATE::SETTINGS:
+			DRAW_CHUNKS();
+			window.setView(camera.getview());
+			for (auto& cur_player:players){
+				cur_player.DRAW(window);
+			}
+			editor.DRAW_EDITOR(entities,window,input);
+			break;
+		case GAME_STATE::MAIN_MENU:
+			DRAW_CHUNKS();
+			window.setView(camera.getview());
+			for (auto& cur_player:players){
+				cur_player.DRAW(window);
+			}
+			break;
+		
+		default:
+			break;
 		}
-		editor.DRAW_EDITOR(entities,window,input);
+
+
 		game_ui.DRAW(window,editor);
 		performance_clocks.DRAW(window);
 

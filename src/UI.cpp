@@ -8,6 +8,14 @@ void USER_INTERFACE::SETUP(){
 		CREATE_BUTTON({850,600},{300,100},BUTTON_TYPE::ESCAPE_SETTINGS,"Settings",sf::Color(253,132,0),sf::Color(0,253,0),60);
 		CREATE_BUTTON({850,700},{300,100},BUTTON_TYPE::ESCAPE_MAIN_MENU,"Main Menu",sf::Color(253,132,0),sf::Color(0,253,0),50);
 		CREATE_BUTTON({550,200},{400,100},BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE,"Editor mode",sf::Color(253,132,0),sf::Color(0,253,0),50);
+
+	//main menu
+	//CREATE_BUTTON({1000,280},{0,100},BUTTON_TYPE::MAIN_MENU_SPARE_TEXT,"Main Menu",sf::Color(255,255,255),sf::Color(255,255,255),80);
+	CREATE_BUTTON({800,300},{400,100},BUTTON_TYPE::MAIN_MENU_CONTINUE,"Continue",sf::Color(253,132,0),sf::Color(0,253,0),60);
+	CREATE_BUTTON({800,400},{400,100},BUTTON_TYPE::MAIN_MENU_SINGLEPLAYER,"Singleplayer",sf::Color(253,132,0),sf::Color(0,253,0),60);
+	CREATE_BUTTON({800,500},{400,100},BUTTON_TYPE::MAIN_MENU_MULTIPLAYER,"Multiplayer",sf::Color(253,132,0),sf::Color(0,253,0),60);
+	CREATE_BUTTON({800,600},{400,100},BUTTON_TYPE::MAIN_MENU_SETTINGS,"Settings",sf::Color(253,132,0),sf::Color(0,253,0),60);
+	CREATE_BUTTON({800,700},{400,100},BUTTON_TYPE::MAIN_MENU_QUIT,"Quit Game",sf::Color(253,132,0),sf::Color(0,253,0),60);
 	//editor menu
 		CREATE_BUTTON({200,10},{0,100},BUTTON_TYPE::EDITOR_PLAIN_TEXT,"EDITOR",sf::Color(255,255,255),sf::Color(255,255,255),70);
 
@@ -34,8 +42,6 @@ void USER_INTERFACE::SETUP(){
 
 		CREATE_BUTTON({1700,920},{0,100},BUTTON_TYPE::EDITOR_SAVE_INDICATOR,"",sf::Color(255,255,255),sf::Color(255,255,255),50);
 
-		
-		
 		
 	//editor menu block selecting
 		CREATE_BUTTON({20,320},{350,100},BUTTON_TYPE::EDITOR_WALL,"WALL",sf::Color(253,132,0),sf::Color(0,253,0),50);
@@ -143,6 +149,22 @@ void USER_INTERFACE::SETUP(){
 
 				window.draw(va,&GLOBAL_ASSETS.ESCAPE_TEXTURE);
 			break;
+		case GAME_STATE::MAIN_MENU:
+				left=750;
+				top=250;
+				right=left+500;
+				bottom=top+600;
+				va.append(sf::Vertex({left,top},color,{0,0}));
+				va.append(sf::Vertex({right,top},color,{t_x_size,0}));
+				va.append(sf::Vertex({left,bottom},color,{0,t_y_size}));
+
+				va.append(sf::Vertex({left,bottom},color,{0,t_y_size}));
+				va.append(sf::Vertex({right,top},color,{t_x_size,0}));
+				va.append(sf::Vertex({right,bottom},color,{t_x_size,t_y_size}));
+
+
+				window.draw(va,&GLOBAL_ASSETS.ESCAPE_TEXTURE);
+			break;
 
 		case GAME_STATE::PLAYING:
 			if (editor.editor_open){
@@ -216,6 +238,25 @@ void USER_INTERFACE::SETUP(){
 				break;
 			case BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE:
 				if (state==GAME_STATE::SETTINGS){return true;}
+				break;
+
+			case BUTTON_TYPE::MAIN_MENU_SINGLEPLAYER:
+				if (state==GAME_STATE::MAIN_MENU){return true;}
+				break;
+			case BUTTON_TYPE::MAIN_MENU_MULTIPLAYER:
+				if (state==GAME_STATE::MAIN_MENU){return true;}
+				break;
+			case BUTTON_TYPE::MAIN_MENU_SETTINGS:
+				if (state==GAME_STATE::MAIN_MENU){return true;}
+				break;
+			case BUTTON_TYPE::MAIN_MENU_QUIT:
+				if (state==GAME_STATE::MAIN_MENU){return true;}
+				break;
+			case BUTTON_TYPE::MAIN_MENU_CONTINUE:
+				if (state==GAME_STATE::MAIN_MENU){return true;}
+				break;
+			case BUTTON_TYPE::MAIN_MENU_SPARE_TEXT:
+				if (state==GAME_STATE::MAIN_MENU){return true;}
 				break;
 
 
