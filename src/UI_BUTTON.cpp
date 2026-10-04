@@ -107,6 +107,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 				case BUTTON_TYPE::ESCAPE_MAIN_MENU:
 					if (IS_PRESSED(input)){
 						VARIABLES_GLOBAL.game_state=GAME_STATE::MAIN_MENU;
+						VARIABLES_GLOBAL.request_to_load_level=true;
 					}			
 					break;
 

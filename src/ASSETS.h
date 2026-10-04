@@ -16,13 +16,13 @@ struct ASSETS{
 };
 
 struct SETTINGS{
+	int max_unlocked_level=1;
+
 	bool SHOW_FPS=true;
 	bool is_full_screen_mode=false;
 	bool is_vsync_on=false;
 	bool EDITOR_ON_BUTTON=true;
 };
 
-
-//NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SETTINGS,SHOW_FPS,is_full_screen_mode,is_vsync_on,EDITOR_ON_BUTTON);
 void LOAD_SETTINGS(SETTINGS& settings);
 void SAVE_SETTINGS(SETTINGS& settings);

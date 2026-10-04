@@ -25,7 +25,6 @@ struct GLOBAL_VARIABLES{
 	bool is_settings_opened_from_menu=false;
 	bool request_to_quit_game=false;
 	bool request_to_continue_from_last_level=false;
-	bool request_to_save_game_progress=false;
-	bool request_to_save_game_settings=false;
+	bool request_to_load_level=false;
 	
 };

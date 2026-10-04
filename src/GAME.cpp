@@ -41,6 +41,16 @@ void GAME::RUN(){
 	
 
 	void GAME::UPDATE_PHYSICS(){
+		if (VARIABLES_GLOBAL.request_to_continue_from_last_level){
+			VARIABLES_GLOBAL.current_level=settings.max_unlocked_level;
+			GAME_LOAD_LEVEL();
+			VARIABLES_GLOBAL.game_state=GAME_STATE::PLAYING;
+			VARIABLES_GLOBAL.request_to_continue_from_last_level=false;
+		}
+		if (VARIABLES_GLOBAL.request_to_load_level){
+			VARIABLES_GLOBAL.request_to_load_level=false;
+			GAME_LOAD_LEVEL();
+		}
 		performance_clocks.UPS_UPDATE();
 		switch (VARIABLES_GLOBAL.game_state)
 		{

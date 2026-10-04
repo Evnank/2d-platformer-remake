@@ -20,7 +20,7 @@ FetchContent_Declare(SFML
 FetchContent_MakeAvailable(SFML)
 FetchContent_MakeAvailable(json)
 
-add_executable(main 
+add_executable(main WIN32
     src/main.cpp
     src/ASSETS.cpp
     src/GLOBALS.cpp
@@ -36,6 +36,7 @@ add_executable(main
     src/CTRL_Z.cpp
     src/EDITOR.cpp
     src/CHUNKS.cpp
+    
     )
 
 if(WIN32)
