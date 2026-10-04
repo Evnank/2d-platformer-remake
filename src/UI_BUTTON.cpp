@@ -64,7 +64,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 	
 
-	void UI_BUTTON::UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor){
+	void UI_BUTTON::UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor,SETTINGS& settings){
 		if (rect.contains(input.mouse_window_coords)){
 			conversion_procentile+=CONSTANTS_GLOBAL.UI_BUTTON_COLOR_CHANGE_SPEED;
 			if (conversion_procentile>=100){conversion_procentile=100;}
@@ -146,12 +146,13 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 
 				case BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE:
-					is_toggled=VARIABLES_GLOBAL.EDITOR_ON_BUTTON;
+					is_toggled=settings.EDITOR_ON_BUTTON;
 					if (IS_PRESSED(input)){
 						is_toggled=!is_toggled;	
 					}	
-					VARIABLES_GLOBAL.EDITOR_ON_BUTTON=is_toggled;
+					settings.EDITOR_ON_BUTTON=is_toggled;
 					editor.editor_special_movement=is_toggled;
+					SAVE_SETTINGS(settings);
 					break;
 
 

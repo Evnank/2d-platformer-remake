@@ -25,6 +25,7 @@ struct GAME{
 	std::vector <ENTITY> entities;
 	USER_INTERFACE game_ui;
 	EDITOR editor;
+	SETTINGS settings;
 
 
 

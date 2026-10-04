@@ -32,8 +32,9 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 	}
 
 
-    void EDITOR::UPDATE_EDITOR(INPUT& input,CAMERA& camera,std::vector <ENTITY>& entities,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
-		if (VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
+    void EDITOR::UPDATE_EDITOR(INPUT& input,CAMERA& camera,std::vector <ENTITY>& entities,std::unordered_map<std::pair<int,int>,
+		GAME_CHUNK,PairHash>& game_chunks,SETTINGS& settings){
+		if (settings.EDITOR_ON_BUTTON){
 			int x=std::floor(input.mouse_true_coords.x/CONSTANTS_GLOBAL.BLOCK_SIZE);
 			int y=std::floor(input.mouse_true_coords.y/CONSTANTS_GLOBAL.BLOCK_SIZE);
 				if (MOUSE_NOT_ON_EDITOR(input) || !editor_open){
@@ -342,9 +343,9 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 	}
 
 
-    	void EDITOR::DRAW_EDITOR(std::vector <ENTITY>& entities,sf::RenderWindow& window,INPUT& input){
+    	void EDITOR::DRAW_EDITOR(std::vector <ENTITY>& entities,sf::RenderWindow& window,INPUT& input,SETTINGS& settings){
 			std::vector <sf::Text> texts;
-			if (VARIABLES_GLOBAL.EDITOR_ON_BUTTON){
+			if (settings.EDITOR_ON_BUTTON){
 				sf::VertexArray draw_array(sf::PrimitiveType::Triangles);
 			if (editor_vector_of_selected_entity_indexes.size()==0){
 				for (auto& cur_entity:entities){

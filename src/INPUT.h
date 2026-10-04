@@ -33,5 +33,5 @@ struct INPUT{
 	bool player2_right;
 	bool player2_jump;
 
-	void read(sf::RenderWindow& window);
+	void read(sf::RenderWindow& window,SETTINGS& settings);
 };

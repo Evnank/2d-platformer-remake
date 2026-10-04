@@ -34,7 +34,7 @@ struct EDITOR{
 
     void EDITOR_MOVEMENT(INPUT& input,CAMERA& camera);
 
-    void UPDATE_EDITOR(INPUT& input,CAMERA& camera,std::vector <ENTITY>& entities,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
+    void UPDATE_EDITOR(INPUT& input,CAMERA& camera,std::vector <ENTITY>& entities,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,SETTINGS& settings);
 
 	void UPDATE_CURSOR_COLOR();
 
@@ -66,5 +66,5 @@ struct EDITOR{
 
 	void DRAW_ENTITY_CONNECTIONS(ENTITY& cur_entity,sf::VertexArray& draw_array);
 
-    void DRAW_EDITOR(std::vector <ENTITY>& entities,sf::RenderWindow& window,INPUT& input);
+    void DRAW_EDITOR(std::vector <ENTITY>& entities,sf::RenderWindow& window,INPUT& input,SETTINGS& settings);
 };

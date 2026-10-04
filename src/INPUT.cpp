@@ -3,7 +3,7 @@
 #include "INPUT.h"
 
 
-void INPUT::read(sf::RenderWindow& window){
+void INPUT::read(sf::RenderWindow& window,SETTINGS& settings){
 		Mouse1=false; Mouse2=false;
 		Mouse1_release=false; Mouse2_release=false;
 		mouse_wheel_movement=0;
@@ -77,14 +77,14 @@ void INPUT::read(sf::RenderWindow& window){
 		player2_jump=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player2_jump_bind);
 
 		if (F11){
-			VARIABLES_GLOBAL.is_full_screen_mode=!VARIABLES_GLOBAL.is_full_screen_mode;
-			if (VARIABLES_GLOBAL.is_full_screen_mode){
+			settings.is_full_screen_mode=!settings.is_full_screen_mode;
+			if (settings.is_full_screen_mode){
 				
 				window.create( sf::VideoMode({CONSTANTS_GLOBAL.desktop}), "platformer game",sf::State::Fullscreen );
 			} else {
 				window.create( sf::VideoMode({CONSTANTS_GLOBAL.screen_width, CONSTANTS_GLOBAL.screen_height}), "platformer game",sf::State::Windowed );
 			}
-			window.setVerticalSyncEnabled(VARIABLES_GLOBAL.is_vsync_on);
+			window.setVerticalSyncEnabled(settings.is_vsync_on);
 		}
 
 	}

@@ -20,6 +20,7 @@ void GAME::RUN(){
 
 
 	void GAME::SETUP(){
+		LOAD_SETTINGS(settings);
 		PLAYER player1;
 		PLAYER player2;
 		player1.SETUP(0);
@@ -27,7 +28,7 @@ void GAME::RUN(){
 		players.push_back(player1);
 		players.push_back(player2);
 		GLOBAL_ASSETS.LOAD_ALL_ASSETS();
-		window.setVerticalSyncEnabled(VARIABLES_GLOBAL.is_vsync_on);
+		window.setVerticalSyncEnabled(settings.is_vsync_on);
 		performance_clocks.SETUP();
 		game_ui.SETUP();
 	}
@@ -35,7 +36,7 @@ void GAME::RUN(){
 
 	void GAME::UPDATE_INPUT(){
 		window.setView(camera.getview());
-		input.read(window);
+		input.read(window,settings);
 	}
 	
 
@@ -47,7 +48,7 @@ void GAME::RUN(){
 			if (!editor.editor_game_pause){
 				STEP_TICK();
 			}
-			editor.UPDATE_EDITOR(input,camera,entities,game_chunks);
+			editor.UPDATE_EDITOR(input,camera,entities,game_chunks,settings);
 			break;
 			
 		default:
@@ -66,7 +67,7 @@ void GAME::RUN(){
 		} 
 
 
-		game_ui.UPDATE(input,entities,editor);
+		game_ui.UPDATE(input,entities,editor,settings);
 	}
 
 	
@@ -129,7 +130,7 @@ void GAME::RUN(){
 			for (auto& cur_player:players){
 				cur_player.DRAW(window);
 			}
-			editor.DRAW_EDITOR(entities,window,input);
+			editor.DRAW_EDITOR(entities,window,input,settings);
 			break;
 		case GAME_STATE::ESCAPE:
 			DRAW_CHUNKS();
@@ -137,7 +138,7 @@ void GAME::RUN(){
 			for (auto& cur_player:players){
 				cur_player.DRAW(window);
 			}
-			editor.DRAW_EDITOR(entities,window,input);
+			editor.DRAW_EDITOR(entities,window,input,settings);
 			break;
 		case GAME_STATE::SETTINGS:
 			DRAW_CHUNKS();
@@ -145,7 +146,7 @@ void GAME::RUN(){
 			for (auto& cur_player:players){
 				cur_player.DRAW(window);
 			}
-			editor.DRAW_EDITOR(entities,window,input);
+			editor.DRAW_EDITOR(entities,window,input,settings);
 			break;
 		case GAME_STATE::MAIN_MENU:
 			DRAW_CHUNKS();
@@ -160,7 +161,7 @@ void GAME::RUN(){
 		}
 
 
-		game_ui.DRAW(window,editor);
+		game_ui.DRAW(window,editor,settings);
 		performance_clocks.DRAW(window);
 
 		window.display();	

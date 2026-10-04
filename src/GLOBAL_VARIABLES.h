@@ -16,10 +16,10 @@ struct GLOBAL_VARIABLES{
 
 	int current_level=1;
 
-	bool SHOW_FPS=true;
-	bool is_full_screen_mode=false;
-	bool is_vsync_on=false;
-	bool EDITOR_ON_BUTTON=true;
+	//bool SHOW_FPS=true;
+	//bool is_full_screen_mode=false;
+	//bool is_vsync_on=false;
+	//bool EDITOR_ON_BUTTON=true;
 	bool load_level=false;
 	bool save_level=false;
 	bool is_settings_opened_from_menu=false;
