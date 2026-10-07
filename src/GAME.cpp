@@ -182,6 +182,16 @@ void GAME::RUN(){
 		window.setView(camera.getview());
 		std::unordered_map<BLOCK_TYPE,sf::VertexArray> draw_arrays;
 		draw_arrays[BLOCK_TYPE::WALL]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::BUTTON]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::LEVER]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::BOOSTER_UP]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::BOUNCY]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::RED_DOOR_LOCKED]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::RED_DOOR_UNLOCKED]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::BLUE_DOOR_LOCKED]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::BLUE_DOOR_UNLOCKED]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::GREEN_DOOR_LOCKED]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::GREEN_DOOR_UNLOCKED]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 		float c_size=CONSTANTS_GLOBAL.CHUNK_SIZE;
 		float bts=CONSTANTS_GLOBAL.BLOCK_TEXTURE_SIZE;
@@ -224,6 +234,16 @@ void GAME::RUN(){
 		}
 
 		window.draw(draw_arrays[BLOCK_TYPE::WALL],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
+		//window.draw(draw_arrays[BLOCK_TYPE::BUTTON],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
+		//window.draw(draw_arrays[BLOCK_TYPE::LEVER],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
+		//window.draw(draw_arrays[BLOCK_TYPE::BOOSTER_UP],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
+		//window.draw(draw_arrays[BLOCK_TYPE::BOUNCY],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
+		window.draw(draw_arrays[BLOCK_TYPE::RED_DOOR_LOCKED],sf::RenderStates{&GLOBAL_ASSETS.RED_DOOR_LOCKED});
+		window.draw(draw_arrays[BLOCK_TYPE::RED_DOOR_UNLOCKED],sf::RenderStates{&GLOBAL_ASSETS.RED_DOOR_UNLOCKED});
+		window.draw(draw_arrays[BLOCK_TYPE::BLUE_DOOR_LOCKED],sf::RenderStates{&GLOBAL_ASSETS.BLUE_DOOR_LOCKED});
+		window.draw(draw_arrays[BLOCK_TYPE::BLUE_DOOR_UNLOCKED],sf::RenderStates{&GLOBAL_ASSETS.BLUE_DOOR_UNLOCKED});
+		window.draw(draw_arrays[BLOCK_TYPE::GREEN_DOOR_LOCKED],sf::RenderStates{&GLOBAL_ASSETS.GREEN_DOOR_LOCKED});
+		window.draw(draw_arrays[BLOCK_TYPE::GREEN_DOOR_UNLOCKED],sf::RenderStates{&GLOBAL_ASSETS.GREEN_DOOR_UNLOCKED});
 	}
 
 
@@ -298,6 +318,7 @@ void GAME::GAME_LOAD_LEVEL(){
 		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   points   loop   coords1,coords2...
 		while (input_file>>cur_type_string){
 	//inputing the data of 1 block
+			
 		//type of the block
 			cur_block_type=STRING_TO_BLOCK_TYPE(cur_type_string);
 			//std::cout<<cur_type_string<<" ";

@@ -12,6 +12,13 @@ struct ASSETS{
 
 	sf::Texture ESCAPE_TEXTURE;
 
+	sf::Texture BLUE_DOOR_LOCKED;
+	sf::Texture BLUE_DOOR_UNLOCKED;
+	sf::Texture RED_DOOR_LOCKED;
+	sf::Texture RED_DOOR_UNLOCKED;
+	sf::Texture GREEN_DOOR_LOCKED;
+	sf::Texture GREEN_DOOR_UNLOCKED;
+
 	void LOAD_ALL_ASSETS();
 };
 

@@ -20,7 +20,7 @@ FetchContent_Declare(SFML
 FetchContent_MakeAvailable(SFML)
 FetchContent_MakeAvailable(json)
 
-add_executable(main WIN32
+add_executable(main 
     src/main.cpp
     src/ASSETS.cpp
     src/GLOBALS.cpp

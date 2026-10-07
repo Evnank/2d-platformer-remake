@@ -16,6 +16,7 @@ struct STATIC_BLOCK{
     int facing_direction=0; //0=up; 1=90 to the right, 2 means 180, 3 means 270
     BLOCK_TYPE type=BLOCK_TYPE::AIR;
     bool is_surface=false;
+    bool is_open=false;
 };
 
 struct GAME_CHUNK{
