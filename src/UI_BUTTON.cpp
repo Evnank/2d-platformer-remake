@@ -197,6 +197,9 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					if (IS_PRESSED(input)){
 						editor.cur_editor_block_type=BLOCK_TYPE::WALL;
 						editor.editor_block_selecting=false;
+						if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
+							entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block.type=editor.cur_editor_block_type;
+						}
 					}
 					break;
 

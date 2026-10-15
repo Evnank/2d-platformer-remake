@@ -1,6 +1,7 @@
 #include "EDITOR.h"
 
 void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
+	/*
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)){
 			camera.position.x+=camera.scale*CONSTANTS_GLOBAL.editor_camera_movement_speed;
 		}
@@ -13,6 +14,7 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)){
 			camera.position.y-=camera.scale*CONSTANTS_GLOBAL.editor_camera_movement_speed;
 		}
+		*/
 		int m_wheel=input.mouse_wheel_movement;
 		for (;m_wheel>0;m_wheel--){
 			camera.scale/=1.1f;

@@ -31,6 +31,11 @@ void GAME::RUN(){
 		window.setVerticalSyncEnabled(settings.is_vsync_on);
 		performance_clocks.SETUP();
 		game_ui.SETUP();
+		if (settings.is_full_screen_mode){
+			window.create( sf::VideoMode({CONSTANTS_GLOBAL.desktop}), "platformer game",sf::State::Fullscreen );
+		} else {
+			window.create( sf::VideoMode({CONSTANTS_GLOBAL.screen_width, CONSTANTS_GLOBAL.screen_height}), "platformer game",sf::State::Windowed );
+		}
 	}
 
 
@@ -78,6 +83,7 @@ void GAME::RUN(){
 
 
 		game_ui.UPDATE(input,entities,editor,settings);
+		UPDATE_ANIMATIONS();
 	}
 
 	
@@ -126,6 +132,51 @@ void GAME::RUN(){
 			if (cur_entity.touched_player2_bottom){players[1].coords.x+=cur_entity.cur_speed.x*CONSTANTS_GLOBAL.ENTITY_SPEED;}
 
 			cur_entity.UPDATE_TARGETS();
+		}
+	}
+
+	void GAME::ANIMATION_STEP_BLOCK(STATIC_BLOCK& cur_block){
+		switch (cur_block.type)
+		{
+		case BLOCK_TYPE::BOOSTER:
+			cur_block.frame=fmod(cur_block.frame+0.15,cur_block.frame_limit);
+			break;
+		
+		default:
+			break;
+		}
+	}
+
+
+	void GAME::UPDATE_ANIMATIONS(){
+		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
+		float c_size=CONSTANTS_GLOBAL.CHUNK_SIZE;
+		float bts=CONSTANTS_GLOBAL.BLOCK_TEXTURE_SIZE;
+		sf::Vector2f camera_left_up(camera.position-camera.size/2.f*camera.scale);
+		int chunk_left=int(std::floor(camera_left_up.x/(b_size*c_size)));
+		int chunk_up=int(std::floor(camera_left_up.y/(b_size*c_size)));
+
+		sf::Vector2f camera_right_down(camera.position+camera.size/2.f*camera.scale);
+		int chunk_right=int(camera_right_down.x/(b_size*c_size));
+		int chunk_down=int(camera_right_down.y/(b_size*c_size));
+
+		for (int cur_chunkx=chunk_left; cur_chunkx<=chunk_right; cur_chunkx++){
+			for (int cur_chunky=chunk_up; cur_chunky<=chunk_down; cur_chunky++){
+				if (game_chunks.find({cur_chunkx,cur_chunky}) != game_chunks.end()){
+					GAME_CHUNK& cur_chunk = game_chunks[{cur_chunkx,cur_chunky}];
+					for (int i=0; i<c_size; i++){
+						for (int g=0; g<c_size; g++){
+							auto& cur_block=cur_chunk.chunk_blocks[i+g*c_size];
+							if (cur_block.type==BLOCK_TYPE::AIR){continue;}
+							ANIMATION_STEP_BLOCK(cur_block);
+						}
+					}
+				}
+			}
+		}
+		for (auto& cur_entity:entities){
+			STATIC_BLOCK& cur_block=cur_entity.block;
+			ANIMATION_STEP_BLOCK(cur_block);
 		}
 	}
 
@@ -184,7 +235,7 @@ void GAME::RUN(){
 		draw_arrays[BLOCK_TYPE::WALL]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::BUTTON]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::LEVER]=sf::VertexArray(sf::PrimitiveType::Triangles);
-		draw_arrays[BLOCK_TYPE::BOOSTER_UP]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::BOOSTER]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::BOUNCY]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::RED_DOOR_LOCKED]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::RED_DOOR_UNLOCKED]=sf::VertexArray(sf::PrimitiveType::Triangles);
@@ -209,7 +260,8 @@ void GAME::RUN(){
 					GAME_CHUNK& cur_chunk = game_chunks[{cur_chunkx,cur_chunky}];
 					for (int i=0; i<c_size; i++){
 						for (int g=0; g<c_size; g++){
-							BLOCK_TYPE cur_block_type=cur_chunk.chunk_blocks[i+g*c_size].type;
+							auto& cur_block=cur_chunk.chunk_blocks[i+g*c_size];
+							BLOCK_TYPE cur_block_type=cur_block.type;
 							if (cur_block_type==BLOCK_TYPE::AIR){continue;}
 							float chunk_origin_x=cur_chunkx*b_size*c_size;
 							float chunk_origin_y=cur_chunky*b_size*c_size;
@@ -218,7 +270,7 @@ void GAME::RUN(){
 							float right=left+b_size;
 							float up=chunk_origin_y+g*b_size;
 							float down=up+b_size;
-							APPEND_VERTEXES(left,right,up,down,draw_arrays,cur_block_type);
+							APPEND_VERTEXES(left,right,up,down,draw_arrays,cur_block);
 						}
 					}
 				}
@@ -229,14 +281,14 @@ void GAME::RUN(){
 			float right=left+b_size;
 			float up=cur_entity.current_coordinates.y;
 			float down=up+b_size;
-			BLOCK_TYPE& cur_type=cur_entity.block.type;
-			APPEND_VERTEXES(left,right,up,down,draw_arrays,cur_type);
+			STATIC_BLOCK& cur_block=cur_entity.block;
+			APPEND_VERTEXES(left,right,up,down,draw_arrays,cur_block);
 		}
 
 		window.draw(draw_arrays[BLOCK_TYPE::WALL],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
 		//window.draw(draw_arrays[BLOCK_TYPE::BUTTON],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
 		//window.draw(draw_arrays[BLOCK_TYPE::LEVER],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
-		//window.draw(draw_arrays[BLOCK_TYPE::BOOSTER_UP],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
+		window.draw(draw_arrays[BLOCK_TYPE::BOOSTER],sf::RenderStates{&GLOBAL_ASSETS.BOOSTER_TEXTURE});
 		//window.draw(draw_arrays[BLOCK_TYPE::BOUNCY],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
 		window.draw(draw_arrays[BLOCK_TYPE::RED_DOOR_LOCKED],sf::RenderStates{&GLOBAL_ASSETS.RED_DOOR_LOCKED});
 		window.draw(draw_arrays[BLOCK_TYPE::RED_DOOR_UNLOCKED],sf::RenderStates{&GLOBAL_ASSETS.RED_DOOR_UNLOCKED});
@@ -249,19 +301,30 @@ void GAME::RUN(){
 
 
 void GAME::APPEND_VERTEXES(float left,float right,float up,float down,
-	std::unordered_map<BLOCK_TYPE,sf::VertexArray>& draw_arrays,BLOCK_TYPE& cur_block_type){
+	std::unordered_map<BLOCK_TYPE,sf::VertexArray>& draw_arrays,STATIC_BLOCK& cur_block){
 
 		float bts=CONSTANTS_GLOBAL.BLOCK_TEXTURE_SIZE;
-		sf::VertexArray& cur_vertex_array=draw_arrays[cur_block_type];
+		int texture_move=0;
+		sf::VertexArray& cur_vertex_array=draw_arrays[cur_block.type];
+		switch (cur_block.type)
+		{
+		case BLOCK_TYPE::BOOSTER:
+			texture_move=CONSTANTS_GLOBAL.BLOCK_SIZE*int(cur_block.frame);
+			break;
+		
+		default:
+			break;
+		}
+		
 
 		sf::Color color=sf::Color::White;
-		cur_vertex_array.append(sf::Vertex({left,up},color,{0.f,0.f}));
-		cur_vertex_array.append(sf::Vertex({right,up},color,{bts,0.f}));
-		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f,bts}));
+		cur_vertex_array.append(sf::Vertex({left,up},color,{0.f+texture_move,0.f}));
+		cur_vertex_array.append(sf::Vertex({right,up},color,{bts+texture_move,0.f}));
+		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f+texture_move,bts}));
 
-		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f,bts}));
-		cur_vertex_array.append(sf::Vertex({right,up},color,{bts,0.f}));
-		cur_vertex_array.append(sf::Vertex({right,down},color,{bts,bts}));
+		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f+texture_move,bts}));
+		cur_vertex_array.append(sf::Vertex({right,up},color,{bts+texture_move,0.f}));
+		cur_vertex_array.append(sf::Vertex({right,down},color,{bts+texture_move,bts}));
 	}
 
 
@@ -317,10 +380,20 @@ void GAME::GAME_LOAD_LEVEL(){
 		//ENTITY:
 		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   points   loop   coords1,coords2...
 		while (input_file>>cur_type_string){
+			STATIC_BLOCK cur_load_block;
 	//inputing the data of 1 block
 			
 		//type of the block
-			cur_block_type=STRING_TO_BLOCK_TYPE(cur_type_string);
+			cur_load_block.type=STRING_TO_BLOCK_TYPE(cur_type_string);
+			switch (cur_load_block.type)
+			{
+			case BLOCK_TYPE::BOOSTER:
+				cur_load_block.frame_limit=11;
+				break;
+			
+			default:
+				break;
+			}
 			//std::cout<<cur_type_string<<" ";
 		//is_entity
 			int entity_bool_input;
@@ -329,23 +402,25 @@ void GAME::GAME_LOAD_LEVEL(){
 			//std::cout<<entity_bool_input<<" ";
 		//index reading
 			input_file>>cur_index;
+			cur_load_block.index=cur_index;
 			//std::cout<<cur_index<<" ";
 		//direction reading
 			input_file>>cur_direction;
+			cur_load_block.facing_direction=cur_direction;
 			//std::cout<<cur_direction<<" ";
 		//is surface reading
 			int is_surface_bool_input;
 			input_file>>is_surface_bool_input;
-			cur_is_surface=(1==is_surface_bool_input);
+			cur_load_block.is_surface=(1==is_surface_bool_input);
 			//std::cout<<is_surface_bool_input<<" ";
 		//hor boost and vert boost
-		input_file>>cur_hor_boost>>cur_ver_boost;
+		input_file>>cur_load_block.hor_boost>>cur_load_block.ver_boost;
 		//std::cout<<cur_hor_boost<<" "<<cur_ver_boost<<" ";
 		// bounciness
-		input_file>>cur_bounciness;
+		input_file>>cur_load_block.bounciness;
 		//std::cout<<cur_bounciness<<" ";
 		// break and respawn time
-		input_file>>cur_break_time>>cur_respawn_time;
+		input_file>>cur_load_block.break_timer>>cur_load_block.respawn_timer;
 		//std::cout<<cur_break_time<<" "<<cur_respawn_time<<" ";
 		//entity reading	
 			if (is_entity){
@@ -365,8 +440,7 @@ void GAME::GAME_LOAD_LEVEL(){
 				}
 				ENTITY cur_entity;
 				cur_entity.SETUP(cur_index,entity_loop,points,cur_block_type);
-				cur_entity.block.facing_direction=cur_direction;
-				cur_entity.block.is_surface=cur_is_surface;
+				cur_entity.block=cur_load_block;
 				entities.push_back(cur_entity);
 			} else {
 		//static block reading
@@ -377,8 +451,7 @@ void GAME::GAME_LOAD_LEVEL(){
 
 				curx_inside=int(cur_cordx)-cur_chunkx*int(CONSTANTS_GLOBAL.CHUNK_SIZE);
 				cury_inside=int(cur_cordy)-cur_chunky*int(CONSTANTS_GLOBAL.CHUNK_SIZE);
-				game_chunks[{cur_chunkx,cur_chunky}].chunk_blocks[curx_inside+cury_inside*int(CONSTANTS_GLOBAL.CHUNK_SIZE)].type=cur_block_type;
-				game_chunks[{cur_chunkx,cur_chunky}].chunk_blocks[curx_inside+cury_inside*int(CONSTANTS_GLOBAL.CHUNK_SIZE)].index=cur_index;
+				game_chunks[{cur_chunkx,cur_chunky}].chunk_blocks[curx_inside+cury_inside*int(CONSTANTS_GLOBAL.CHUNK_SIZE)]=cur_load_block;
 			}
 			//std::cout<<"\n";
 		}

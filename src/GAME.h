@@ -42,12 +42,16 @@ struct GAME{
 
 	void UPDATE_ENTETIES();
 
+	void ANIMATION_STEP_BLOCK(STATIC_BLOCK& cur_block);
+
+	void UPDATE_ANIMATIONS();
+
 	void DRAW();
 
 	void DRAW_CHUNKS();
 
 	void APPEND_VERTEXES(float left,float right,float up,float down,
-	std::unordered_map<BLOCK_TYPE,sf::VertexArray>& draw_arrays,BLOCK_TYPE& cur_block_type);
+	std::unordered_map<BLOCK_TYPE,sf::VertexArray>& draw_arrays,STATIC_BLOCK& cur_block);
 
 	void GAME_LOAD_LEVEL();
 

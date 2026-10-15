@@ -71,10 +71,10 @@ void PLAYER::SETUP(int ind){
 				int cury_inside=y-cur_chunky*c_size;
 				if (game_chunks.find({cur_chunkx,cur_chunky})==game_chunks.end()){continue;}
 				GAME_CHUNK& cur_chunk=game_chunks[{cur_chunkx,cur_chunky}];
-				BLOCK_TYPE& type=cur_chunk.chunk_blocks[curx_inside+cury_inside*c_size].type;
+				STATIC_BLOCK& cur_block=cur_chunk.chunk_blocks[curx_inside+cury_inside*c_size];
 				sf::FloatRect block_rect{{float(x*b_size),float(y*b_size)},{float(b_size),float(b_size)}};
 				if (player_rect.findIntersection(block_rect)){
-					switch (type){
+					switch (cur_block.type){
 						case BLOCK_TYPE::WALL:
 							if (coords.x<x*b_size){
 								coords.x=x*b_size-size.x;
@@ -107,10 +107,10 @@ void PLAYER::SETUP(int ind){
 				int cury_inside=y-cur_chunky*c_size;
 				if (game_chunks.find({cur_chunkx,cur_chunky})==game_chunks.end()){continue;}
 				GAME_CHUNK& cur_chunk=game_chunks[{cur_chunkx,cur_chunky}];
-				BLOCK_TYPE& type=cur_chunk.chunk_blocks[curx_inside+cury_inside*c_size].type;
+				STATIC_BLOCK& cur_block=cur_chunk.chunk_blocks[curx_inside+cury_inside*c_size];
 				sf::FloatRect block_rect{{float(x*b_size),float(y*b_size)},{float(b_size),float(b_size)}};
 				if (player_rect.findIntersection(block_rect)){
-					switch (type){
+					switch (cur_block.type){
 						case BLOCK_TYPE::WALL:
 							if (coords.y<y*b_size){
 								coords.y=y*b_size-size.y;
@@ -133,9 +133,9 @@ void PLAYER::SETUP(int ind){
 			int b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 			sf::FloatRect player_rect{coords,size};
 			sf::FloatRect entity_rect{cur_entity.current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{float(b_size),float(b_size)}-sf::Vector2f{0,0.2}};
-			BLOCK_TYPE& type=cur_entity.block.type;
+			STATIC_BLOCK& cur_block=cur_entity.block;
 			if (player_rect.findIntersection(entity_rect)){
-					switch (type){
+					switch (cur_block.type){
 						case BLOCK_TYPE::WALL:
 							if (coords.x<cur_entity.current_coordinates.x){
 								coords.x=cur_entity.current_coordinates.x-size.x;
@@ -156,9 +156,9 @@ void PLAYER::SETUP(int ind){
 			sf::FloatRect player_rect{coords,size};
 			if (index==0){cur_entity.touched_player1_bottom=false;} else {cur_entity.touched_player2_bottom=false;}
 			sf::FloatRect entity_rect{cur_entity.current_coordinates+sf::Vector2f{0,0.1},sf::Vector2f{float(b_size),float(b_size)}-sf::Vector2f{0,0.2}};
-			BLOCK_TYPE& type=cur_entity.block.type;
+			STATIC_BLOCK& cur_block=cur_entity.block;
 			if (player_rect.findIntersection(entity_rect)){
-					switch (type){
+					switch (cur_block.type){
 						case BLOCK_TYPE::WALL:
 							if (coords.y<cur_entity.current_coordinates.y){
 								coords.y=cur_entity.current_coordinates.y-size.y;

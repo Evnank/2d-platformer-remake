@@ -79,12 +79,13 @@ void INPUT::read(sf::RenderWindow& window,SETTINGS& settings){
 		if (F11){
 			settings.is_full_screen_mode=!settings.is_full_screen_mode;
 			if (settings.is_full_screen_mode){
-				
+
 				window.create( sf::VideoMode({CONSTANTS_GLOBAL.desktop}), "platformer game",sf::State::Fullscreen );
 			} else {
 				window.create( sf::VideoMode({CONSTANTS_GLOBAL.screen_width, CONSTANTS_GLOBAL.screen_height}), "platformer game",sf::State::Windowed );
 			}
 			window.setVerticalSyncEnabled(settings.is_vsync_on);
+			SAVE_SETTINGS(settings);
 		}
 
 	}
