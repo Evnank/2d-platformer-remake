@@ -44,7 +44,8 @@ void USER_INTERFACE::SETUP(){
 
 		
 	//editor menu block selecting
-		CREATE_BUTTON({20,320},{350,100},BUTTON_TYPE::EDITOR_WALL,"WALL",sf::Color(253,132,0),sf::Color(0,253,0),50);
+		CREATE_BUTTON({20,320},{350,100},BUTTON_TYPE::EDITOR_BLOCK_WALL,"WALL",sf::Color(253,132,0),sf::Color(0,253,0),50);
+		CREATE_BUTTON({20,420},{350,100},BUTTON_TYPE::EDITOR_BLOCK_BOOSTER,"BOOSTER",sf::Color(253,132,0),sf::Color(0,253,0),50);
 
 	//editor on screen info
 		CREATE_BUTTON({160,70},{0,100},BUTTON_TYPE::EDITOR_INFO,"",sf::Color(253,132,0),sf::Color(0,253,0),50);
@@ -269,9 +270,15 @@ void USER_INTERFACE::SETUP(){
 			case BUTTON_TYPE::EDITOR_IS_LOOPING_TOGGLE:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && editor.editor_vector_of_selected_entity_indexes.size()!=0){return true;}
 				break;
-			case BUTTON_TYPE::EDITOR_WALL:
+
+			case BUTTON_TYPE::EDITOR_BLOCK_WALL:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && editor.editor_block_selecting){return true;}
 				break;
+			case BUTTON_TYPE::EDITOR_BLOCK_BOOSTER:
+				if (state==GAME_STATE::PLAYING && editor.editor_open && editor.editor_block_selecting){return true;}
+				break;
+
+
 			case BUTTON_TYPE::EDITOR_INDEX_SHOW:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting){return true;}
 				break;

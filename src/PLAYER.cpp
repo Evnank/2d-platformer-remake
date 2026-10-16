@@ -75,6 +75,7 @@ void PLAYER::SETUP(int ind){
 				sf::FloatRect block_rect{{float(x*b_size),float(y*b_size)},{float(b_size),float(b_size)}};
 				if (player_rect.findIntersection(block_rect)){
 					switch (cur_block.type){
+
 						case BLOCK_TYPE::WALL:
 							if (coords.x<x*b_size){
 								coords.x=x*b_size-size.x;
@@ -83,6 +84,18 @@ void PLAYER::SETUP(int ind){
 							}
 								velocity.x=0;
 							break;
+
+						case BLOCK_TYPE::BOOSTER:
+							if (coords.x<x*b_size){
+								coords.x=x*b_size-size.x;
+							} else {
+								coords.x=(x+1)*b_size;
+							}
+								velocity.x=0;
+								velocity.x+=cur_block.hor_boost;
+								velocity.y+=cur_block.ver_boost;
+							break;
+
 						
 						default:
 							break;
@@ -111,6 +124,7 @@ void PLAYER::SETUP(int ind){
 				sf::FloatRect block_rect{{float(x*b_size),float(y*b_size)},{float(b_size),float(b_size)}};
 				if (player_rect.findIntersection(block_rect)){
 					switch (cur_block.type){
+
 						case BLOCK_TYPE::WALL:
 							if (coords.y<y*b_size){
 								coords.y=y*b_size-size.y;
@@ -119,8 +133,23 @@ void PLAYER::SETUP(int ind){
 								coords.y=(y+1)*b_size;
 							}
 								velocity.y=0;
+								
 							break;
 						
+						
+						case BLOCK_TYPE::BOOSTER:
+							if (coords.y<y*b_size){
+								coords.y=y*b_size-size.y;
+								is_standing=true;
+							} else {
+								coords.y=(y+1)*b_size;
+							}
+								velocity.y=0;
+								velocity.x+=cur_block.hor_boost;
+								velocity.y+=cur_block.ver_boost;
+							break;
+
+
 						default:
 							break;
 					}
@@ -136,6 +165,7 @@ void PLAYER::SETUP(int ind){
 			STATIC_BLOCK& cur_block=cur_entity.block;
 			if (player_rect.findIntersection(entity_rect)){
 					switch (cur_block.type){
+
 						case BLOCK_TYPE::WALL:
 							if (coords.x<cur_entity.current_coordinates.x){
 								coords.x=cur_entity.current_coordinates.x-size.x;
@@ -144,6 +174,18 @@ void PLAYER::SETUP(int ind){
 							}
 								velocity.x=cur_entity.cur_speed.x;
 							break;
+
+						case BLOCK_TYPE::BOOSTER:
+							if (coords.x<cur_entity.current_coordinates.x){
+								coords.x=cur_entity.current_coordinates.x-size.x;
+							} else {
+								coords.x=cur_entity.current_coordinates.x+b_size;
+							}
+								velocity.x=cur_entity.cur_speed.x;
+								velocity.x+=cur_block.hor_boost;
+								velocity.y+=cur_block.ver_boost;
+							break;
+
 						
 						default:
 							break;
@@ -159,6 +201,7 @@ void PLAYER::SETUP(int ind){
 			STATIC_BLOCK& cur_block=cur_entity.block;
 			if (player_rect.findIntersection(entity_rect)){
 					switch (cur_block.type){
+
 						case BLOCK_TYPE::WALL:
 							if (coords.y<cur_entity.current_coordinates.y){
 								coords.y=cur_entity.current_coordinates.y-size.y;
@@ -168,6 +211,19 @@ void PLAYER::SETUP(int ind){
 								coords.y=cur_entity.current_coordinates.y+b_size;
 							}
 								velocity.y=cur_entity.cur_speed.y;
+							break;
+						
+						case BLOCK_TYPE::BOOSTER:
+							if (coords.y<cur_entity.current_coordinates.y){
+								coords.y=cur_entity.current_coordinates.y-size.y;
+								is_standing=true;
+								if (index==0){cur_entity.touched_player1_bottom=true;} else {cur_entity.touched_player2_bottom=true;}
+							} else {
+								coords.y=cur_entity.current_coordinates.y+b_size;
+							}
+								velocity.y=cur_entity.cur_speed.y;
+								velocity.x+=cur_block.hor_boost;
+								velocity.y+=cur_block.ver_boost;
 							break;
 						
 						default:
