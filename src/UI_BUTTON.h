@@ -39,11 +39,11 @@ struct UI_BUTTON{
 
 	void CENTER();
 
-	bool IS_PRESSED(INPUT& input);
+	bool IS_PRESSED(INPUT& input,float view_move_y);
 
-	bool IS_RELEASED(INPUT& input);
+	bool IS_RELEASED(INPUT& input,float view_move_y);
 
-	void UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor,SETTINGS& settings);
+	void UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor,SETTINGS& settings,float view_move_y);
 
 	void DRAW(sf::RenderWindow& window);
 

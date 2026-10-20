@@ -25,9 +25,16 @@ void USER_INTERFACE::SETUP(){
 		CREATE_BUTTON({20,220},{350,100},BUTTON_TYPE::EDITOR_BLOCK_SELECT,"Select block",sf::Color(253,132,0),sf::Color(0,253,0),50);
 
 		CREATE_BUTTON({20,320},{350,100},BUTTON_TYPE::EDITOR_INDEX_SHOW,"",sf::Color(255,255,255),sf::Color(255,255,255),70);
-
 		CREATE_BUTTON({20,420},{175,100},BUTTON_TYPE::EDITOR_INDEX_INCREASE,"+",sf::Color(253,132,0),sf::Color(0,253,0),70);
 		CREATE_BUTTON({195,420},{175,100},BUTTON_TYPE::EDITOR_INDEX_DECREASE,"-",sf::Color(253,132,0),sf::Color(0,253,0),70);
+
+		CREATE_BUTTON({20,920},{350,100},BUTTON_TYPE::EDITOR_HOR_BOOST_SHOW,"",sf::Color(255,255,255),sf::Color(255,255,255),70);
+		CREATE_BUTTON({20,1020},{175,100},BUTTON_TYPE::EDITOR_HOR_BOOST_INCREASE,"+",sf::Color(253,132,0),sf::Color(0,253,0),70);
+		CREATE_BUTTON({195,1020},{175,100},BUTTON_TYPE::EDITOR_HOR_BOOST_DECREASE,"-",sf::Color(253,132,0),sf::Color(0,253,0),70);
+
+		//CREATE_BUTTON({20,320},{350,100},BUTTON_TYPE::EDITOR_INDEX_SHOW,"",sf::Color(255,255,255),sf::Color(255,255,255),70);
+		//CREATE_BUTTON({20,420},{175,100},BUTTON_TYPE::EDITOR_INDEX_INCREASE,"+",sf::Color(253,132,0),sf::Color(0,253,0),70);
+		//CREATE_BUTTON({195,420},{175,100},BUTTON_TYPE::EDITOR_INDEX_DECREASE,"-",sf::Color(253,132,0),sf::Color(0,253,0),70);
 
 		CREATE_BUTTON({20,520},{350,100},BUTTON_TYPE::EDITOR_BLOCK_SHOW,"",sf::Color(255,255,255),sf::Color(255,255,255),70);
 
@@ -52,6 +59,12 @@ void USER_INTERFACE::SETUP(){
 			
 	}
 	void USER_INTERFACE::UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor,SETTINGS& settings){
+		if (!editor.MOUSE_NOT_ON_EDITOR(input)){
+			int m_wheel=input.mouse_wheel_movement;
+				cur_scroll-=m_wheel*50;
+				if (cur_scroll>1000){cur_scroll=1000;}
+				if (cur_scroll<0){cur_scroll=0;}
+		}
 		if (input.ESCAPE){
 			switch (VARIABLES_GLOBAL.game_state)
 			{
@@ -95,8 +108,8 @@ void USER_INTERFACE::SETUP(){
 			if (background_darkening<=0){background_darkening=0;}
 		}
 		for (auto& cur_button:buttons){
-			if (CHECK_IF_UPDATE_BUTTON(cur_button,editor,settings)){
-				cur_button.UPDATE(input,entities,editor,settings);
+			if (CHECK_IF_UPDATE_BUTTON(cur_button,editor,settings,entities)){
+				cur_button.UPDATE(input,entities,editor,settings,cur_scroll);
 			}
 		}
 	}
@@ -173,7 +186,7 @@ void USER_INTERFACE::SETUP(){
 				left=0;
 				top=0;
 				right=left+400;
-				bottom=top+1000;
+				bottom=top+2000;
 				va.append(sf::Vertex({left,top},color,{0,0}));
 				va.append(sf::Vertex({right,top},color,{0,0}));
 				va.append(sf::Vertex({left,bottom},color,{0,0}));
@@ -196,12 +209,14 @@ void USER_INTERFACE::SETUP(){
 		
 	}
 
-	void USER_INTERFACE::DRAW(sf::RenderWindow& window,EDITOR& editor,SETTINGS& settings){
-		window.setView(CONSTANTS_GLOBAL.default_view);
+	void USER_INTERFACE::DRAW(sf::RenderWindow& window,EDITOR& editor,SETTINGS& settings,std::vector<ENTITY>& entities){
+		sf::View ui_view=CONSTANTS_GLOBAL.default_view;
+		ui_view.move({0.f,cur_scroll});
+		window.setView(ui_view);
 		DRAW_BACKGROUND_BLUR(window);
 		DRAW_BACKGROUND(window,editor);
 		for (auto& cur_button:buttons){
-			if (CHECK_IF_UPDATE_BUTTON(cur_button,editor,settings)){
+			if (CHECK_IF_UPDATE_BUTTON(cur_button,editor,settings,entities)){
 				cur_button.DRAW(window);
 			}
 		}
@@ -214,7 +229,7 @@ void USER_INTERFACE::SETUP(){
 		buttons.push_back(cur_button);
 	}
 
-	bool USER_INTERFACE::CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button,EDITOR& editor,SETTINGS& settings){
+	bool USER_INTERFACE::CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button,EDITOR& editor,SETTINGS& settings,std::vector<ENTITY>& entities){
 		BUTTON_TYPE type=cur_button.type;
 		GAME_STATE state=VARIABLES_GLOBAL.game_state;
 			switch (type)
@@ -288,6 +303,33 @@ void USER_INTERFACE::SETUP(){
 			case BUTTON_TYPE::EDITOR_INDEX_DECREASE:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting){return true;}
 				break;
+
+			case BUTTON_TYPE::EDITOR_HOR_BOOST_SHOW:
+				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting && 
+					editor.cur_editor_block_type==BLOCK_TYPE::BOOSTER){return true;} else {editor.editor_block_hor_boost=0;}
+				break;
+			case BUTTON_TYPE::EDITOR_HOR_BOOST_INCREASE:
+				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting && 
+					editor.cur_editor_block_type==BLOCK_TYPE::BOOSTER){return true;}
+				break;
+			case BUTTON_TYPE::EDITOR_HOR_BOOST_DECREASE:
+				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting && 
+					editor.cur_editor_block_type==BLOCK_TYPE::BOOSTER){return true;}
+				break;
+
+			case BUTTON_TYPE::EDITOR_VER_BOOST_SHOW:
+				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting && 
+					editor.cur_editor_block_type==BLOCK_TYPE::BOOSTER){return true;} else {editor.editor_block_ver_boost=0;}
+				break;
+			case BUTTON_TYPE::EDITOR_VER_BOOST_INCREASE:
+				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting && 
+					editor.cur_editor_block_type==BLOCK_TYPE::BOOSTER){return true;}
+				break;
+			case BUTTON_TYPE::EDITOR_VER_BOOST_DECREASE:
+				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting && 
+					editor.cur_editor_block_type==BLOCK_TYPE::BOOSTER){return true;}
+				break;
+
 			case BUTTON_TYPE::EDITOR_BLOCK_SHOW:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting){return true;}
 				break;

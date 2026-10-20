@@ -21,6 +21,8 @@ struct EDITOR{
 	int editor_request_from_place_block_to_select_block_to_select_block_with_index=-1;
 
 	int editor_block_index=-1;
+	float editor_block_hor_boost=0;
+	float editor_block_ver_boost=0;
 	bool editor_is_entity=false;
 	bool editor_block_selecting=false;
 

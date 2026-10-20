@@ -191,7 +191,7 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 
 
 	bool EDITOR::MOUSE_NOT_ON_EDITOR(INPUT& input){
-		sf::FloatRect editor_text_rect({-50.f,-50.f},{450,1050});
+		sf::FloatRect editor_text_rect({-50.f,-50.f},{450,2000});
 		if (editor_text_rect.contains(input.mouse_window_coords)){
 			return false;
 		}

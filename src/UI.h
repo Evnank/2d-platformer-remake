@@ -5,6 +5,7 @@
 struct USER_INTERFACE{
 	std::vector<UI_BUTTON> buttons;
 	float background_darkening=0;
+	float cur_scroll=0;
 
 	void SETUP();
 
@@ -14,10 +15,10 @@ struct USER_INTERFACE{
 
 	void DRAW_BACKGROUND(sf::RenderWindow& window,EDITOR& editor);
 
-	void DRAW(sf::RenderWindow& window,EDITOR& editor,SETTINGS& settings);
+	void DRAW(sf::RenderWindow& window,EDITOR& editor,SETTINGS& settings,std::vector<ENTITY>& entities);
 
 	void CREATE_BUTTON(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTTON_TYPE setup_type, std::string setup_string,
 	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size);
 
-	bool CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button,EDITOR& editor,SETTINGS& settings);
+	bool CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button,EDITOR& editor,SETTINGS& settings,std::vector<ENTITY>& entities);
 };

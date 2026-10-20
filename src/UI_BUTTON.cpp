@@ -46,16 +46,16 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 		text.setPosition(rect.position+rect.size/2.f);
 	}
 
-	bool UI_BUTTON::IS_PRESSED(INPUT& input){
-		if (rect.contains(input.mouse_window_coords) && input.Mouse1){
+	bool UI_BUTTON::IS_PRESSED(INPUT& input,float view_move_y){
+		if (rect.contains(input.mouse_window_coords+sf::Vector2f{0.f,view_move_y}) && input.Mouse1){
 			input.Mouse1=false;
 			return true;
 		}
 		return false;
 	}
 
-	bool UI_BUTTON::IS_RELEASED(INPUT& input){
-		if (rect.contains(input.mouse_window_coords) && input.Mouse1_release){
+	bool UI_BUTTON::IS_RELEASED(INPUT& input,float view_move_y){
+		if (rect.contains(input.mouse_window_coords+sf::Vector2f{0.f,view_move_y}) && input.Mouse1_release){
 			input.Mouse1_release=false;
 			return true;
 		}
@@ -64,8 +64,8 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 	
 
-	void UI_BUTTON::UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor,SETTINGS& settings){
-		if (rect.contains(input.mouse_window_coords)){
+	void UI_BUTTON::UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor,SETTINGS& settings, float view_move_y){
+		if (rect.contains(input.mouse_window_coords+sf::Vector2f{0.f,view_move_y})){
 			conversion_procentile+=CONSTANTS_GLOBAL.UI_BUTTON_COLOR_CHANGE_SPEED;
 			if (conversion_procentile>=100){conversion_procentile=100;}
 			is_hovering=true;
@@ -85,27 +85,27 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 		switch (type)
 				{
 				case BUTTON_TYPE::ESCAPE_RESUME:
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						VARIABLES_GLOBAL.game_state=GAME_STATE::PLAYING;
 					}		
 					break;
 
 				case BUTTON_TYPE::ESCAPE_RESTART:
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						VARIABLES_GLOBAL.game_state=GAME_STATE::PLAYING;
 						VARIABLES_GLOBAL.load_level=true;	
 					}
 					break;
 
 				case BUTTON_TYPE::ESCAPE_SETTINGS:
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						VARIABLES_GLOBAL.game_state=GAME_STATE::SETTINGS;
 						VARIABLES_GLOBAL.is_settings_opened_from_menu=false;
 					}
 					break;
 
 				case BUTTON_TYPE::ESCAPE_MAIN_MENU:
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						VARIABLES_GLOBAL.game_state=GAME_STATE::MAIN_MENU;
 						VARIABLES_GLOBAL.request_to_load_level=true;
 					}			
@@ -114,28 +114,28 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 
 				case BUTTON_TYPE::MAIN_MENU_CONTINUE:
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						VARIABLES_GLOBAL.request_to_continue_from_last_level=true;
 					}			
 					break;
 				case BUTTON_TYPE::MAIN_MENU_SINGLEPLAYER:
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						VARIABLES_GLOBAL.game_state=GAME_STATE::MAIN_MENU;
 					}			
 					break;
 				case BUTTON_TYPE::MAIN_MENU_MULTIPLAYER:
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						VARIABLES_GLOBAL.game_state=GAME_STATE::MAIN_MENU;
 					}			
 					break;
 				case BUTTON_TYPE::MAIN_MENU_SETTINGS:
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						VARIABLES_GLOBAL.game_state=GAME_STATE::SETTINGS;
 						VARIABLES_GLOBAL.is_settings_opened_from_menu=true;
 					}			
 					break;
 				case BUTTON_TYPE::MAIN_MENU_QUIT:
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						VARIABLES_GLOBAL.request_to_quit_game=true;
 					}			
 					break;
@@ -148,7 +148,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 				case BUTTON_TYPE::SETTINGS_EDITOR_TOGGLE:
 					is_toggled=settings.EDITOR_ON_BUTTON;
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						is_toggled=!is_toggled;	
 					}	
 					settings.EDITOR_ON_BUTTON=is_toggled;
@@ -163,7 +163,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 
 				case BUTTON_TYPE::EDITOR_ENTITY_TOGGLE:
-					if (IS_PRESSED(input) && editor.editor_vector_of_selected_entity_indexes.size()==0){
+					if (IS_PRESSED(input,view_move_y) && editor.editor_vector_of_selected_entity_indexes.size()==0){
 						is_toggled=!is_toggled;
 					}
 					editor.editor_is_entity=is_toggled;
@@ -173,7 +173,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 						bool& cur_toggle=
 						entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].IS_LOOPING;
 						is_toggled=cur_toggle;
-						if (IS_PRESSED(input)){
+						if (IS_PRESSED(input,view_move_y)){
 							is_toggled=!is_toggled;
 							cur_toggle=is_toggled;
 						}
@@ -183,7 +183,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 				case BUTTON_TYPE::EDITOR_BLOCK_SELECT:
 					is_toggled=editor.editor_block_selecting;
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						is_toggled=!is_toggled;
 					}
 					if (is_toggled && input.ESCAPE){
@@ -194,7 +194,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					break;
 
 				case BUTTON_TYPE::EDITOR_BLOCK_WALL:
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						editor.cur_editor_block_type=BLOCK_TYPE::WALL;
 						editor.editor_block_selecting=false;
 						if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
@@ -203,7 +203,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					}
 					break;
 				case BUTTON_TYPE::EDITOR_BLOCK_BOOSTER:
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						editor.cur_editor_block_type=BLOCK_TYPE::BOOSTER;
 						editor.editor_block_selecting=false;
 						if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
@@ -212,8 +212,10 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					}
 					break;
 
+
+
 				case BUTTON_TYPE::EDITOR_INDEX_INCREASE:
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						editor.editor_block_index++;
 						if (editor.editor_block_index>=100){editor.editor_block_index=100;}
 					}
@@ -225,7 +227,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					break;
 
 				case BUTTON_TYPE::EDITOR_INDEX_DECREASE:
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						editor.editor_block_index--;
 						if (editor.editor_block_index<=-1){editor.editor_block_index=-1;}
 					}
@@ -245,6 +247,44 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					CENTER();
 					break;
 
+
+
+				case BUTTON_TYPE::EDITOR_HOR_BOOST_INCREASE:
+					if (IS_PRESSED(input,view_move_y)){
+						editor.editor_block_hor_boost+=1;
+						if (editor.editor_block_index>=100){editor.editor_block_index=100;}
+					}
+					if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
+						auto& cur_entity=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]];
+						cur_entity.block.hor_boost=editor.editor_block_hor_boost;
+					}
+					
+					break;
+
+				case BUTTON_TYPE::EDITOR_HOR_BOOST_DECREASE:
+					if (IS_PRESSED(input,view_move_y)){
+						editor.editor_block_hor_boost-=1;
+						if (editor.editor_block_index<=-1){editor.editor_block_index=-1;}
+					}
+					if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
+						auto& cur_entity=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]];
+						cur_entity.block.hor_boost=editor.editor_block_hor_boost;
+					}
+					
+					break;
+				
+				case BUTTON_TYPE::EDITOR_HOR_BOOST_SHOW:
+					if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
+						auto& cur_entity=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]];
+						editor.editor_block_index=cur_entity.block.hor_boost;
+					}
+					text.setString("Hor_boost: "+std::to_string(int(editor.editor_block_hor_boost)));
+					CENTER();
+					break;
+
+
+
+
 				case BUTTON_TYPE::EDITOR_BLOCK_SHOW:
 					text.setString("Block: "+BLOCK_TYPE_TO_STRING(editor.cur_editor_block_type));
 					CENTER();
@@ -257,7 +297,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					break;
 				case BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON:
 					is_toggled=editor.editor_special_movement;
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						is_toggled=!is_toggled;
 					}
 					editor.editor_special_movement=is_toggled;
@@ -265,7 +305,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					break;
 				case BUTTON_TYPE::EDITOR_SPECIAL_PAUSE_BUTTON:
 					is_toggled=editor.editor_game_pause;
-					if (IS_PRESSED(input)){
+					if (IS_PRESSED(input,view_move_y)){
 						is_toggled=!is_toggled;
 					}
 					editor.editor_game_pause=is_toggled;
@@ -324,7 +364,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 
 	void UI_BUTTON::DRAW(sf::RenderWindow& window){
-		window.setView(CONSTANTS_GLOBAL.default_view);
+		//window.setView(CONSTANTS_GLOBAL.default_view);
 		sf::VertexArray va(sf::PrimitiveType::Triangles);
 		text.setFillColor(cur_color);
 

@@ -275,7 +275,7 @@ void GAME::RUN(){
 		}
 
 
-		game_ui.DRAW(window,editor,settings);
+		game_ui.DRAW(window,editor,settings,entities);
 		performance_clocks.DRAW(window);
 
 		window.display();	
