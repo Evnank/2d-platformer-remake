@@ -9,8 +9,10 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		if (!arial_font.openFromFile("assets/fonts/arial.ttf")){std::cout<<"font failed to load";} 
 		if (!conthrax_font.openFromFile("assets/fonts/Conthrax.otf")){std::cout<<"font failed to load";} 
 		if (!wall_texture.loadFromFile("assets/textures/WALL.png")){} 
-		if (!player_blue.loadFromFile("assets/textures/PLAYER_BLUE.png")){} 
-		if (!player_red.loadFromFile("assets/textures/PLAYER_RED.png")){} 
+		if (!player_blue_static.loadFromFile("assets/textures/PLAYER_BLUE_STATIC.png")){} 
+		if (!player_red_static.loadFromFile("assets/textures/PLAYER_RED_STATIC.png")){} 
+		if (!player_blue_walk_animation.loadFromFile("assets/textures/PLAYER_BLUE_WALK_ANIMATION.png")){} 
+		if (!player_red_walk_animation.loadFromFile("assets/textures/PLAYER_RED_WALK_ANIMATION.png")){} 
 		if (!ESCAPE_TEXTURE.loadFromFile("assets/textures/ESCAPE.png")){} 
 
 		if (!BOOSTER_TEXTURE.loadFromFile("assets/textures/BOOSTER.png")){} 

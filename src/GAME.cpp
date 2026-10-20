@@ -147,8 +147,61 @@ void GAME::RUN(){
 		}
 	}
 
+	void GAME::ANIMATION_STEP_PLAYER(PLAYER& cur_player){
+		if (cur_player.index==0){
+			if (input.player1_left){
+				cur_player.animation_goes=true;
+				cur_player.animation_step_counter+=1;
+				if (cur_player.animation_step_counter>=4){
+					cur_player.animation_step_counter=0;
+					cur_player.animation_frame=(cur_player.animation_frame+1)%8;
+				}
+				cur_player.animation_side=0;
+			} else if (input.player1_right){
+				cur_player.animation_goes=true;
+				cur_player.animation_step_counter+=1;
+				if (cur_player.animation_step_counter>=4){
+					cur_player.animation_step_counter=0;
+					cur_player.animation_frame=(cur_player.animation_frame+1)%8;
+				}
+				cur_player.animation_side=1;
+			} else {
+				cur_player.animation_goes=false;
+				cur_player.animation_side=0;
+				cur_player.animation_step_counter=0;
+				cur_player.animation_frame=0;
+			}
+		} else {
+			if (input.player2_left){
+				cur_player.animation_goes=true;
+				cur_player.animation_step_counter+=1;
+				if (cur_player.animation_step_counter>=4){
+					cur_player.animation_step_counter=0;
+					cur_player.animation_frame=(cur_player.animation_frame+1)%8;
+				}
+				cur_player.animation_side=0;
+			} else if (input.player2_right){
+				cur_player.animation_goes=true;
+				cur_player.animation_step_counter+=1;
+				if (cur_player.animation_step_counter>=4){
+					cur_player.animation_step_counter=0;
+					cur_player.animation_frame=(cur_player.animation_frame+1)%8;
+				}
+				cur_player.animation_side=1;
+			} else {
+				cur_player.animation_goes=false;
+				cur_player.animation_side=0;
+				cur_player.animation_step_counter=0;
+				cur_player.animation_frame=0;
+			}
+		}
+	}
+
 
 	void GAME::UPDATE_ANIMATIONS(){
+		for (auto& cur_player:players){
+			ANIMATION_STEP_PLAYER(cur_player);
+		}
 		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 		float c_size=CONSTANTS_GLOBAL.CHUNK_SIZE;
 		float bts=CONSTANTS_GLOBAL.BLOCK_TEXTURE_SIZE;

@@ -7,8 +7,10 @@ struct ASSETS{
 	sf::Font arial_font;
 	sf::Font conthrax_font;
 	sf::Texture wall_texture;
-	sf::Texture player_blue;
-	sf::Texture player_red;
+	sf::Texture player_blue_static;
+	sf::Texture player_red_static;
+	sf::Texture player_blue_walk_animation;
+	sf::Texture player_red_walk_animation;
 
 	sf::Texture ESCAPE_TEXTURE;
 

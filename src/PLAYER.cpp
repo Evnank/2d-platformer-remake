@@ -17,19 +17,31 @@ void PLAYER::SETUP(int ind){
 		float right=coords.x+size.x;
 		float down=coords.y+size.y;
 
+		float tex_move_x=0;
+		float tex_move_y=texsize.y*animation_side;
+			tex_move_x=texsize.x*animation_frame;
+		
+
 		sf::Color color=sf::Color::White;
 		
-		cur_vertex_array.append(sf::Vertex({left,up},color,{0.f,0.f}));
-		cur_vertex_array.append(sf::Vertex({right,up},color,{texsize.x,0.f}));
-		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f,texsize.y}));
+		cur_vertex_array.append(sf::Vertex({left,up},color,{0.f+tex_move_x,0.f+tex_move_y}));
+		cur_vertex_array.append(sf::Vertex({right,up},color,{texsize.x+tex_move_x,0.f+tex_move_y}));
+		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f+tex_move_x,texsize.y+tex_move_y}));
 
-		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f,texsize.y}));
-		cur_vertex_array.append(sf::Vertex({right,up},color,{texsize.x,0.f}));
-		cur_vertex_array.append(sf::Vertex({right,down},color,{texsize.x,texsize.y}));
+		cur_vertex_array.append(sf::Vertex({left,down},color,{0.f+tex_move_x,texsize.y+tex_move_y}));
+		cur_vertex_array.append(sf::Vertex({right,up},color,{texsize.x+tex_move_x,0.f+tex_move_y}));
+		cur_vertex_array.append(sf::Vertex({right,down},color,{texsize.x+tex_move_x,texsize.y+tex_move_y}));
 
-		if (index==0){
-			window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_blue));
-		} else {window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_red));}
+		if (!animation_goes){
+			if (index==0){
+				window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_blue_static));
+			} else {window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_red_static));}
+		} else {
+			if (index==0){
+				window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_blue_walk_animation));
+			} else {window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_red_walk_animation));}
+		}
+		
 	}
 
 	void PLAYER::UPDATE(INPUT& input,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,std::vector<ENTITY>& entities){

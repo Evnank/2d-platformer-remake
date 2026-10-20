@@ -12,6 +12,10 @@ struct PLAYER{
 	sf::Vector2f texsize{32.f,48.f};
 	bool died=false;
 	int index=0;
+	int animation_frame=0;
+	float animation_step_counter=0;
+	int animation_side=0;
+	bool animation_goes=false;
 	bool is_standing=false;
 
 	void SETUP(int ind);

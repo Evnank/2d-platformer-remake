@@ -44,6 +44,8 @@ struct GAME{
 
 	void ANIMATION_STEP_BLOCK(STATIC_BLOCK& cur_block);
 
+	void ANIMATION_STEP_PLAYER(PLAYER& cur_player);
+
 	void UPDATE_ANIMATIONS();
 
 	void DRAW();
