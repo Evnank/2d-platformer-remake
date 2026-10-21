@@ -33,7 +33,7 @@ struct CTRL_Z{
     void UPDATE_INPUT(INPUT& input,std::vector<ENTITY>& entities,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
 
     void DRAW(sf::RenderWindow& window){
-        text.setPosition({0.f,1000.f});
+        text.setPosition({400.f,1000.f});
         text.setCharacterSize(50);
         text.setString("EDIT: "+std::to_string(current_action_index+1)+"/"+std::to_string(actions.size()));
         window.setView(CONSTANTS_GLOBAL.default_view);
