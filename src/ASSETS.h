@@ -11,6 +11,8 @@ struct ASSETS{
 	sf::Texture player_red_static;
 	sf::Texture player_blue_walk_animation;
 	sf::Texture player_red_walk_animation;
+	sf::Texture player_blue_excited_animation;
+	sf::Texture player_red_excited_animation;
 
 	sf::Texture ESCAPE_TEXTURE;
 

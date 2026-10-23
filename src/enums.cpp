@@ -8,6 +8,8 @@ BLOCK_TYPE STRING_TO_BLOCK_TYPE(std::string the_string){
 	if (the_string=="lever"){return BLOCK_TYPE::LEVER;}
 	if (the_string=="booster"){return BLOCK_TYPE::BOOSTER;}
 	if (the_string=="bouncy"){return BLOCK_TYPE::BOUNCY;}
+	if (the_string=="water"){return BLOCK_TYPE::WATER;}
+	if (the_string=="lava"){return BLOCK_TYPE::LAVA;}
 	if (the_string=="red_door_locked"){return BLOCK_TYPE::RED_DOOR_LOCKED;}
 	if (the_string=="red_door_unlocked"){return BLOCK_TYPE::RED_DOOR_UNLOCKED;}
 	if (the_string=="blue_door_locked"){return BLOCK_TYPE::BLUE_DOOR_LOCKED;}
@@ -25,6 +27,8 @@ std::string BLOCK_TYPE_TO_STRING(BLOCK_TYPE& type){
 	if (type==BLOCK_TYPE::LEVER){return "lever";}
 	if (type==BLOCK_TYPE::BOOSTER){return "booster";}
 	if (type==BLOCK_TYPE::BOUNCY){return "bouncy";}
+	if (type==BLOCK_TYPE::LAVA){return "lava";}
+	if (type==BLOCK_TYPE::WATER){return "water";}
 	if (type==BLOCK_TYPE::RED_DOOR_LOCKED){return "red_door_locked";}
 	if (type==BLOCK_TYPE::RED_DOOR_UNLOCKED){return "red_door_unlocked";}
 	if (type==BLOCK_TYPE::BLUE_DOOR_LOCKED){return "blue_door_locked";}

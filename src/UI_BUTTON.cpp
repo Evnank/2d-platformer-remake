@@ -213,6 +213,26 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 						}
 					}
 					break;
+				case BUTTON_TYPE::EDITOR_BLOCK_WATER:
+					if (IS_PRESSED(input,view_move_y)){
+						editor.cur_editor_block_type=BLOCK_TYPE::WATER;
+						editor.editor_block_selecting=false;
+						if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
+							entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block=STATIC_BLOCK{};
+							entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block.type=editor.cur_editor_block_type;
+						}
+					}
+					break;
+				case BUTTON_TYPE::EDITOR_BLOCK_LAVA:
+					if (IS_PRESSED(input,view_move_y)){
+						editor.cur_editor_block_type=BLOCK_TYPE::LAVA;
+						editor.editor_block_selecting=false;
+						if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
+							entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block=STATIC_BLOCK{};
+							entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block.type=editor.cur_editor_block_type;
+						}
+					}
+					break;
 
 
 				//index editor

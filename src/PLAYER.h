@@ -16,6 +16,7 @@ struct PLAYER{
 	float animation_step_counter=0;
 	int animation_side=0;
 	bool animation_goes=false;
+	bool excited_animation=false;
 	bool is_standing=false;
 
 	void SETUP(int ind);
@@ -39,6 +40,8 @@ struct PLAYER{
 
 	void RESOLVE_COLLISION_Y(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
 	void RESOLVE_COLLISION_Y_ENTITY(ENTITY& cur_entity);
+
+	void CHECK_IF_NEAR_WATER_OR_LAVA(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,std::vector<ENTITY>& entities);
 
 
 //velocity

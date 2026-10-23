@@ -148,6 +148,7 @@ void GAME::RUN(){
 	}
 
 	void GAME::ANIMATION_STEP_PLAYER(PLAYER& cur_player){
+		cur_player.CHECK_IF_NEAR_WATER_OR_LAVA(game_chunks,entities);
 		if (cur_player.index==0){
 			if (input.player1_left){
 				cur_player.animation_goes=true;
@@ -168,8 +169,10 @@ void GAME::RUN(){
 			} else {
 				cur_player.animation_goes=false;
 				cur_player.animation_side=0;
-				cur_player.animation_step_counter=0;
-				cur_player.animation_frame=0;
+				if (!cur_player.excited_animation){
+					cur_player.animation_step_counter=0;
+					cur_player.animation_frame=0;
+				}
 			}
 		} else {
 			if (input.player2_left){
@@ -191,8 +194,18 @@ void GAME::RUN(){
 			} else {
 				cur_player.animation_goes=false;
 				cur_player.animation_side=0;
+				if (!cur_player.excited_animation){
+					cur_player.animation_step_counter=0;
+					cur_player.animation_frame=0;
+				}
+			}
+		}
+		if (!cur_player.animation_goes && cur_player.excited_animation){
+			cur_player.animation_step_counter+=1;
+			cur_player.animation_frame=cur_player.animation_frame%2;
+			if (cur_player.animation_step_counter>=6){
 				cur_player.animation_step_counter=0;
-				cur_player.animation_frame=0;
+				cur_player.animation_frame=(cur_player.animation_frame+1)%2;
 			}
 		}
 	}

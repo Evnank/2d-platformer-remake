@@ -32,14 +32,19 @@ void PLAYER::SETUP(int ind){
 		cur_vertex_array.append(sf::Vertex({right,up},color,{texsize.x+tex_move_x,0.f+tex_move_y}));
 		cur_vertex_array.append(sf::Vertex({right,down},color,{texsize.x+tex_move_x,texsize.y+tex_move_y}));
 
-		if (!animation_goes){
-			if (index==0){
-				window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_blue_static));
-			} else {window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_red_static));}
-		} else {
+		if (animation_goes){
 			if (index==0){
 				window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_blue_walk_animation));
 			} else {window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_red_walk_animation));}
+			
+		} else if (excited_animation){
+			if (index==0){
+				window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_blue_excited_animation));
+			} else {window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_red_excited_animation));}
+		} else {
+			if (index==0){
+				window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_blue_static));
+			} else {window.draw(cur_vertex_array,sf::RenderStates(&GLOBAL_ASSETS.player_red_static));}
 		}
 		
 	}
@@ -243,6 +248,31 @@ void PLAYER::SETUP(int ind){
 					}
 				}
 	}
+
+
+	void PLAYER::CHECK_IF_NEAR_WATER_OR_LAVA(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,std::vector<ENTITY>& entities){
+		excited_animation=false;
+		int c_size=CONSTANTS_GLOBAL.CHUNK_SIZE;
+		int b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
+		sf::FloatRect player_rect{coords,size};
+		int startx=std::floor(coords.x/b_size);
+		int starty=std::floor(coords.y/b_size);
+		for (int x=startx-10;x<=startx+10;x++){
+			for (int y=starty-10;y<=starty+10;y++){
+				int cur_chunkx=std::floor(float(x)/c_size);
+				int cur_chunky=std::floor(float(y)/c_size);
+				int curx_inside=x-cur_chunkx*c_size;
+				int cury_inside=y-cur_chunky*c_size;
+				if (game_chunks.find({cur_chunkx,cur_chunky})==game_chunks.end()){continue;}
+				GAME_CHUNK& cur_chunk=game_chunks[{cur_chunkx,cur_chunky}];
+				STATIC_BLOCK& cur_block=cur_chunk.chunk_blocks[curx_inside+cury_inside*c_size];
+				if ((cur_block.type==BLOCK_TYPE::WATER && index==0) || (cur_block.type==BLOCK_TYPE::LAVA && index==1)){
+					excited_animation=true;
+				}
+			}
+		}
+	}
+
 
 	void PLAYER::VELOCITY_SIDE(INPUT& input){
 		bool cur_move_left=false;
