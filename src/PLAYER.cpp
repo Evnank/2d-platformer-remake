@@ -109,6 +109,12 @@ void PLAYER::SETUP(int ind){
 							is_in_water_or_lava=true;
 						}
 							break;
+						case BLOCK_TYPE::LAVA:
+						if (index==0){died=true;}
+						if (index==1){
+							is_in_water_or_lava=true;
+						}
+							break;
 
 						case BLOCK_TYPE::BOOSTER:
 							if (coords.x<x*b_size){
@@ -168,6 +174,12 @@ void PLAYER::SETUP(int ind){
 							is_in_water_or_lava=true;
 						}
 							break;
+						case BLOCK_TYPE::LAVA:
+						if (index==0){died=true;}
+						if (index==1){
+							is_in_water_or_lava=true;
+						}
+							break;
 						
 						
 						case BLOCK_TYPE::BOOSTER:
@@ -214,6 +226,12 @@ void PLAYER::SETUP(int ind){
 							is_in_water_or_lava=true;
 						}
 							break;
+						case BLOCK_TYPE::LAVA:
+						if (index==0){died=true;}
+						if (index==1){
+							is_in_water_or_lava=true;
+						}
+							break;
 
 						case BLOCK_TYPE::BOOSTER:
 							if (coords.x<cur_entity.current_coordinates.x){
@@ -256,6 +274,12 @@ void PLAYER::SETUP(int ind){
 						if (is_standing){break;}
 						if (index==1){died=true;}
 						if (index==0){
+							is_in_water_or_lava=true;
+						}
+							break;
+						case BLOCK_TYPE::LAVA:
+						if (index==0){died=true;}
+						if (index==1){
 							is_in_water_or_lava=true;
 						}
 							break;

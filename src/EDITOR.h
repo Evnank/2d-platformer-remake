@@ -13,7 +13,7 @@ struct EDITOR{
 	sf::Vector2f editor_block_to_move_coords;
 	bool editor_is_moving_block=false;
 	sf::Color editor_mouse_cursor_color;
-    bool editor_special_movement=true;
+    bool editor_special_movement=false;
 	bool editor_game_pause=false;
 	sf::Vector2f editor_stored_mouse_true_coords;
 	sf::Vector2f editor_stored_camera_true_coords;

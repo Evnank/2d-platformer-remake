@@ -198,8 +198,9 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 						editor.cur_editor_block_type=BLOCK_TYPE::WALL;
 						editor.editor_block_selecting=false;
 						if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
-							entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block=STATIC_BLOCK{};
-							entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block.type=editor.cur_editor_block_type;
+							auto& cur_block=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block;
+							cur_block=STATIC_BLOCK{};
+							cur_block.type=editor.cur_editor_block_type;
 						}
 					}
 					break;
@@ -208,8 +209,9 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 						editor.cur_editor_block_type=BLOCK_TYPE::BOOSTER;
 						editor.editor_block_selecting=false;
 						if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
-							entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block=STATIC_BLOCK{};
-							entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block.type=editor.cur_editor_block_type;
+							auto& cur_block=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block;
+							cur_block=STATIC_BLOCK{};
+							cur_block.type=editor.cur_editor_block_type;
 						}
 					}
 					break;
@@ -218,8 +220,9 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 						editor.cur_editor_block_type=BLOCK_TYPE::WATER;
 						editor.editor_block_selecting=false;
 						if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
-							entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block=STATIC_BLOCK{};
-							entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block.type=editor.cur_editor_block_type;
+							auto& cur_block=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block;
+							cur_block=STATIC_BLOCK{};
+							cur_block.type=editor.cur_editor_block_type;
 						}
 					}
 					break;
@@ -228,8 +231,31 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 						editor.cur_editor_block_type=BLOCK_TYPE::LAVA;
 						editor.editor_block_selecting=false;
 						if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
-							entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block=STATIC_BLOCK{};
-							entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block.type=editor.cur_editor_block_type;
+							auto& cur_block=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block;
+							cur_block=STATIC_BLOCK{};
+							cur_block.type=editor.cur_editor_block_type;
+						}
+					}
+					break;
+				case BUTTON_TYPE::EDITOR_BLOCK_LEVER:
+					if (IS_PRESSED(input,view_move_y)){
+						editor.cur_editor_block_type=BLOCK_TYPE::LEVER;
+						editor.editor_block_selecting=false;
+						if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
+							auto& cur_block=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block;
+							cur_block=STATIC_BLOCK{};
+							cur_block.type=editor.cur_editor_block_type;
+						}
+					}
+					break;
+				case BUTTON_TYPE::EDITOR_BLOCK_BUTTON:
+					if (IS_PRESSED(input,view_move_y)){
+						editor.cur_editor_block_type=BLOCK_TYPE::BUTTON;
+						editor.editor_block_selecting=false;
+						if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
+							auto& cur_block=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]].block;
+							cur_block=STATIC_BLOCK{};
+							cur_block.type=editor.cur_editor_block_type;
 						}
 					}
 					break;

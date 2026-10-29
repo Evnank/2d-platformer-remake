@@ -111,7 +111,8 @@ void GAME::RUN(){
 			sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
 			if (cur_entity.touched_player1_bottom){players[0].coords.x+=cur_entity.cur_speed.x*CONSTANTS_GLOBAL.ENTITY_SPEED;}
 			if (cur_entity.touched_player2_bottom){players[1].coords.x+=cur_entity.cur_speed.x*CONSTANTS_GLOBAL.ENTITY_SPEED;}
-			if (cur_entity.block.type!=BLOCK_TYPE::WATER && cur_entity.block.type!=BLOCK_TYPE::LAVA){
+			if (cur_entity.block.type!=BLOCK_TYPE::WATER && cur_entity.block.type!=BLOCK_TYPE::LAVA &&
+			cur_entity.block.type!=BLOCK_TYPE::LEVER && cur_entity.block.type!=BLOCK_TYPE::BUTTON){
 				for (auto& cur_player:players){
 					cur_player.RESOLVE_COLLISION_X_ENTITY(cur_entity);
 					cur_player.RESOLVE_COLLISION_X(game_chunks);
@@ -124,7 +125,8 @@ void GAME::RUN(){
 			cur_entity.MOVEY();
 			cur_entity_rect={cur_entity.current_coordinates+sf::Vector2f{0,0.1},
 			sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
-			if (cur_entity.block.type!=BLOCK_TYPE::WATER && cur_entity.block.type!=BLOCK_TYPE::LAVA){
+			if (cur_entity.block.type!=BLOCK_TYPE::WATER && cur_entity.block.type!=BLOCK_TYPE::LAVA &&
+			cur_entity.block.type!=BLOCK_TYPE::LEVER && cur_entity.block.type!=BLOCK_TYPE::BUTTON){
 				for (auto& cur_player:players){
 					cur_player.RESOLVE_COLLISION_Y_ENTITY(cur_entity);
 					cur_player.RESOLVE_COLLISION_Y(game_chunks);
@@ -272,7 +274,7 @@ void GAME::RUN(){
 		draw_arrays[BLOCK_TYPE::LEVER]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::BOOSTER]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::WATER]=sf::VertexArray(sf::PrimitiveType::Triangles);
-		draw_arrays[BLOCK_TYPE::WATER]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::LAVA]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::BOUNCY]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::RED_DOOR_LOCKED]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::RED_DOOR_UNLOCKED]=sf::VertexArray(sf::PrimitiveType::Triangles);
@@ -324,9 +326,10 @@ void GAME::RUN(){
 
 		window.draw(draw_arrays[BLOCK_TYPE::WALL],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
 		//window.draw(draw_arrays[BLOCK_TYPE::BUTTON],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
-		//window.draw(draw_arrays[BLOCK_TYPE::LEVER],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
+		window.draw(draw_arrays[BLOCK_TYPE::LEVER],sf::RenderStates{&GLOBAL_ASSETS.LEVER_TEXTURE});
 		window.draw(draw_arrays[BLOCK_TYPE::BOOSTER],sf::RenderStates{&GLOBAL_ASSETS.BOOSTER_TEXTURE});
 		window.draw(draw_arrays[BLOCK_TYPE::WATER],sf::RenderStates{&GLOBAL_ASSETS.WATER_TEXTURE});
+		window.draw(draw_arrays[BLOCK_TYPE::LAVA],sf::RenderStates{&GLOBAL_ASSETS.LAVA_TEXTURE});
 		//window.draw(draw_arrays[BLOCK_TYPE::BOUNCY],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
 		window.draw(draw_arrays[BLOCK_TYPE::RED_DOOR_LOCKED],sf::RenderStates{&GLOBAL_ASSETS.RED_DOOR_LOCKED});
 		window.draw(draw_arrays[BLOCK_TYPE::RED_DOOR_UNLOCKED],sf::RenderStates{&GLOBAL_ASSETS.RED_DOOR_UNLOCKED});

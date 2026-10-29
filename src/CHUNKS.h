@@ -19,6 +19,7 @@ struct STATIC_BLOCK{
     BLOCK_TYPE type=BLOCK_TYPE::AIR;
     bool is_surface=false;
     bool is_open=false;
+    bool activated=false;
 };
 
 struct GAME_CHUNK{

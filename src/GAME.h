@@ -25,6 +25,7 @@ struct GAME{
 	std::unordered_map<BLOCK_TYPE,BLOCK_FRAME> block_animation_frames{
 		{BLOCK_TYPE::BOOSTER,{0,0.15,10}},
 		{BLOCK_TYPE::WATER,{0,0.45,33}},
+		{BLOCK_TYPE::LAVA,{0,0.45,64}},
 	};
 
 

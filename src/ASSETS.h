@@ -18,6 +18,8 @@ struct ASSETS{
 
 	sf::Texture BOOSTER_TEXTURE;
 	sf::Texture WATER_TEXTURE;
+	sf::Texture LAVA_TEXTURE;
+	sf::Texture LEVER_TEXTURE;
 
 	sf::Texture BLUE_DOOR_LOCKED;
 	sf::Texture BLUE_DOOR_UNLOCKED;
