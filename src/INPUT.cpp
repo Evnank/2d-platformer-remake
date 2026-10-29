@@ -75,6 +75,7 @@ void INPUT::read(sf::RenderWindow& window,SETTINGS& settings){
 
 		player2_left=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player2_left_bind);
 		player2_right=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player2_right_bind);
+		player2_jump=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player2_jump_bind);
 		player2_down=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player2_down_bind);
 
 		if (F11){

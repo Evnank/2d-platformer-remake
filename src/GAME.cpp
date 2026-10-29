@@ -111,23 +111,28 @@ void GAME::RUN(){
 			sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
 			if (cur_entity.touched_player1_bottom){players[0].coords.x+=cur_entity.cur_speed.x*CONSTANTS_GLOBAL.ENTITY_SPEED;}
 			if (cur_entity.touched_player2_bottom){players[1].coords.x+=cur_entity.cur_speed.x*CONSTANTS_GLOBAL.ENTITY_SPEED;}
-			
-			for (auto& cur_player:players){
-				cur_player.RESOLVE_COLLISION_X_ENTITY(cur_entity);
-				cur_player.RESOLVE_COLLISION_X(game_chunks);
-				sf::FloatRect cur_player_rect={cur_player.coords,cur_player.size};
-				if (cur_entity_rect.findIntersection(cur_player_rect)){cur_player.died=true;}
+			if (cur_entity.block.type!=BLOCK_TYPE::WATER && cur_entity.block.type!=BLOCK_TYPE::LAVA){
+				for (auto& cur_player:players){
+					cur_player.RESOLVE_COLLISION_X_ENTITY(cur_entity);
+					cur_player.RESOLVE_COLLISION_X(game_chunks);
+					sf::FloatRect cur_player_rect={cur_player.coords,cur_player.size};
+					if (cur_entity_rect.findIntersection(cur_player_rect)){cur_player.died=true;}
+				}
 			}
+			
 
 			cur_entity.MOVEY();
 			cur_entity_rect={cur_entity.current_coordinates+sf::Vector2f{0,0.1},
 			sf::Vector2f{b_size,b_size}-sf::Vector2f{0,0.2}};
-			for (auto& cur_player:players){
-				cur_player.RESOLVE_COLLISION_Y_ENTITY(cur_entity);
-				cur_player.RESOLVE_COLLISION_Y(game_chunks);
-				sf::FloatRect cur_player_rect={cur_player.coords,cur_player.size};
-				if (cur_entity_rect.findIntersection(cur_player_rect)){cur_player.died=true;}
+			if (cur_entity.block.type!=BLOCK_TYPE::WATER && cur_entity.block.type!=BLOCK_TYPE::LAVA){
+				for (auto& cur_player:players){
+					cur_player.RESOLVE_COLLISION_Y_ENTITY(cur_entity);
+					cur_player.RESOLVE_COLLISION_Y(game_chunks);
+					sf::FloatRect cur_player_rect={cur_player.coords,cur_player.size};
+					if (cur_entity_rect.findIntersection(cur_player_rect)){cur_player.died=true;}
+				}
 			}
+			
 			if (cur_entity.touched_player1_bottom){players[0].coords.x+=cur_entity.cur_speed.x*CONSTANTS_GLOBAL.ENTITY_SPEED;}
 			if (cur_entity.touched_player2_bottom){players[1].coords.x+=cur_entity.cur_speed.x*CONSTANTS_GLOBAL.ENTITY_SPEED;}
 
@@ -266,6 +271,8 @@ void GAME::RUN(){
 		draw_arrays[BLOCK_TYPE::BUTTON]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::LEVER]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::BOOSTER]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::WATER]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::WATER]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::BOUNCY]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::RED_DOOR_LOCKED]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::RED_DOOR_UNLOCKED]=sf::VertexArray(sf::PrimitiveType::Triangles);
