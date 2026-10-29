@@ -18,6 +18,7 @@ struct PLAYER{
 	bool animation_goes=false;
 	bool excited_animation=false;
 	bool is_standing=false;
+	bool is_in_water_or_lava=false;
 
 	void SETUP(int ind);
 
@@ -48,7 +49,7 @@ struct PLAYER{
 
 	void VELOCITY_SIDE(INPUT& input);
 
-	void GRAVITY();
+	void GRAVITY(INPUT& input);
 
 	void JUMP(INPUT& input);
 

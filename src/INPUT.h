@@ -28,10 +28,12 @@ struct INPUT{
 	bool player1_left;
 	bool player1_right;
 	bool player1_jump;
+	bool player1_down;
 
 	bool player2_left;
 	bool player2_right;
 	bool player2_jump;
+	bool player2_down;
 
 	void read(sf::RenderWindow& window,SETTINGS& settings);
 };

@@ -71,10 +71,11 @@ void INPUT::read(sf::RenderWindow& window,SETTINGS& settings){
 		player1_left=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player1_left_bind);
 		player1_right=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player1_right_bind);
 		player1_jump=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player1_jump_bind);
+		player1_down=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player1_down_bind);
 
 		player2_left=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player2_left_bind);
 		player2_right=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player2_right_bind);
-		player2_jump=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player2_jump_bind);
+		player2_down=sf::Keyboard::isKeyPressed(VARIABLES_GLOBAL.player2_down_bind);
 
 		if (F11){
 			settings.is_full_screen_mode=!settings.is_full_screen_mode;

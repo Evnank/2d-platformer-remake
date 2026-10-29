@@ -11,10 +11,18 @@ struct GLOBAL_CONSTANTS{
 	
 
 	float player_max_side_speed=8;
+	float player_max_side_speed_in_water=4;
 	float player_acceleration=0.4;
+	float player_acceleration_in_water=0.4;
 	float player_speed_loss=0.1;
+	float player_speed_loss_in_water=0.05;
 	float player_jump_power=13;
+	float player_jump_power_in_water=0.2;
 	float player_gravity_power=0.5;
+	float player_gravity_power_in_water=0.1;
+	float player_max_vertical_speed=15;
+	float player_max_vertical_speed_in_water=4;
+	
 
 	float ENTITY_SPEED=1;
 	float CAMERA_SPEED=0.02;

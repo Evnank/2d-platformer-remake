@@ -135,18 +135,6 @@ void GAME::RUN(){
 		}
 	}
 
-	void GAME::ANIMATION_STEP_BLOCK(STATIC_BLOCK& cur_block){
-		switch (cur_block.type)
-		{
-		case BLOCK_TYPE::BOOSTER:
-			cur_block.frame=fmod(cur_block.frame+0.15,cur_block.frame_limit);
-			break;
-		
-		default:
-			break;
-		}
-	}
-
 	void GAME::ANIMATION_STEP_PLAYER(PLAYER& cur_player){
 		cur_player.CHECK_IF_NEAR_WATER_OR_LAVA(game_chunks,entities);
 		if (cur_player.index==0){
@@ -212,33 +200,13 @@ void GAME::RUN(){
 
 
 	void GAME::UPDATE_ANIMATIONS(){
+		window.setView(camera.getview());
 		for (auto& cur_player:players){
 			ANIMATION_STEP_PLAYER(cur_player);
 		}
-		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
-		float c_size=CONSTANTS_GLOBAL.CHUNK_SIZE;
-		float bts=CONSTANTS_GLOBAL.BLOCK_TEXTURE_SIZE;
-		sf::Vector2f camera_left_up(camera.position-camera.size/2.f*camera.scale);
-		int chunk_left=int(std::floor(camera_left_up.x/(b_size*c_size)));
-		int chunk_up=int(std::floor(camera_left_up.y/(b_size*c_size)));
-
-		sf::Vector2f camera_right_down(camera.position+camera.size/2.f*camera.scale);
-		int chunk_right=int(camera_right_down.x/(b_size*c_size));
-		int chunk_down=int(camera_right_down.y/(b_size*c_size));
-
-		for (int cur_chunkx=chunk_left; cur_chunkx<=chunk_right; cur_chunkx++){
-			for (int cur_chunky=chunk_up; cur_chunky<=chunk_down; cur_chunky++){
-				if (game_chunks.find({cur_chunkx,cur_chunky}) != game_chunks.end()){
-					GAME_CHUNK& cur_chunk = game_chunks[{cur_chunkx,cur_chunky}];
-					for (int i=0; i<c_size; i++){
-						for (int g=0; g<c_size; g++){
-							auto& cur_block=cur_chunk.chunk_blocks[i+g*c_size];
-							if (cur_block.type==BLOCK_TYPE::AIR){continue;}
-							ANIMATION_STEP_BLOCK(cur_block);
-						}
-					}
-				}
-			}
+		for (auto& cur_element:block_animation_frames){
+			auto& cur_animation=cur_element.second;
+			cur_animation.frame=fmod(cur_animation.frame+cur_animation.frame_increase,cur_animation.frame_limit);
 		}
 		for (auto& cur_entity:entities){
 			STATIC_BLOCK& cur_block=cur_entity.block;
@@ -355,6 +323,7 @@ void GAME::RUN(){
 		//window.draw(draw_arrays[BLOCK_TYPE::BUTTON],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
 		//window.draw(draw_arrays[BLOCK_TYPE::LEVER],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
 		window.draw(draw_arrays[BLOCK_TYPE::BOOSTER],sf::RenderStates{&GLOBAL_ASSETS.BOOSTER_TEXTURE});
+		window.draw(draw_arrays[BLOCK_TYPE::WATER],sf::RenderStates{&GLOBAL_ASSETS.WATER_TEXTURE});
 		//window.draw(draw_arrays[BLOCK_TYPE::BOUNCY],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
 		window.draw(draw_arrays[BLOCK_TYPE::RED_DOOR_LOCKED],sf::RenderStates{&GLOBAL_ASSETS.RED_DOOR_LOCKED});
 		window.draw(draw_arrays[BLOCK_TYPE::RED_DOOR_UNLOCKED],sf::RenderStates{&GLOBAL_ASSETS.RED_DOOR_UNLOCKED});
@@ -372,16 +341,8 @@ void GAME::APPEND_VERTEXES(float left,float right,float up,float down,
 		float bts=CONSTANTS_GLOBAL.BLOCK_TEXTURE_SIZE;
 		int texture_move=0;
 		sf::VertexArray& cur_vertex_array=draw_arrays[cur_block.type];
-		switch (cur_block.type)
-		{
-		case BLOCK_TYPE::BOOSTER:
-			texture_move=CONSTANTS_GLOBAL.BLOCK_SIZE*int(cur_block.frame);
-			break;
-		
-		default:
-			break;
-		}
-		
+		int cur_frame=block_animation_frames[cur_block.type].frame;
+		texture_move=CONSTANTS_GLOBAL.BLOCK_SIZE*cur_frame;
 
 		sf::Color color=sf::Color::White;
 		cur_vertex_array.append(sf::Vertex({left,up},color,{0.f+texture_move,0.f}));
@@ -517,6 +478,18 @@ void GAME::GAME_LOAD_LEVEL(){
 
 				curx_inside=int(cur_cordx)-cur_chunkx*int(CONSTANTS_GLOBAL.CHUNK_SIZE);
 				cury_inside=int(cur_cordy)-cur_chunky*int(CONSTANTS_GLOBAL.CHUNK_SIZE);
+				switch (cur_load_block.type)
+				{
+				case BLOCK_TYPE::BOOSTER:
+					cur_load_block.frame_limit=8;
+					break;
+				case BLOCK_TYPE::WATER:
+					cur_load_block.frame_limit=33;
+					break;
+				
+				default:
+					break;
+				}
 				game_chunks[{cur_chunkx,cur_chunky}].chunk_blocks[curx_inside+cury_inside*int(CONSTANTS_GLOBAL.CHUNK_SIZE)]=cur_load_block;
 			}
 			//std::cout<<"\n";

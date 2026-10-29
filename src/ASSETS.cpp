@@ -18,6 +18,7 @@ void ASSETS::LOAD_ALL_ASSETS(){
 		if (!ESCAPE_TEXTURE.loadFromFile("assets/textures/ESCAPE.png")){} 
 
 		if (!BOOSTER_TEXTURE.loadFromFile("assets/textures/BOOSTER.png")){} 
+		if (!WATER_TEXTURE.loadFromFile("assets/textures/WATER_ANIMATION.png")){}
 		
 		if (!BLUE_DOOR_LOCKED.loadFromFile("assets/textures/BLUE_DOOR_LOCKED.png")){} 
 		if (!BLUE_DOOR_UNLOCKED.loadFromFile("assets/textures/BLUE_DOOR_UNLOCKED.png")){} 

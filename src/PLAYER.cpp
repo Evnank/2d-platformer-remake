@@ -51,17 +51,19 @@ void PLAYER::SETUP(int ind){
 
 	void PLAYER::UPDATE(INPUT& input,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,std::vector<ENTITY>& entities){
 		UPDATE_VELOCITY(input);
+		
 		MOVE(game_chunks,entities);
 	}
 
 	void PLAYER::UPDATE_VELOCITY(INPUT& input){
 		VELOCITY_SIDE(input);
-		GRAVITY();
+		GRAVITY(input);
 		JUMP(input);
 	}
 
 	void PLAYER::MOVE(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,std::vector<ENTITY>& entities){
 		coords.x+=velocity.x;
+		is_in_water_or_lava=false;
 		RESOLVE_COLLISION_X(game_chunks);
 		for (auto& cur_entity:entities){
 			RESOLVE_COLLISION_X_ENTITY(cur_entity);
@@ -100,6 +102,12 @@ void PLAYER::SETUP(int ind){
 								coords.x=(x+1)*b_size;
 							}
 								velocity.x=0;
+							break;
+						case BLOCK_TYPE::WATER:
+						if (index==1){died=true;}
+						if (index==0){
+							is_in_water_or_lava=true;
+						}
 							break;
 
 						case BLOCK_TYPE::BOOSTER:
@@ -146,11 +154,19 @@ void PLAYER::SETUP(int ind){
 							if (coords.y<y*b_size){
 								coords.y=y*b_size-size.y;
 								is_standing=true;
+								is_in_water_or_lava=false;
 							} else {
 								coords.y=(y+1)*b_size;
 							}
 								velocity.y=0;
 								
+							break;
+						case BLOCK_TYPE::WATER:
+						if (is_standing){break;}
+						if (index==1){died=true;}
+						if (index==0){
+							is_in_water_or_lava=true;
+						}
 							break;
 						
 						
@@ -158,6 +174,7 @@ void PLAYER::SETUP(int ind){
 							if (coords.y<y*b_size){
 								coords.y=y*b_size-size.y;
 								is_standing=true;
+								is_in_water_or_lava=false;
 							} else {
 								coords.y=(y+1)*b_size;
 							}
@@ -190,6 +207,12 @@ void PLAYER::SETUP(int ind){
 								coords.x=cur_entity.current_coordinates.x+b_size;
 							}
 								velocity.x=cur_entity.cur_speed.x;
+							break;
+						case BLOCK_TYPE::WATER:
+						if (index==1){died=true;}
+						if (index==0){
+							is_in_water_or_lava=true;
+						}
 							break;
 
 						case BLOCK_TYPE::BOOSTER:
@@ -228,6 +251,13 @@ void PLAYER::SETUP(int ind){
 								coords.y=cur_entity.current_coordinates.y+b_size;
 							}
 								velocity.y=cur_entity.cur_speed.y;
+							break;
+						case BLOCK_TYPE::WATER:
+						if (is_standing){break;}
+						if (index==1){died=true;}
+						if (index==0){
+							is_in_water_or_lava=true;
+						}
 							break;
 						
 						case BLOCK_TYPE::BOOSTER:
@@ -283,32 +313,86 @@ void PLAYER::SETUP(int ind){
 			cur_move_left=input.player2_left;cur_move_right=input.player2_right;
 		}
 	//moving
-		if (cur_move_left){
-			if (velocity.x>-CONSTANTS_GLOBAL.player_max_side_speed){
-				velocity.x-=CONSTANTS_GLOBAL.player_acceleration;
-			}
-		} else if(cur_move_right){
-			if (velocity.x<CONSTANTS_GLOBAL.player_max_side_speed){
-				velocity.x+=CONSTANTS_GLOBAL.player_acceleration;
+		if (is_in_water_or_lava){
+			if (cur_move_left){
+				if (velocity.x>-CONSTANTS_GLOBAL.player_max_side_speed_in_water){
+					velocity.x-=CONSTANTS_GLOBAL.player_acceleration_in_water;
+				}
+			} else if(cur_move_right){
+				if (velocity.x<CONSTANTS_GLOBAL.player_max_side_speed_in_water){
+					velocity.x+=CONSTANTS_GLOBAL.player_acceleration_in_water;
+				}
+			} else {
+				velocity.x*=(1-CONSTANTS_GLOBAL.player_speed_loss_in_water);
+				if (abs(velocity.x)<0.1){velocity.x=0;}
 			}
 		} else {
-			velocity.x*=(1-CONSTANTS_GLOBAL.player_speed_loss);
-			if (abs(velocity.x)<0.1){velocity.x=0;}
+				if (cur_move_left){
+				if (velocity.x>-CONSTANTS_GLOBAL.player_max_side_speed){
+					velocity.x-=CONSTANTS_GLOBAL.player_acceleration;
+				}
+			} else if(cur_move_right){
+				if (velocity.x<CONSTANTS_GLOBAL.player_max_side_speed){
+					velocity.x+=CONSTANTS_GLOBAL.player_acceleration;
+				}
+			} else {
+				velocity.x*=(1-CONSTANTS_GLOBAL.player_speed_loss);
+				if (abs(velocity.x)<0.1){velocity.x=0;}
+			}
 		}
+		
 	}
 
-	void PLAYER::GRAVITY(){
-		velocity.y+=CONSTANTS_GLOBAL.player_gravity_power;
+	void PLAYER::GRAVITY(INPUT& input){
+		if (is_in_water_or_lava){
+
+			velocity.y*=0.98;
+			if (velocity.y>CONSTANTS_GLOBAL.player_max_vertical_speed_in_water){
+				velocity.y=CONSTANTS_GLOBAL.player_max_vertical_speed_in_water;
+			}
+			if (velocity.y<-CONSTANTS_GLOBAL.player_max_vertical_speed_in_water){
+				velocity.y=-CONSTANTS_GLOBAL.player_max_vertical_speed_in_water;
+			}
+
+		} else {
+
+			velocity.y+=CONSTANTS_GLOBAL.player_gravity_power;
+			if (velocity.y>CONSTANTS_GLOBAL.player_max_vertical_speed){
+				velocity.y=CONSTANTS_GLOBAL.player_max_vertical_speed;
+			}
+
+		}
+		
 	}
 
 	void PLAYER::JUMP(INPUT& input){
 		bool jump_input=false;
+		bool crouch_input=false;
 		if (index==0){
 			jump_input=input.player1_jump;
+			crouch_input=input.player1_down;
 		} else {
 			jump_input=input.player2_jump;
+			crouch_input=input.player2_down;
 		}
 		if (is_standing && jump_input){
 			velocity.y=-CONSTANTS_GLOBAL.player_jump_power;
+			if (velocity.y<-CONSTANTS_GLOBAL.player_max_vertical_speed){
+				velocity.y=CONSTANTS_GLOBAL.player_max_vertical_speed;
+			}
+		}
+		if (is_in_water_or_lava){
+			if (jump_input && !crouch_input){
+				velocity.y-=CONSTANTS_GLOBAL.player_jump_power_in_water;
+				if (velocity.y<-CONSTANTS_GLOBAL.player_max_vertical_speed_in_water){
+					velocity.y=-CONSTANTS_GLOBAL.player_max_vertical_speed_in_water;
+				}
+			}
+			if (crouch_input && !jump_input){
+				velocity.y+=CONSTANTS_GLOBAL.player_jump_power_in_water;
+				if (velocity.y>CONSTANTS_GLOBAL.player_max_vertical_speed_in_water){
+					velocity.y=CONSTANTS_GLOBAL.player_max_vertical_speed_in_water;
+				}
+			}
 		}
 	}

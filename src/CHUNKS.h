@@ -31,5 +31,11 @@ struct PairHash {
     }
 };
 
+struct BLOCK_FRAME{
+	float frame=0;
+    float frame_increase=0;
+    float frame_limit=1;
+};
+
 
 STATIC_BLOCK& find_block_by_coords(int x,int y,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);

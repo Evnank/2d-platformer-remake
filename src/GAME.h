@@ -10,10 +10,6 @@
 #include <SFML/Audio.hpp>
 
 
-
-
-
-
 struct GAME{
 	sf::RenderWindow window{ sf::VideoMode({CONSTANTS_GLOBAL.screen_width, CONSTANTS_GLOBAL.screen_height}), "platformer game" };
 	INPUT input;
@@ -26,6 +22,10 @@ struct GAME{
 	USER_INTERFACE game_ui;
 	EDITOR editor;
 	SETTINGS settings;
+	std::unordered_map<BLOCK_TYPE,BLOCK_FRAME> block_animation_frames{
+		{BLOCK_TYPE::BOOSTER,{0,0.15,10}},
+		{BLOCK_TYPE::WATER,{0,0.45,33}},
+	};
 
 
 

@@ -8,10 +8,12 @@ struct GLOBAL_VARIABLES{
 	sf::Keyboard::Key player1_left_bind=sf::Keyboard::Key::Left;
 	sf::Keyboard::Key player1_right_bind=sf::Keyboard::Key::Right;
 	sf::Keyboard::Key player1_jump_bind=sf::Keyboard::Key::Up;
+	sf::Keyboard::Key player1_down_bind=sf::Keyboard::Key::Down;
 
 	sf::Keyboard::Key player2_left_bind=sf::Keyboard::Key::A;
 	sf::Keyboard::Key player2_right_bind=sf::Keyboard::Key::D;
 	sf::Keyboard::Key player2_jump_bind=sf::Keyboard::Key::W;
+	sf::Keyboard::Key player2_down_bind=sf::Keyboard::Key::S;
 	GAME_STATE game_state=GAME_STATE::PLAYING;
 
 	int current_level=1;
