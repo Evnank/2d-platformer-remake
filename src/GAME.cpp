@@ -208,10 +208,6 @@ void GAME::RUN(){
 			auto& cur_animation=cur_element.second;
 			cur_animation.frame=fmod(cur_animation.frame+cur_animation.frame_increase,cur_animation.frame_limit);
 		}
-		for (auto& cur_entity:entities){
-			STATIC_BLOCK& cur_block=cur_entity.block;
-			ANIMATION_STEP_BLOCK(cur_block);
-		}
 	}
 
 
