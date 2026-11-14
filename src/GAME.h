@@ -22,6 +22,7 @@ struct GAME{
 	USER_INTERFACE game_ui;
 	EDITOR editor;
 	SETTINGS settings;
+	std::vector<std::pair<int,int>> levers;
 	std::unordered_map<BLOCK_TYPE,BLOCK_FRAME> block_animation_frames{
 		{BLOCK_TYPE::BOOSTER,{0,0.15,10}},
 		{BLOCK_TYPE::WATER,{0,0.45,33}},

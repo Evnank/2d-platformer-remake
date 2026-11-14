@@ -20,6 +20,7 @@ struct STATIC_BLOCK{
     bool is_surface=false;
     bool is_open=false;
     bool activated=false;
+    bool is_activated_by_default=false;
 };
 
 struct GAME_CHUNK{
