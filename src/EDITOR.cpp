@@ -35,7 +35,7 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 
 
     void EDITOR::UPDATE_EDITOR(INPUT& input,CAMERA& camera,std::vector <ENTITY>& entities,std::unordered_map<std::pair<int,int>,
-		GAME_CHUNK,PairHash>& game_chunks,SETTINGS& settings){
+		GAME_CHUNK,PairHash>& game_chunks,SETTINGS& settings,std::vector<std::pair<int,int>>& levers){
 		if (settings.EDITOR_ON_BUTTON){
 			int x=std::floor(input.mouse_true_coords.x/CONSTANTS_GLOBAL.BLOCK_SIZE);
 			int y=std::floor(input.mouse_true_coords.y/CONSTANTS_GLOBAL.BLOCK_SIZE);
@@ -45,7 +45,7 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 						}
 					if (!editor_is_entity){
 						if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
-							PLACE_BLOCK(x,y,game_chunks);
+							PLACE_BLOCK(x,y,game_chunks,levers);
 						}
 					} else {
 						if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)){
@@ -325,7 +325,7 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 		}
 	}
 
-	void EDITOR::PLACE_BLOCK(int x,int y,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks){
+	void EDITOR::PLACE_BLOCK(int x,int y,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,std::vector<std::pair<int,int>>& levers){
 		auto& cur_block=find_block_by_coords(x,y,game_chunks);
 
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && (cur_block.index!=editor_block_index || cur_block.type!=cur_editor_block_type || 
@@ -338,7 +338,10 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 			cur_block.hor_boost=editor_block_hor_boost;
 			cur_block.ver_boost=editor_block_ver_boost;
 			ctrl_z.current_ctrl_z_action.game_chunks_new=game_chunks;
-
+			if (cur_block.type==BLOCK_TYPE::LEVER){
+				levers.push_back({x,y});
+			}
+			
 		} else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && 
 			(cur_block.index!=-1 || cur_block.type!=BLOCK_TYPE::AIR)){
 

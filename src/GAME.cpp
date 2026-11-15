@@ -63,7 +63,7 @@ void GAME::RUN(){
 			if (!editor.editor_game_pause){
 				STEP_TICK();
 			}
-			editor.UPDATE_EDITOR(input,camera,entities,game_chunks,settings);
+			editor.UPDATE_EDITOR(input,camera,entities,game_chunks,settings,levers);
 			break;
 			
 		default:
@@ -89,9 +89,10 @@ void GAME::RUN(){
 	
 
 	void GAME::STEP_TICK(){
-			for (auto& cur_player:players){
-				cur_player.UPDATE(input,game_chunks,entities);
-			}
+		UPDATE_LEVERS();
+		for (auto& cur_player:players){
+			cur_player.UPDATE(input,game_chunks,entities);
+		}
 		UPDATE_ENTETIES();
 		for (auto& cur_player:players){
 			if (cur_player.died){cur_player.SETUP(cur_player.index);}
@@ -140,6 +141,40 @@ void GAME::RUN(){
 
 			cur_entity.UPDATE_TARGETS();
 		}
+	}
+
+	void GAME::UPDATE_LEVERS(){
+		indexes_pressed.clear();
+		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
+		for (auto& cur_entity:entities){
+			if (cur_entity.block.type==BLOCK_TYPE::LEVER){
+				UPDATE_ONE_LEVER_BLOCK(cur_entity.block,cur_entity.current_coordinates.x,cur_entity.current_coordinates.y);
+			}
+		}
+		for (auto& cur_pair:levers){
+			auto& cur_block=find_block_by_coords(cur_pair.first,cur_pair.second,game_chunks);
+			UPDATE_ONE_LEVER_BLOCK(cur_block,cur_pair.first*b_size,cur_pair.second*b_size);
+		}
+	}
+
+	void GAME::UPDATE_ONE_LEVER_BLOCK(STATIC_BLOCK& cur_block,float x,float y){
+		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
+		sf::FloatRect cur_player_rect1={players[0].coords,players[0].size};
+		sf::FloatRect cur_player_rect2={players[1].coords,players[1].size};
+		sf::FloatRect cur_block_rect={sf::Vector2f{x,y},sf::Vector2f{b_size,b_size}};
+		bool currently_touches=(cur_player_rect1.findIntersection(cur_block_rect).has_value() || cur_player_rect2.findIntersection(cur_block_rect).has_value());
+		if (currently_touches && !cur_block.player_touching){
+			cur_block.activated=!cur_block.activated;
+		}
+		if (cur_block.activated){
+			cur_block.frame+=0.5;
+			if (cur_block.frame>1){cur_block.frame=1;}
+			indexes_pressed[cur_block.lever_index]=true;
+		} else {
+			cur_block.frame-=0.5;
+			if (cur_block.frame<0){cur_block.frame=0;}
+		}
+		cur_block.player_touching=currently_touches;
 	}
 
 	void GAME::ANIMATION_STEP_PLAYER(PLAYER& cur_player){
@@ -348,7 +383,12 @@ void GAME::APPEND_VERTEXES(float left,float right,float up,float down,
 		int texture_move=0;
 		sf::VertexArray& cur_vertex_array=draw_arrays[cur_block.type];
 		int cur_frame=block_animation_frames[cur_block.type].frame;
+		if (cur_block.type==BLOCK_TYPE::LEVER){
+			cur_frame=cur_block.frame;
+		}
+		
 		texture_move=CONSTANTS_GLOBAL.BLOCK_SIZE*cur_frame;
+		//if (cur_block.activated){texture_move=50;}
 
 		sf::Color color=sf::Color::White;
 		cur_vertex_array.append(sf::Vertex({left,up},color,{0.f+texture_move,0.f}));
@@ -381,42 +421,45 @@ void GAME::GAME_LOAD_LEVEL(){
 		int cur_chunky;
 		int curx_inside;
 		int cury_inside;
-		//is entity
-		bool is_entity=false;
-		//index
-		int cur_index=1;
-		//direction
-		int cur_direction=0;
-		//is surface
-		bool cur_is_surface=false;
-		// horizontal boost
-		float cur_hor_boost;
-		//vertical boost
-		float cur_ver_boost;
-		//bounciness
-		float cur_bounciness;
-		//break time
-		float cur_break_time;
-		//respawn time
-		float cur_respawn_time;
-		//number of entity points
-		int number_of_points=0;
-		//does entity loop
-		bool entity_loop=false;
+		
+		bool is_entity=false; 						//is entity	
 
+		int cur_index=1;							//index	
+
+		int cur_direction=0;						//direction	
+
+		bool cur_is_surface=false;					//is surface	
+
+		float cur_hor_boost;						// horizontal boost	
+
+		float cur_ver_boost;						//vertical boost
+
+		float cur_bounciness;						//bounciness
+
+		float cur_break_time;						//break time
+
+		float cur_respawn_time;						//respawn time
+		
+		int number_of_points=0;						//number of entity points
+		
+		bool entity_loop=false;						//does entity loop
+
+		int is_default_activated_input;
 
 		
 		std::vector<sf::Vector2f> points;
 		BLOCK_TYPE cur_block_type=BLOCK_TYPE::AIR;
 
-		//BLOCK:
-		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   cords   
-		//ENTITY:
-		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   points   loop   coords1,coords2...
+
+		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   is_default_activated  
+		//BLOCK_SPECIFIC:
+		//cords
+		//ENTITY_SPECIFIC:
+		//points   loop   coords1,coords2...
 		while (input_file>>cur_type_string){
 			STATIC_BLOCK cur_load_block;  //inputing the data of 1 block
 	
-			cur_load_block.type=STRING_TO_BLOCK_TYPE(cur_type_string);			  //type of the block
+			cur_load_block.type=STRING_TO_BLOCK_TYPE(cur_type_string);			  	//type of the block
 			//std::cout<<cur_type_string<<" ";		
 			int entity_bool_input;          //is_entity
 			input_file>>entity_bool_input;
@@ -445,6 +488,12 @@ void GAME::GAME_LOAD_LEVEL(){
 			input_file>>cur_load_block.break_timer>>cur_load_block.respawn_timer;	// break and respawn time
 		//std::cout<<cur_break_time<<" "<<cur_respawn_time<<" ";
 			
+			input_file>>is_default_activated_input;									//is_default_activated_lever
+			cur_load_block.is_activated_by_default=(is_default_activated_input==1);
+			cur_load_block.activated=cur_load_block.is_activated_by_default;
+
+
+
 			if (is_entity){															//entity reading	
 				points.clear();
 			
@@ -509,6 +558,7 @@ void GAME::GAME_LOAD_LEVEL(){
 						if (cur_block.is_surface){save_stream<<1;} else {save_stream<<0;}
 						save_stream<<" "<<cur_block.hor_boost<<" "<<cur_block.ver_boost<<" "<<cur_block.bounciness<<" "<<cur_block.break_timer<<" ";
 						save_stream<<cur_block.respawn_timer<<" ";
+						if (cur_block.is_activated_by_default){save_stream<<1;} else {save_stream<<0;}
 						save_stream<<" "<<block_x<<" "<<block_y<<"\n";
 					}
 				}
@@ -520,7 +570,8 @@ void GAME::GAME_LOAD_LEVEL(){
 			if (cur_entity.block.is_surface){save_stream<<1;} else {save_stream<<0;}
 			save_stream<<" "<<cur_entity.block.hor_boost<<" "<<cur_entity.block.ver_boost<<" "<<cur_entity.block.bounciness<<" "<<cur_entity.block.break_timer<<" ";
 			save_stream<<cur_entity.block.respawn_timer<<" ";
-			save_stream<<cur_entity.coords.size()<<" ";
+			if (cur_entity.block.is_activated_by_default){save_stream<<1;} else {save_stream<<0;}
+			save_stream<<" "<<cur_entity.coords.size()<<" ";
 			if (cur_entity.IS_LOOPING){
 				save_stream<<1;
 			} else {

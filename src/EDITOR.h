@@ -36,7 +36,8 @@ struct EDITOR{
 
     void EDITOR_MOVEMENT(INPUT& input,CAMERA& camera);
 
-    void UPDATE_EDITOR(INPUT& input,CAMERA& camera,std::vector <ENTITY>& entities,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,SETTINGS& settings);
+    void UPDATE_EDITOR(INPUT& input,CAMERA& camera,std::vector <ENTITY>& entities,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,
+		SETTINGS& settings,std::vector<std::pair<int,int>>& levers);
 
 	void UPDATE_CURSOR_COLOR();
 
@@ -52,7 +53,7 @@ struct EDITOR{
 
 	void PLACE_ENTITY(int x,int y,std::vector <ENTITY>& entities,INPUT& input);
 
-	void PLACE_BLOCK(int x,int y,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
+	void PLACE_BLOCK(int x,int y,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,std::vector<std::pair<int,int>>& levers);
 
     void EDITOR_DRAW_CURSOR(sf::VertexArray& draw_array,sf::Color outline_color_cursor,INPUT& input);
 

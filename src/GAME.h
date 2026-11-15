@@ -44,6 +44,10 @@ struct GAME{
 
 	void UPDATE_ENTETIES();
 
+	void UPDATE_LEVERS();
+
+	void UPDATE_ONE_LEVER_BLOCK(STATIC_BLOCK& cur_block,float x,float y);
+
 	void ANIMATION_STEP_PLAYER(PLAYER& cur_player);
 
 	void UPDATE_ANIMATIONS();
