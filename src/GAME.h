@@ -42,6 +42,8 @@ struct GAME{
 	
 	void UPDATE_PHYSICS();
 
+	void UPDATE_ENTITIES_PERMISION_TO_MOVE();
+
 	void UPDATE_ENTETIES();
 
 	void UPDATE_LEVERS();

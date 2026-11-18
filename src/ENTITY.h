@@ -10,12 +10,16 @@ struct ENTITY{
 	bool IS_LOOPING=false;
 	bool touched_player1_bottom=false;
 	bool touched_player2_bottom=false;
+	bool is_entity_allowed_to_move=false;
 	int current_target=0;
 	sf::Vector2f cur_speed{0.f,0.f};
+	sf::Vector2f actual_speed{0.f,0.f};
 	std::vector<sf::Vector2f> coords;
 	sf::Vector2f current_coordinates{0.f,0.f};
 
 	void SETUP(int setup_index,bool setup_looping,std::vector<sf::Vector2f> setup_coords,BLOCK_TYPE& setup_type);
+
+	void UPDATE_IS_ENTITY_ALLOWED_TO_MOVE(std::unordered_map<int,bool>& indexes_pressed);
 
 	void UPDATE_TARGETS();
 

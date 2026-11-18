@@ -102,7 +102,14 @@ void GAME::RUN(){
 		}
 	}
 
+	void GAME::UPDATE_ENTITIES_PERMISION_TO_MOVE(){
+		for (auto& cur_entity:entities){
+			cur_entity.UPDATE_IS_ENTITY_ALLOWED_TO_MOVE(indexes_pressed);
+		}
+	}
+
 	void GAME::UPDATE_ENTETIES(){
+		UPDATE_ENTITIES_PERMISION_TO_MOVE();
 		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 		for (auto& cur_entity:entities){
 			sf::FloatRect cur_entity_rect={cur_entity.current_coordinates+sf::Vector2f{0,0.1},
@@ -144,6 +151,7 @@ void GAME::RUN(){
 	}
 
 	void GAME::UPDATE_LEVERS(){
+
 		indexes_pressed.clear();
 		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 		for (auto& cur_entity:entities){
@@ -153,7 +161,9 @@ void GAME::RUN(){
 		}
 		for (auto& cur_pair:levers){
 			auto& cur_block=find_block_by_coords(cur_pair.first,cur_pair.second,game_chunks);
-			UPDATE_ONE_LEVER_BLOCK(cur_block,cur_pair.first*b_size,cur_pair.second*b_size);
+			if (cur_block.type==BLOCK_TYPE::LEVER){
+				UPDATE_ONE_LEVER_BLOCK(cur_block,cur_pair.first*b_size,cur_pair.second*b_size);
+			}
 		}
 	}
 
@@ -175,6 +185,9 @@ void GAME::RUN(){
 			if (cur_block.frame<0){cur_block.frame=0;}
 		}
 		cur_block.player_touching=currently_touches;
+		if (cur_block.activated){
+			indexes_pressed[cur_block.lever_index]=true;
+		}
 	}
 
 	void GAME::ANIMATION_STEP_PLAYER(PLAYER& cur_player){
