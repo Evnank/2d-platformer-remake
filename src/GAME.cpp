@@ -424,7 +424,9 @@ void GAME::GAME_LOAD_LEVEL(){
 		
 		bool is_entity=false; 						//is entity	
 
-		int cur_index=1;							//index	
+		int cur_index=-1;							//index	
+
+		int cur_lever_index=-1;						//lever index
 
 		int cur_direction=0;						//direction	
 
@@ -450,7 +452,7 @@ void GAME::GAME_LOAD_LEVEL(){
 		std::vector<sf::Vector2f> points;
 		BLOCK_TYPE cur_block_type=BLOCK_TYPE::AIR;
 
-
+								//+lever_index
 		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   is_default_activated  
 		//BLOCK_SPECIFIC:
 		//cords
@@ -469,7 +471,11 @@ void GAME::GAME_LOAD_LEVEL(){
 			input_file>>cur_index;     												//index reading
 			cur_load_block.index=cur_index;
 			//std::cout<<cur_index<<" ";
+
+			input_file>>cur_lever_index;											//lever index reading
+			cur_load_block.lever_index=cur_lever_index;
 		
+
 			input_file>>cur_direction;        										//direction reading
 			cur_load_block.facing_direction=cur_direction;
 			//std::cout<<cur_direction<<" ";
@@ -553,7 +559,7 @@ void GAME::GAME_LOAD_LEVEL(){
 					if (cur_block.type!=BLOCK_TYPE::AIR){
 						int block_x=cur_chunk.first.first*CONSTANTS_GLOBAL.CHUNK_SIZE+x;
 						int block_y=cur_chunk.first.second*CONSTANTS_GLOBAL.CHUNK_SIZE+y;
-						save_stream<<BLOCK_TYPE_TO_STRING(cur_block.type)<<" 0 "<<cur_block.index;
+						save_stream<<BLOCK_TYPE_TO_STRING(cur_block.type)<<" 0 "<<cur_block.index<<" "<<cur_block.lever_index;
 						save_stream<<" "<<cur_block.facing_direction<<" ";
 						if (cur_block.is_surface){save_stream<<1;} else {save_stream<<0;}
 						save_stream<<" "<<cur_block.hor_boost<<" "<<cur_block.ver_boost<<" "<<cur_block.bounciness<<" "<<cur_block.break_timer<<" ";
@@ -565,7 +571,7 @@ void GAME::GAME_LOAD_LEVEL(){
 			}
 		}
 		for (auto& cur_entity:entities){
-			save_stream<<BLOCK_TYPE_TO_STRING(cur_entity.block.type)<<" 1 "<<cur_entity.block.index;
+			save_stream<<BLOCK_TYPE_TO_STRING(cur_entity.block.type)<<" 1 "<<cur_entity.block.index<<" "<<cur_entity.block.lever_index;
 			save_stream<<" "<<cur_entity.block.facing_direction<<" ";
 			if (cur_entity.block.is_surface){save_stream<<1;} else {save_stream<<0;}
 			save_stream<<" "<<cur_entity.block.hor_boost<<" "<<cur_entity.block.ver_boost<<" "<<cur_entity.block.bounciness<<" "<<cur_entity.block.break_timer<<" ";

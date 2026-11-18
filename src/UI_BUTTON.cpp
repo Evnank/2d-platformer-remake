@@ -294,6 +294,41 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					text.setString("Index: "+std::to_string(editor.editor_block_index));
 					CENTER();
 					break;
+				
+
+				//lever index editor
+				case BUTTON_TYPE::EDITOR_LEVER_INDEX_INCREASE:
+					if (IS_PRESSED(input,view_move_y)){
+						editor.editor_block_lever_index++;
+						if (editor.editor_block_lever_index>=100){editor.editor_block_lever_index=100;}
+					}
+					if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
+						auto& cur_entity=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]];
+						cur_entity.block.lever_index=editor.editor_block_lever_index;
+					}
+					
+					break;
+
+				case BUTTON_TYPE::EDITOR_LEVER_INDEX_DECREASE:
+					if (IS_PRESSED(input,view_move_y)){
+						editor.editor_block_lever_index--;
+						if (editor.editor_block_lever_index<=-1){editor.editor_block_lever_index=-1;}
+					}
+					if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
+						auto& cur_entity=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]];
+						cur_entity.block.lever_index=editor.editor_block_lever_index;
+					}
+					
+					break;
+				
+				case BUTTON_TYPE::EDITOR_LEVER_INDEX_SHOW:
+					if (editor.editor_vector_of_selected_entity_indexes.size()!=0){
+						auto& cur_entity=entities[editor.editor_vector_of_selected_entity_indexes[editor.editor_index_in_vector_of_selected_entity_indexes]];
+						editor.editor_block_lever_index=cur_entity.block.lever_index;
+					}
+					text.setString("Lever index: "+std::to_string(editor.editor_block_lever_index));
+					CENTER();
+					break;
 
 
 				//hor boost editor

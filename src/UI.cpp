@@ -28,6 +28,10 @@ void USER_INTERFACE::SETUP(){
 		CREATE_BUTTON({20,420},{175,100},BUTTON_TYPE::EDITOR_INDEX_INCREASE,"+",sf::Color(253,132,0),sf::Color(0,253,0),70);
 		CREATE_BUTTON({195,420},{175,100},BUTTON_TYPE::EDITOR_INDEX_DECREASE,"-",sf::Color(253,132,0),sf::Color(0,253,0),70);
 
+		CREATE_BUTTON({20,920},{350,100},BUTTON_TYPE::EDITOR_LEVER_INDEX_SHOW,"",sf::Color(255,255,255),sf::Color(255,255,255),50);
+		CREATE_BUTTON({20,1020},{175,100},BUTTON_TYPE::EDITOR_LEVER_INDEX_INCREASE,"+",sf::Color(253,132,0),sf::Color(0,253,0),70);
+		CREATE_BUTTON({195,1020},{175,100},BUTTON_TYPE::EDITOR_LEVER_INDEX_DECREASE,"-",sf::Color(253,132,0),sf::Color(0,253,0),70);
+
 		CREATE_BUTTON({20,920},{350,100},BUTTON_TYPE::EDITOR_HOR_BOOST_SHOW,"",sf::Color(255,255,255),sf::Color(255,255,255),50);
 		CREATE_BUTTON({20,1020},{175,100},BUTTON_TYPE::EDITOR_HOR_BOOST_INCREASE,"+",sf::Color(253,132,0),sf::Color(0,253,0),50);
 		CREATE_BUTTON({195,1020},{175,100},BUTTON_TYPE::EDITOR_HOR_BOOST_DECREASE,"-",sf::Color(253,132,0),sf::Color(0,253,0),50);
@@ -314,7 +318,7 @@ void USER_INTERFACE::SETUP(){
 			case BUTTON_TYPE::EDITOR_BLOCK_BUTTON:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && editor.editor_block_selecting){return true;}
 				break;
-
+			
 
 			case BUTTON_TYPE::EDITOR_INDEX_SHOW:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting){return true;}
@@ -324,6 +328,19 @@ void USER_INTERFACE::SETUP(){
 				break;
 			case BUTTON_TYPE::EDITOR_INDEX_DECREASE:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting){return true;}
+				break;
+
+			case BUTTON_TYPE::EDITOR_LEVER_INDEX_SHOW:
+				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting &&
+				editor.cur_editor_block_type==BLOCK_TYPE::LEVER){return true;}
+				break;
+			case BUTTON_TYPE::EDITOR_LEVER_INDEX_INCREASE:
+				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting &&
+				editor.cur_editor_block_type==BLOCK_TYPE::LEVER){return true;}
+				break;
+			case BUTTON_TYPE::EDITOR_LEVER_INDEX_DECREASE:
+				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting &&
+				editor.cur_editor_block_type==BLOCK_TYPE::LEVER){return true;}
 				break;
 
 			case BUTTON_TYPE::EDITOR_HOR_BOOST_SHOW:
