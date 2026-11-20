@@ -332,43 +332,43 @@ void USER_INTERFACE::SETUP(){
 
 			case BUTTON_TYPE::EDITOR_LEVER_INDEX_SHOW:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting &&
-				editor.cur_editor_block_type==BLOCK_TYPE::LEVER){return true;}
+				editor.editor_block.type==BLOCK_TYPE::LEVER){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_LEVER_INDEX_INCREASE:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting &&
-				editor.cur_editor_block_type==BLOCK_TYPE::LEVER){return true;}
+				editor.editor_block.type==BLOCK_TYPE::LEVER){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_LEVER_INDEX_DECREASE:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting &&
-				editor.cur_editor_block_type==BLOCK_TYPE::LEVER){return true;}
+				editor.editor_block.type==BLOCK_TYPE::LEVER){return true;}
 				break;
 
 			case BUTTON_TYPE::EDITOR_HOR_BOOST_SHOW:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting){
-					if (editor.cur_editor_block_type==BLOCK_TYPE::BOOSTER){return true;} else {editor.editor_block_hor_boost=0;}
+					if (editor.editor_block.type==BLOCK_TYPE::BOOSTER){return true;} else {editor.editor_block.hor_boost=0;}
 				}
 			case BUTTON_TYPE::EDITOR_HOR_BOOST_INCREASE:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting && 
-					editor.cur_editor_block_type==BLOCK_TYPE::BOOSTER){return true;}
+					editor.editor_block.type==BLOCK_TYPE::BOOSTER){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_HOR_BOOST_DECREASE:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting && 
-					editor.cur_editor_block_type==BLOCK_TYPE::BOOSTER){return true;}
+					editor.editor_block.type==BLOCK_TYPE::BOOSTER){return true;}
 				break;
 
 
 			case BUTTON_TYPE::EDITOR_VER_BOOST_SHOW:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting){
-					if (editor.cur_editor_block_type==BLOCK_TYPE::BOOSTER){return true;} else {editor.editor_block_ver_boost=0;}
+					if (editor.editor_block.type==BLOCK_TYPE::BOOSTER){return true;} else {editor.editor_block.ver_boost=0;}
 				}	
 				break;
 			case BUTTON_TYPE::EDITOR_VER_BOOST_INCREASE:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting && 
-					editor.cur_editor_block_type==BLOCK_TYPE::BOOSTER){return true;}
+					editor.editor_block.type==BLOCK_TYPE::BOOSTER){return true;}
 				break;
 			case BUTTON_TYPE::EDITOR_VER_BOOST_DECREASE:
 				if (state==GAME_STATE::PLAYING && editor.editor_open && !editor.editor_block_selecting && 
-					editor.cur_editor_block_type==BLOCK_TYPE::BOOSTER){return true;}
+					editor.editor_block.type==BLOCK_TYPE::BOOSTER){return true;}
 				break;
 
 			case BUTTON_TYPE::EDITOR_BLOCK_SHOW:

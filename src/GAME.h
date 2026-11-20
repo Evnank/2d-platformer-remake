@@ -23,6 +23,7 @@ struct GAME{
 	EDITOR editor;
 	SETTINGS settings;
 	std::vector<std::pair<int,int>> levers;
+	std::vector<std::pair<int,int>> buttons;
 	std::unordered_map<BLOCK_TYPE,BLOCK_FRAME> block_animation_frames{
 		{BLOCK_TYPE::BOOSTER,{0,0.15,10}},
 		{BLOCK_TYPE::WATER,{0,0.45,33}},
@@ -46,9 +47,15 @@ struct GAME{
 
 	void UPDATE_ENTETIES();
 
+	void UPDATE_INDEXES_PRESSED();
+
 	void UPDATE_LEVERS();
 
 	void UPDATE_ONE_LEVER_BLOCK(STATIC_BLOCK& cur_block,float x,float y);
+
+	void UPDATE_BUTTONS();
+
+	void UPDATE_ONE_BUTTON_BLOCK(STATIC_BLOCK& cur_block,float x,float y);
 
 	void ANIMATION_STEP_PLAYER(PLAYER& cur_player);
 

@@ -20,16 +20,18 @@ struct EDITOR{
 
 	int editor_request_from_place_block_to_select_block_to_select_block_with_index=-1;
 
-	int editor_block_index=-1;
-	int editor_block_lever_index=-1;
-	float editor_block_hor_boost=0;
-	float editor_block_ver_boost=0;
+	//int editor_block_index=-1;
+	//int editor_block_lever_index=-1;
+	//float editor_block_hor_boost=0;
+	//float editor_block_ver_boost=0;
+	STATIC_BLOCK editor_block;
+
 	bool editor_is_entity=false;
 	bool editor_block_selecting=false;
 
 	int editor_index_in_vector_of_selected_entity_indexes;
 	std::vector <int> editor_vector_of_selected_entity_indexes;
-	BLOCK_TYPE cur_editor_block_type=BLOCK_TYPE::WALL;
+	//BLOCK_TYPE cur_editor_block_type=BLOCK_TYPE::WALL;
 
 
     CTRL_Z ctrl_z;

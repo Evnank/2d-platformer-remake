@@ -84,9 +84,7 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 					SELECT_ENTITY(x,y,entities,input);
 				}
 			if (editor_vector_of_selected_entity_indexes.size()!=0){
-				cur_editor_block_type=entities[editor_vector_of_selected_entity_indexes[editor_index_in_vector_of_selected_entity_indexes]].block.type;
-				editor_block_hor_boost=entities[editor_vector_of_selected_entity_indexes[editor_index_in_vector_of_selected_entity_indexes]].block.hor_boost;
-				editor_block_ver_boost=entities[editor_vector_of_selected_entity_indexes[editor_index_in_vector_of_selected_entity_indexes]].block.ver_boost;
+				editor_block=entities[editor_vector_of_selected_entity_indexes[editor_index_in_vector_of_selected_entity_indexes]].block;
 			}
 		}
 	}	
@@ -305,7 +303,8 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 			ENTITY new_entity;
 			std::vector<sf::Vector2f> cur_setup_coords;
 			cur_setup_coords.push_back(cur_start_coords);
-			new_entity.SETUP(editor_block_index,true,cur_setup_coords,cur_editor_block_type);
+			new_entity.SETUP(true,cur_setup_coords);
+			new_entity.block=editor_block;
 			entities.push_back(new_entity);
 			editor_request_from_place_block_to_select_block_to_select_block_with_index=entities.size()-1;
 
@@ -328,15 +327,11 @@ void EDITOR::EDITOR_MOVEMENT(INPUT& input,CAMERA& camera){
 	void EDITOR::PLACE_BLOCK(int x,int y,std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks,std::vector<std::pair<int,int>>& levers){
 		auto& cur_block=find_block_by_coords(x,y,game_chunks);
 
-		if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && (cur_block.index!=editor_block_index || cur_block.type!=cur_editor_block_type || 
-			editor_block_hor_boost!=cur_block.hor_boost || editor_block_ver_boost!=cur_block.ver_boost)){
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && (cur_block!=editor_block)){
 
 			ctrl_z.current_ctrl_z_action.type=CTRL_Z_ACTION_TYPE::BLOCK;
 			ctrl_z.current_ctrl_z_action.game_chunks_old=game_chunks;
-			cur_block.index=editor_block_index;
-			cur_block.type=cur_editor_block_type;
-			cur_block.hor_boost=editor_block_hor_boost;
-			cur_block.ver_boost=editor_block_ver_boost;
+			cur_block=editor_block;
 			ctrl_z.current_ctrl_z_action.game_chunks_new=game_chunks;
 			if (cur_block.type==BLOCK_TYPE::LEVER){
 				levers.push_back({x,y});

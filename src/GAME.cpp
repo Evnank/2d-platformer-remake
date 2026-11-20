@@ -89,7 +89,7 @@ void GAME::RUN(){
 	
 
 	void GAME::STEP_TICK(){
-		UPDATE_LEVERS();
+		UPDATE_INDEXES_PRESSED();
 		for (auto& cur_player:players){
 			cur_player.UPDATE(input,game_chunks,entities);
 		}
@@ -150,9 +150,15 @@ void GAME::RUN(){
 		}
 	}
 
+	void GAME::UPDATE_INDEXES_PRESSED(){
+		indexes_pressed.clear();
+		indexes_pressed[-1]=true;
+		UPDATE_LEVERS();
+		UPDATE_BUTTONS();
+	}
+
 	void GAME::UPDATE_LEVERS(){
 
-		indexes_pressed.clear();
 		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 		for (auto& cur_entity:entities){
 			if (cur_entity.block.type==BLOCK_TYPE::LEVER){
@@ -168,6 +174,44 @@ void GAME::RUN(){
 	}
 
 	void GAME::UPDATE_ONE_LEVER_BLOCK(STATIC_BLOCK& cur_block,float x,float y){
+		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
+		sf::FloatRect cur_player_rect1={players[0].coords,players[0].size};
+		sf::FloatRect cur_player_rect2={players[1].coords,players[1].size};
+		sf::FloatRect cur_block_rect={sf::Vector2f{x,y},sf::Vector2f{b_size,b_size}};
+		bool currently_touches=(cur_player_rect1.findIntersection(cur_block_rect).has_value() || cur_player_rect2.findIntersection(cur_block_rect).has_value());
+		if (currently_touches && !cur_block.player_touching){
+			cur_block.activated=!cur_block.activated;
+		}
+		if (cur_block.activated){
+			cur_block.frame+=0.5;
+			if (cur_block.frame>1){cur_block.frame=1;}
+			indexes_pressed[cur_block.lever_index]=true;
+		} else {
+			cur_block.frame-=0.5;
+			if (cur_block.frame<0){cur_block.frame=0;}
+		}
+		cur_block.player_touching=currently_touches;
+		if (cur_block.activated){
+			indexes_pressed[cur_block.lever_index]=true;
+		}
+	}
+
+	void GAME::UPDATE_BUTTONS(){
+		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
+		for (auto& cur_entity:entities){
+			if (cur_entity.block.type==BLOCK_TYPE::BUTTON){
+				UPDATE_ONE_BUTTON_BLOCK(cur_entity.block,cur_entity.current_coordinates.x,cur_entity.current_coordinates.y);
+			}
+		}
+		for (auto& cur_pair:levers){
+			auto& cur_block=find_block_by_coords(cur_pair.first,cur_pair.second,game_chunks);
+			if (cur_block.type==BLOCK_TYPE::BUTTON){
+				UPDATE_ONE_BUTTON_BLOCK(cur_block,cur_pair.first*b_size,cur_pair.second*b_size);
+			}
+		}
+	}
+
+	void GAME::UPDATE_ONE_BUTTON_BLOCK(STATIC_BLOCK& cur_block,float x,float y){
 		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 		sf::FloatRect cur_player_rect1={players[0].coords,players[0].size};
 		sf::FloatRect cur_player_rect2={players[1].coords,players[1].size};
@@ -460,14 +504,16 @@ void GAME::GAME_LOAD_LEVEL(){
 		
 		bool entity_loop=false;						//does entity loop
 
-		int is_default_activated_input;
+		int is_default_activated_input;				//is_default_activated_lever
+
+		int cur_button_deactivate_time=0;				//button deactivate time
 
 		
 		std::vector<sf::Vector2f> points;
 		BLOCK_TYPE cur_block_type=BLOCK_TYPE::AIR;
 
-								//+lever_index
-		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   is_default_activated  button_deactivate_timer
+		//type    is_entity   index   lever_index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time
+		//respawn_time   is_default_activated  button_deactivate_time
 		//BLOCK_SPECIFIC:
 		//cords
 		//ENTITY_SPECIFIC:
@@ -512,6 +558,8 @@ void GAME::GAME_LOAD_LEVEL(){
 			cur_load_block.is_activated_by_default=(is_default_activated_input==1);
 			cur_load_block.activated=cur_load_block.is_activated_by_default;
 
+			input_file>>cur_button_deactivate_time;
+			cur_load_block.button_deactivate_time=cur_button_deactivate_time;
 
 
 			if (is_entity){															//entity reading	
@@ -531,7 +579,7 @@ void GAME::GAME_LOAD_LEVEL(){
 				}
 
 				ENTITY cur_entity;													//entity creation
-				cur_entity.SETUP(cur_index,entity_loop,points,cur_block_type);
+				cur_entity.SETUP(entity_loop,points);
 				cur_entity.block=cur_load_block;
 				entities.push_back(cur_entity);	
 			} else {																//static block reading
@@ -549,6 +597,9 @@ void GAME::GAME_LOAD_LEVEL(){
 					case BLOCK_TYPE::LEVER:
 						levers.push_back({cur_cordx,cur_cordy});
 						break;
+					case BLOCK_TYPE::BUTTON:
+						buttons.push_back({cur_cordx,cur_cordy});
+						break;
 			
 					default:
 						break;
@@ -558,10 +609,12 @@ void GAME::GAME_LOAD_LEVEL(){
 		}
 	}
 
-	//BLOCK:
-		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   cords   
-		//ENTITY:
-		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   points   loop   coords1,coords2...
+	//type    is_entity   index   lever_index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time
+	//respawn_time   is_default_activated  button_deactivate_time
+		//BLOCK_SPECIFIC:
+		//cords
+		//ENTITY_SPECIFIC:
+		//points   loop   coords1,coords2...
 	void GAME::GAME_SAVE_LEVEL(){
 		std::string level_save_string="assets/levels/"+std::to_string(VARIABLES_GLOBAL.current_level)+".txt";
 		std::ofstream save_stream(level_save_string);
@@ -579,6 +632,7 @@ void GAME::GAME_LOAD_LEVEL(){
 						save_stream<<" "<<cur_block.hor_boost<<" "<<cur_block.ver_boost<<" "<<cur_block.bounciness<<" "<<cur_block.break_timer<<" ";
 						save_stream<<cur_block.respawn_timer<<" ";
 						if (cur_block.is_activated_by_default){save_stream<<1;} else {save_stream<<0;}
+						save_stream<<" "<<cur_block.button_deactivate_time;
 						save_stream<<" "<<block_x<<" "<<block_y<<"\n";
 					}
 				}
@@ -591,6 +645,7 @@ void GAME::GAME_LOAD_LEVEL(){
 			save_stream<<" "<<cur_entity.block.hor_boost<<" "<<cur_entity.block.ver_boost<<" "<<cur_entity.block.bounciness<<" "<<cur_entity.block.break_timer<<" ";
 			save_stream<<cur_entity.block.respawn_timer<<" ";
 			if (cur_entity.block.is_activated_by_default){save_stream<<1;} else {save_stream<<0;}
+			save_stream<<" "<<cur_entity.block.button_deactivate_time;
 			save_stream<<" "<<cur_entity.coords.size()<<" ";
 			if (cur_entity.IS_LOOPING){
 				save_stream<<1;
