@@ -34,7 +34,6 @@ void ENTITY::UPDATE_TARGETS(){
 
 	void ENTITY::SWITCH_TARGETS(){
 		if (IS_LOOPING){
-			current_target=(current_target+1)%coords.size();
 			if (is_entity_allowed_to_move){
 				current_target=(current_target+1)%coords.size();
 			} else {
