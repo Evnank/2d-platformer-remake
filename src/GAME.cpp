@@ -320,6 +320,7 @@ void GAME::RUN(){
 		draw_arrays[BLOCK_TYPE::WALL]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::BUTTON]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::LEVER]=sf::VertexArray(sf::PrimitiveType::Triangles);
+		draw_arrays[BLOCK_TYPE::BUTTON]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::BOOSTER]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::WATER]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		draw_arrays[BLOCK_TYPE::LAVA]=sf::VertexArray(sf::PrimitiveType::Triangles);
@@ -373,7 +374,7 @@ void GAME::RUN(){
 		}
 
 		window.draw(draw_arrays[BLOCK_TYPE::WALL],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
-		//window.draw(draw_arrays[BLOCK_TYPE::BUTTON],sf::RenderStates{&GLOBAL_ASSETS.wall_texture});
+		window.draw(draw_arrays[BLOCK_TYPE::BUTTON],sf::RenderStates{&GLOBAL_ASSETS.BUTTON_TEXTURE});
 		window.draw(draw_arrays[BLOCK_TYPE::LEVER],sf::RenderStates{&GLOBAL_ASSETS.LEVER_TEXTURE});
 		window.draw(draw_arrays[BLOCK_TYPE::WATER],sf::RenderStates{&GLOBAL_ASSETS.WATER_TEXTURE});
 		window.draw(draw_arrays[BLOCK_TYPE::LAVA],sf::RenderStates{&GLOBAL_ASSETS.LAVA_TEXTURE});
@@ -466,7 +467,7 @@ void GAME::GAME_LOAD_LEVEL(){
 		BLOCK_TYPE cur_block_type=BLOCK_TYPE::AIR;
 
 								//+lever_index
-		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   is_default_activated  
+		//type    is_entity   index   direction   is_surface   hor_boost   ver_boost   bounciness   break_time   respawn_time   is_default_activated  button_deactivate_timer
 		//BLOCK_SPECIFIC:
 		//cords
 		//ENTITY_SPECIFIC:
