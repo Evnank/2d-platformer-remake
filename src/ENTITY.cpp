@@ -10,7 +10,7 @@ void ENTITY::SETUP(bool setup_looping,std::vector<sf::Vector2f> setup_coords){
 
 void ENTITY::UPDATE_IS_ENTITY_ALLOWED_TO_MOVE(std::unordered_map<int,bool>& indexes_pressed){
 		is_entity_allowed_to_move=(indexes_pressed[block.index]);
-		if (is_entity_allowed_to_move){
+		if (is_entity_allowed_to_move || !IS_LOOPING){
 			cur_speed=actual_speed;
 		} else {
 			cur_speed={0.f,0.f};
@@ -37,7 +37,7 @@ void ENTITY::UPDATE_TARGETS(){
 			if (is_entity_allowed_to_move){
 				current_target=(current_target+1)%coords.size();
 			} else {
-				current_target=(current_target-1+coords.size())%coords.size();
+				current_target=(current_target+1+coords.size())%coords.size();
 			}
 		} else{
 			if (is_entity_allowed_to_move){
