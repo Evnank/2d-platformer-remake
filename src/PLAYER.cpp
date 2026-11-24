@@ -123,8 +123,7 @@ void PLAYER::SETUP(int ind){
 								coords.x=(x+1)*b_size;
 							}
 								velocity.x=0;
-								velocity.x+=cur_block.hor_boost;
-								velocity.y+=cur_block.ver_boost;
+								BOOSTER_INTERACTION(cur_block);
 							break;
 
 						
@@ -191,8 +190,7 @@ void PLAYER::SETUP(int ind){
 								coords.y=(y+1)*b_size;
 							}
 								velocity.y=0;
-								velocity.x+=cur_block.hor_boost;
-								velocity.y+=cur_block.ver_boost;
+								BOOSTER_INTERACTION(cur_block);
 							break;
 
 
@@ -240,8 +238,7 @@ void PLAYER::SETUP(int ind){
 								coords.x=cur_entity.current_coordinates.x+b_size;
 							}
 								velocity.x=cur_entity.cur_speed.x;
-								velocity.x+=cur_block.hor_boost;
-								velocity.y+=cur_block.ver_boost;
+								BOOSTER_INTERACTION(cur_block);
 							break;
 
 						
@@ -293,14 +290,39 @@ void PLAYER::SETUP(int ind){
 								coords.y=cur_entity.current_coordinates.y+b_size;
 							}
 								velocity.y=cur_entity.cur_speed.y;
-								velocity.x+=cur_block.hor_boost;
-								velocity.y+=cur_block.ver_boost;
+								BOOSTER_INTERACTION(cur_block);
 							break;
 						
 						default:
 							break;
 					}
 				}
+	}
+
+	void PLAYER::BOOSTER_INTERACTION(STATIC_BLOCK& cur_block){
+		if (cur_block.hor_boost>0){
+			if (velocity.x<cur_block.hor_boost){
+				velocity.x+=cur_block.hor_boost;
+				if (velocity.x>cur_block.hor_boost){velocity.x=cur_block.hor_boost;}
+			}
+		} else {
+			if (velocity.x>cur_block.hor_boost){
+				velocity.x+=cur_block.hor_boost;
+				if (velocity.x<cur_block.hor_boost){velocity.x=cur_block.hor_boost;}
+			}
+		}
+
+		if (cur_block.ver_boost>0){
+			if (velocity.y<cur_block.ver_boost){
+				velocity.y+=cur_block.ver_boost;
+				if (velocity.y>cur_block.ver_boost){velocity.y=cur_block.ver_boost;}
+			}
+		} else {
+			if (velocity.y>cur_block.ver_boost){
+				velocity.y+=cur_block.ver_boost;
+				if (velocity.y<cur_block.ver_boost){velocity.y=cur_block.ver_boost;}
+			}
+		}
 	}
 
 

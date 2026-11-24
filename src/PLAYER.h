@@ -34,6 +34,7 @@ struct PLAYER{
 
 //collision
 
+	void BOOSTER_INTERACTION(STATIC_BLOCK& cur_block);
 
 	void RESOLVE_COLLISION_X(std::unordered_map<std::pair<int,int>,GAME_CHUNK,PairHash>& game_chunks);
 	void RESOLVE_COLLISION_X_ENTITY(ENTITY& cur_entity);
