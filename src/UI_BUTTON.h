@@ -35,7 +35,7 @@ struct UI_BUTTON{
 	sf::Text text{GLOBAL_ASSETS.conthrax_font};
 
 	void SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTTON_TYPE setup_type, std::string setup_string,
-	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size);
+	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size,bool center_from_start);
 
 	void CENTER();
 
@@ -43,7 +43,7 @@ struct UI_BUTTON{
 
 	bool IS_RELEASED(INPUT& input,float view_move_y);
 
-	void UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor,SETTINGS& settings,float view_move_y);
+	void UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor,SETTINGS& settings,float view_move_y,CAMERA& camera);
 
 	void DRAW(sf::RenderWindow& window);
 

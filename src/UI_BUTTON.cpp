@@ -2,7 +2,7 @@
 
 
 void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTTON_TYPE setup_type, std::string setup_string,
-	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size){
+	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size,bool center_from_start){
 		rect=sf::FloatRect(setup_position,setup_size);
 		type=setup_type;
 		text_string=setup_string;
@@ -18,7 +18,9 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 		text.setFillColor(cur_color);
 		text.setScale({0.7f,1.f});
 
-		CENTER();
+		if (center_from_start){
+			CENTER();
+		}
 
 		rinc=(end_color.r-start_color.r)/100.f;
 		ginc=(end_color.g-start_color.g)/100.f;
@@ -64,7 +66,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 
 	
 
-	void UI_BUTTON::UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor,SETTINGS& settings, float view_move_y){
+	void UI_BUTTON::UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor,SETTINGS& settings, float view_move_y,CAMERA& camera){
 		if (rect.contains(input.mouse_window_coords+sf::Vector2f{0.f,view_move_y})){
 			conversion_procentile+=CONSTANTS_GLOBAL.UI_BUTTON_COLOR_CHANGE_SPEED;
 			if (conversion_procentile>=100){conversion_procentile=100;}
@@ -408,10 +410,26 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					break;
 
 				case BUTTON_TYPE::EDITOR_INFO:
-					text.setString(std::string("EDITOR: ON\nBlock: ")+BLOCK_TYPE_TO_STRING(editor.editor_block.type)+
-					std::string("\nIndex: ")+std::to_string(editor.editor_block.index)+std::string("\n")+is_entity_on_string(editor.editor_is_entity));
-					CENTER();
+				{
+					std::string string_cords=std::string("\nx: ")+
+						std::to_string(int(std::floor(input.mouse_true_coords.x/CONSTANTS_GLOBAL.BLOCK_SIZE)))+
+						std::string("; y: ")+
+						std::to_string(int(std::floor(input.mouse_true_coords.y/CONSTANTS_GLOBAL.BLOCK_SIZE)));
+
+					text.setString(std::string("EDITOR: ON\nBlock: ")+
+						BLOCK_TYPE_TO_STRING(editor.editor_block.type)+
+						std::string("\nIndex: ")+
+						std::to_string(editor.editor_block.index)+
+						std::string("\n")+
+						is_entity_on_string(editor.editor_is_entity)+
+						std::string("\ncam scale: ")+
+						std::format("{:.3f}", camera.scale)+
+						string_cords);
+
+					//CENTER();
 					break;
+				}
+
 				case BUTTON_TYPE::EDITOR_SPECIAL_MOVEMENT_ON_BUTTON:
 					is_toggled=editor.editor_special_movement;
 					if (IS_PRESSED(input,view_move_y)){
@@ -420,6 +438,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					editor.editor_special_movement=is_toggled;
 					if (is_toggled){conversion_procentile=100;}
 					break;
+
 				case BUTTON_TYPE::EDITOR_SPECIAL_PAUSE_BUTTON:
 					is_toggled=editor.editor_game_pause;
 					if (IS_PRESSED(input,view_move_y)){
@@ -428,6 +447,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					editor.editor_game_pause=is_toggled;
 					if (is_toggled){conversion_procentile=100;}
 					break;
+
 				case BUTTON_TYPE::EDITOR_PLAIN_TEXT:
 					if (editor.editor_vector_of_selected_entity_indexes.size()==0){
 						text.setString("EDITOR");
@@ -436,6 +456,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					}
 					CENTER();
 					break;
+
 				case BUTTON_TYPE::EDITOR_SELECTED_ENTITY_NUMBER:
 				{
 					int size_of_current_vector=editor.editor_vector_of_selected_entity_indexes.size();
@@ -445,6 +466,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					CENTER();
 					break;
 				}
+
 				case BUTTON_TYPE::EDITOR_SAVE_INDICATOR:
 				{
 					if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl) && input.S){
@@ -468,6 +490,7 @@ void UI_BUTTON::SETUP(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTT
 					
 					break;
 				}
+
 				default:
 					break;
 				}

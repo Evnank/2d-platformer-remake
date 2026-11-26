@@ -9,7 +9,7 @@ struct USER_INTERFACE{
 
 	void SETUP();
 
-	void UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor,SETTINGS& settings);
+	void UPDATE(INPUT& input,std::vector <ENTITY>& entities,EDITOR& editor,SETTINGS& settings,CAMERA& camera);
 
 	void DRAW_BACKGROUND_BLUR(sf::RenderWindow& window);
 
@@ -18,7 +18,7 @@ struct USER_INTERFACE{
 	void DRAW(sf::RenderWindow& window,EDITOR& editor,SETTINGS& settings,std::vector<ENTITY>& entities);
 
 	void CREATE_BUTTON(sf::Vector2f setup_position, sf::Vector2f setup_size, BUTTON_TYPE setup_type, std::string setup_string,
-	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size);
+	sf::Color setup_start_color, sf::Color setup_end_color, int setup_char_size,bool center_from_start);
 
 	bool CHECK_IF_UPDATE_BUTTON(UI_BUTTON& cur_button,EDITOR& editor,SETTINGS& settings,std::vector<ENTITY>& entities);
 };

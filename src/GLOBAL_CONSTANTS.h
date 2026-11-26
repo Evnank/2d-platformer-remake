@@ -8,6 +8,11 @@ struct GLOBAL_CONSTANTS{
 	float BLOCK_SIZE=64;
 	float CHUNK_SIZE=10;
 	float BLOCK_TEXTURE_SIZE=64;
+
+	int chunk_render_limit_left=-500;
+	int chunk_render_limit_right=+500;
+	int chunk_render_limit_up=-500;
+	int chunk_render_limit_down=+500;
 	
 
 	float player_max_side_speed=8;

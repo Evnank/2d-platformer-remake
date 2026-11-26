@@ -21,6 +21,9 @@ void GAME::RUN(){
 
 	void GAME::SETUP(){
 		LOAD_SETTINGS(settings);
+		if (settings.EDITOR_ON_BUTTON){
+			editor.editor_special_movement=true;
+		}
 		PLAYER player1;
 		PLAYER player2;
 		player1.SETUP(0);
@@ -82,7 +85,7 @@ void GAME::RUN(){
 		} 
 
 
-		game_ui.UPDATE(input,entities,editor,settings);
+		game_ui.UPDATE(input,entities,editor,settings,camera);
 		UPDATE_ANIMATIONS();
 	}
 
@@ -377,7 +380,7 @@ void GAME::RUN(){
 		draw_arrays[BLOCK_TYPE::GREEN_DOOR_UNLOCKED]=sf::VertexArray(sf::PrimitiveType::Triangles);
 		float b_size=CONSTANTS_GLOBAL.BLOCK_SIZE;
 		float c_size=CONSTANTS_GLOBAL.CHUNK_SIZE;
-		float bts=CONSTANTS_GLOBAL.BLOCK_TEXTURE_SIZE;
+		//float bts=CONSTANTS_GLOBAL.BLOCK_TEXTURE_SIZE;
 		sf::Vector2f camera_left_up(camera.position-camera.size/2.f*camera.scale);
 		int chunk_left=int(std::floor(camera_left_up.x/(b_size*c_size)));
 		int chunk_up=int(std::floor(camera_left_up.y/(b_size*c_size)));
@@ -385,6 +388,12 @@ void GAME::RUN(){
 		sf::Vector2f camera_right_down(camera.position+camera.size/2.f*camera.scale);
 		int chunk_right=int(camera_right_down.x/(b_size*c_size));
 		int chunk_down=int(camera_right_down.y/(b_size*c_size));
+		
+		chunk_left=std::max(chunk_left,CONSTANTS_GLOBAL.chunk_render_limit_left);
+		chunk_right=std::min(chunk_right,CONSTANTS_GLOBAL.chunk_render_limit_right);
+		chunk_up=std::max(chunk_up,CONSTANTS_GLOBAL.chunk_render_limit_up);
+		chunk_down=std::min(chunk_down,CONSTANTS_GLOBAL.chunk_render_limit_down);
+
 
 		for (int cur_chunkx=chunk_left; cur_chunkx<=chunk_right; cur_chunkx++){
 			for (int cur_chunky=chunk_up; cur_chunky<=chunk_down; cur_chunky++){
